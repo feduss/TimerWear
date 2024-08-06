@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.feduss.timerwear.utils'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 28
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+
+    //Kotlin core
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    //Androidx for legacy support
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.wear.compose:compose-foundation:1.3.1'
+
+    //Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+
+    //SharedPreferences
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+}

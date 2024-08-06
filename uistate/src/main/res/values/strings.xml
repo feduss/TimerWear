@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_page_settings_button">Impostazioni</string>
+    <string name="main_page_custom_workout_button">Workout personalizzato</string>
+    <string name="main_page_emom_timer_button">Emom</string>
+    <string name="main_page_tabata_timer_button">Tabata</string>
+    <string name="custom_workout_header_text" type="id">Lista workouts</string>
+    <string name="custom_workout_add_button_text" type="id">Aggiungi</string>
+    <string name="add_custom_workout_header_text">Nuovo workout</string>
+    <string name="add_custom_workout_add_workout_button_text">Conferma</string>
+    <string name="add_custom_workout_name_text_field_title">Titolo</string>
+    <string name="add_custom_workout_repetitions_text_field_title">Numero ripetizioni</string>
+    <string name="add_custom_workout_intermedium_rest_text_field_title">Riposo lungo</string>
+    <string name="add_custom_workout_add_timer_button_text">Nuovo timer</string>
+    <string name="timer_picker_minutes_title">Minuti</string>
+    <string name="timer_picker_seconds_title">Secondi</string>
+    <string name="add_custom_workout_timer_section_title">Lista timer</string>
+    <string name="add_custom_workout_name_text_field_placeholder">Es.: Circuito 20min</string>
+    <string name="add_custom_workout_repetitions_text_field_placeholder">Quante volte ripetere la lista dei timer</string>
+    <string name="add_custom_workout_intermedium_rest_text_field_placeholder">Tempo di attesa tra una ripetizione e l\'altra, se i timer si ripetono</string>
+    <string name="add_custom_workout_timer_name_text_field_title">Nome</string>
+    <string name="add_custom_workout_timer_name_text_field_placeholder">Nuovo timer</string>
+    <string name="add_custom_workout_timer_duration_text_field_title">Durata</string>
+    <string name="add_custom_workout_timer_duration_text_field_placeholder">Es.: 30s</string>
+    <string name="add_custom_workout_timer_type_text_field_title">Tipo</string>
+    <string name="add_custom_workout_title_error">Il titolo del workout non è valido</string>
+    <string name="add_custom_workout_repetitions_error">Il numero di ripetizioni del workout non è valido</string>
+    <string name="add_custom_workout_intermedium_rest_error">Il riposo lungo del workout non è valido</string>
+    <string name="add_custom_workout_timer_name_error">Il nome non è valido</string>
+    <string name="add_custom_workout_timer_duration_error">La durata  non è valida</string>
+    <string name="add_custom_workout_timer_type_error">Il tipo del timer non è valido</string>
+    <string name="add_custom_workout_timers_error">Devi aggiungere almeno 1 timer</string>
+    <string name="add_custom_workout_generic_error">Correggi gli errori per continuare</string>
+</resources>

@@ -1,0 +1,120 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
+    id 'com.google.dagger.hilt.android'
+    id 'com.google.gms.google-services'
+    id("com.google.firebase.crashlytics")
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+
+android {
+    namespace = "com.feduss.timerwear"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.feduss.timerwear"
+        minSdk = 28
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+
+        coreLibraryDesugaringEnabled true
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+}
+
+dependencies {
+
+    //Modules
+    implementation project(path: ':business')
+    implementation project(path: ':data')
+    implementation project(path: ':utils')
+    implementation project(path: ':uistate')
+
+    //Kotlin core
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    //Androidx for legacy support
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    //Compose wear
+    implementation 'androidx.wear.compose:compose-ui-tooling:1.3.1'
+    implementation 'androidx.wear.compose:compose-foundation:1.3.1'
+    implementation 'androidx.wear.compose:compose-material:1.3.1'
+    implementation 'androidx.wear.compose:compose-navigation:1.3.1'
+
+    //
+    implementation 'androidx.wear:wear-remote-interactions:1.0.0'
+    implementation 'androidx.wear:wear:1.3.0'
+    implementation project(':entity')
+
+    // Testing
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.6.8"
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.8'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest:1.6.8'
+
+    // Optional - Integration with ViewModels
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4'
+
+    //Google pager + scaffold
+    implementation 'com.google.android.horologist:horologist-compose-layout:0.5.28'
+    implementation 'com.google.android.horologist:horologist-composables:0.5.28'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+
+    //Hilt
+    implementation 'com.google.dagger:hilt-android:2.51.1'
+    kapt 'com.google.dagger:hilt-android-compiler:2.51.1'
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
+
+    //Gson
+    implementation 'com.google.code.gson:gson:2.11.0'
+
+    //Skeleton view
+    implementation 'com.valentinilk.shimmer:compose-shimmer:1.3.0'
+
+    //APIs for SplashScreen, including compatibility helpers on devices prior Android 12
+    implementation 'androidx.core:core-splashscreen:1.2.0-alpha01'
+
+    //Reboot helper
+    implementation 'com.jakewharton:process-phoenix:3.0.0'
+
+    //Tooltip
+    implementation 'com.github.skydoves:balloon-compose:1.6.6'
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes true
+}

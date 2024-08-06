@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
+    id 'com.google.dagger.hilt.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+
+android {
+    namespace 'com.feduss.timerwear.uistate'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 28
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.12'
+    }
+}
+
+dependencies {
+
+    //Depencendies
+    implementation project(path: ':data')
+    implementation project(path: ':business')
+    implementation project(path: ':entity')
+    implementation project(path: ':utils')
+
+    //Hilt
+    implementation 'com.google.dagger:hilt-android:2.51.1'
+    kapt 'com.google.dagger:hilt-android-compiler:2.51.1'
+    implementation "androidx.hilt:hilt-work:1.2.0"
+    kapt "androidx.hilt:hilt-compiler:1.2.0"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
+
+    //Gson
+    implementation 'com.google.code.gson:gson:2.11.0'
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes true
+}

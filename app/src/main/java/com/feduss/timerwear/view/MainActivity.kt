@@ -1,0 +1,66 @@
+
+
+package com.feduss.timerwear.view
+
+import android.annotation.SuppressLint
+import android.app.NotificationManager
+import android.content.IntentFilter
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.wear.compose.material.MaterialTheme
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    //private val timerReceiver = TimerReceiver()
+
+    private lateinit var notificationManager: NotificationManager
+
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Handle the splash screen transition.
+        installSplashScreen()
+        super.onCreate(savedInstanceState)
+
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        val filter = IntentFilter()
+        /*registerReceiver(timerReceiver, filter)
+
+        if(intent.getBooleanExtra(Consts.FromOngoingNotification.value, false)) {
+            NotificationUtils.restoreTimerSecondsFromOngoingNotification(context)
+        }*/
+
+        setContent {
+            MaterialTheme {
+                MainNavView(
+                    mainActivity = this
+                )
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        //val isTimerActive = PrefsUtils.getPref(context, PrefParamName.IsTimerActive.name) == "true"
+
+        /*if (isTimerActive) {
+            AlarmUtils.setBackgroundAlert(context, TimerReceiver::class.java)
+            NotificationUtils.setOngoingNotification(context, iconId = R.drawable.ic_app)
+        }*/
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //AlarmUtils.removeBackgroundAlert(context, TimerReceiver::class.java)
+        //NotificationUtils.removeOngoingNotification(context)
+    }
+
+    override fun onDestroy() {
+        //unregisterReceiver(timerReceiver)
+        super.onDestroy()
+    }
+}

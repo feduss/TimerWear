@@ -1,6 +1,7 @@
 package com.feduss.timerwear.view.custom_workout
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,11 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.lazy.items
-import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
+import com.feduss.timerwear.view.component.card.CustomWorkoutCardView
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -30,7 +32,8 @@ fun CustomWorkoutView(
     context: Context,
     viewModel: CustomWorkoutViewModel = hiltViewModel(),
     navController: NavController,
-    columnState: ScalingLazyColumnState
+    columnState: ScalingLazyColumnState,
+    swipeToDismissBoxState: SwipeToDismissBoxState
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
@@ -46,17 +49,32 @@ fun CustomWorkoutView(
 
     navUiState?.let {
         when (it) {
-            is CustomWorkoutViewModel.NavUiState.AddCustomTimerClicked -> {
+            is CustomWorkoutViewModel.NavUiState.AddCustomWorkoutClicked -> {
                 goToAddCustomWorkoutPage(
                     navController = navController
                 )
             }
-            is CustomWorkoutViewModel.NavUiState.EditCustomTimerClicked ->
+            is CustomWorkoutViewModel.NavUiState.EditCustomWorkoutClicked ->
                 goToAddCustomWorkoutPage(
                     navController = navController,
-                    workoutId = it.id
+                    workoutId = it.id.toString()
                 )
-            is CustomWorkoutViewModel.NavUiState.ExistingCustomTimerClicked -> TODO()
+            is CustomWorkoutViewModel.NavUiState.ExistingCustomWorkoutClicked -> {
+                TODO()
+            }
+
+            is CustomWorkoutViewModel.NavUiState.BalloonDismissed -> {
+                viewModel.balloonDismissed(context = context)
+            }
+
+            is CustomWorkoutViewModel.NavUiState.CustomWorkoutDeleted -> {
+                Toast.makeText(
+                    context,
+                    stringResource(id = it.textId),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
         }
         viewModel.navStateFired()
     }
@@ -75,18 +93,33 @@ fun CustomWorkoutView(
 
             state.customWorkouts?.let { customWorkoutState ->
                 items(
-                    items = customWorkoutState,
-                    key = { customWorkoutState.map { it.timerId } }
-                ) {
-                    GenericRoundedCard(
-                        leftIconId = it.leftIconId,
-                        leftIconContentDescription = it.leftIconDescription,
-                        leftIconTintColor = it.leftIconTintColor,
-                        leftText = it.timerName,
-                        bottomText = it.timerDuration,
-                        onCardClick =  {
-                            //TODO
-                        }
+                    items = customWorkoutState
+                ) { state ->
+
+                    state.onCardClicked = {
+                        //TODO:
+                    }
+
+                    state.onEditWorkoutButtonClicked = {
+                        viewModel.userHasClickedEditCustomWorkout(
+                            id = state.id
+                        )
+                    }
+
+                    state.onDeleteWorkoutButtonClicked = {
+                        viewModel.userHasClickedDeleteCustomWorkout(
+                            context = context,
+                            id = state.id
+                        )
+                    }
+
+                    state.onBalloonDismissed = {
+                        viewModel.onBalloonDismissed()
+                    }
+
+                    CustomWorkoutCardView(
+                        state = state,
+                        swipeToDismissBoxState = swipeToDismissBoxState
                     )
                 }
             }
@@ -98,7 +131,7 @@ fun CustomWorkoutView(
                     leftIconTintColor = state.addCustomWorkoutButton.leftIconTintColor,
                     leftText = stringResource(id = state.addCustomWorkoutButton.textId),
                     onCardClick =  {
-                        viewModel.userHasClickedAddTimer()
+                        viewModel.userHasClickedAddCustomWorkout()
                     }
 
                 )

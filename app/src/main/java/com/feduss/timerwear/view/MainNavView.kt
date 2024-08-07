@@ -51,7 +51,8 @@ fun MainNavView(
                     CustomWorkoutView(
                         context = mainActivity,
                         columnState = it,
-                        navController = navController
+                        navController = navController,
+                        swipeToDismissBoxState = swipeToDismissBoxState
                     )
                 }
             }

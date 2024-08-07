@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,9 +20,11 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
 
 
     sealed class NavUiState {
-        data object AddCustomTimerClicked: NavUiState()
-        data class EditCustomTimerClicked(val id: String): NavUiState()
-        data class ExistingCustomTimerClicked(val customTimerCardUiState: CustomTimerCardUiState): NavUiState()
+        data object AddCustomWorkoutClicked: NavUiState()
+        data class EditCustomWorkoutClicked(val id: Int): NavUiState()
+        data class ExistingCustomWorkoutClicked(val customWorkoutCardUiState: CustomWorkoutCardUiState): NavUiState()
+        data object BalloonDismissed: NavUiState()
+        data class CustomWorkoutDeleted(val textId: Int): NavUiState()
     }
 
     private var _dataUiState = MutableStateFlow<CustomWorkoutUiState?>(null)
@@ -30,7 +33,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     private var _navUiState = MutableStateFlow<NavUiState?>(null)
     val navUiState = _navUiState.asStateFlow()
 
-    private var customWorkoutModels: List<CustomWorkoutModel>? = null
+    private var customWorkoutModels: ArrayList<CustomWorkoutModel>? = null
 
     // Copies
     val headerTextId = R.string.custom_workout_header_text
@@ -44,20 +47,20 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
 
     fun getCustomTimerList(context: Context) {
 
-        val customWorkoutModels: List<CustomWorkoutModel>? = getCustomWorkoutModels(context)
-        this.customWorkoutModels = customWorkoutModels
+        this.customWorkoutModels = ArrayList(getCustomWorkoutModels(context) ?: listOf())
 
         _dataUiState.value = CustomWorkoutUiState(
-            customWorkouts = customWorkoutModels?.map { customWorkout ->
+            customWorkouts = customWorkoutModels?.mapIndexed { index, customWorkout ->
                 val durationSecondsSum = customWorkout.timers.sumOf { it.duration.toSeconds() }
                 val durationMins = durationSecondsSum / 60
                 val durationSecs = durationSecondsSum % 60
-                CustomTimerCardUiState(
+                CustomWorkoutCardUiState(
                     leftIconId = workoutIconId,
                     leftIconDescription = workoutIconDescription,
-                    timerId = customWorkout.id,
-                    timerName = customWorkout.name,
-                    timerDuration = "${durationMins}m ${durationSecs}s x${customWorkout.repetition}"
+                    id = customWorkout.id,
+                    name = customWorkout.name,
+                    duration = "${durationMins}m ${durationSecs}s x${customWorkout.repetition}",
+                    isBalloonEnabled = needsToShowBalloon(context = context) && index == 0
                 )
             },
             addCustomWorkoutButton = GenericButtonCardUiState(
@@ -77,11 +80,55 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
         return customWorkoutModels
     }
 
+    //Utils
+    private fun needsToShowBalloon(context: Context): Boolean {
+        return PrefsUtils.getStringPref(
+            context = context,
+            pref = PrefParam.BalloonDismissed.value
+        ) == null
+    }
+
+    //Events
+
     fun navStateFired() {
         _navUiState.value = null
     }
 
-    fun userHasClickedAddTimer() {
-        _navUiState.value = NavUiState.AddCustomTimerClicked
+    fun userHasClickedAddCustomWorkout() {
+        _navUiState.value = NavUiState.AddCustomWorkoutClicked
+    }
+
+    fun onBalloonDismissed() {
+        _navUiState.value = NavUiState.BalloonDismissed
+    }
+
+    fun balloonDismissed(context: Context) {
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.BalloonDismissed.value,
+            newValue = "true"
+        )
+    }
+
+    fun userHasClickedEditCustomWorkout(id: Int) {
+        _navUiState.value = NavUiState.EditCustomWorkoutClicked(id = id)
+    }
+
+    fun userHasClickedDeleteCustomWorkout(context: Context, id: Int) {
+
+        val index = customWorkoutModels?.indexOfFirst { it.id == id }
+
+        if (index != null) {
+            customWorkoutModels?.removeAt(index)
+
+            val json = Gson().toJson(customWorkoutModels)
+            PrefsUtils.setStringPref(context, PrefParam.CustomWorkoutList.value, json)
+            _dataUiState.update { state ->
+                state?.copy(
+                    customWorkouts = state.customWorkouts?.filter { it.id != id }
+                )
+            }
+            _navUiState.value = NavUiState.CustomWorkoutDeleted(textId = R.string.custom_workout_deleted_text)
+        }
     }
 }

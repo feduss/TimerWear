@@ -187,7 +187,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
                     errorTextId = getWorkoutRepetitionsErrorId(newValue)
                 ),
                 intermediumRestUiState =
-                if (newValue.isEmpty() || newValue.toInt() == 0)
+                if (newValue.isNotEmpty() && newValue.toInt() == 1)
                     it.intermediumRestUiState.copy(
                         value = null,
                         errorTextId = null
@@ -384,14 +384,14 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
 
     private fun isWorkoutTitleValid(newTitle: String) = isTimerNameValid(newTitle)
 
-    private fun areWorkoutRepetitionsValid(repetitions: String) = repetitions.isNotEmpty()
+    private fun areWorkoutRepetitionsValid(repetitions: String) = repetitions.isNotEmpty() && repetitions.toInt() > 0
 
     private fun isWorkoutIntermediumRestValid(
         repetitionsValue: String,
         intermediumRest: TimerPickerModel?
     ): Boolean {
         if (repetitionsValue.isEmpty()) return false
-        return (repetitionsValue.toInt() == 0 && intermediumRest == null) || (repetitionsValue.toInt() > 1 && intermediumRest != null)
+        return (repetitionsValue.toInt() == 1 && intermediumRest == null) || (repetitionsValue.toInt() > 1 && intermediumRest != null)
     }
 
     private fun isTimerNameValid(name: String) = name.trim().isNotEmpty()
@@ -476,8 +476,10 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         val maxId = customWorkoutModels.maxOfOrNull { it.id }
         val state = _dataUiState.value ?: return
 
+        val oldId = workoutId.toIntOrNull()
+
         val newCustomWorkoutModel = CustomWorkoutModel(
-            id = maxId ?: 0,
+            id = oldId ?: (maxId?.plus(1)) ?: 0,
             name = state.titleUiState.value,
             repetition = state.repetitionsUiState.value.toInt(),
             intermediumRest = state.intermediumRestUiState.value,

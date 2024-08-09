@@ -14,11 +14,17 @@ import com.google.android.horologist.compose.layout.rememberColumnState
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun PageView(columnState: ScalingLazyColumnState = rememberColumnState(),
-             content: @Composable BoxScope.(ScalingLazyColumnState) -> Unit) {
+fun PageView(
+    columnState: ScalingLazyColumnState = rememberColumnState(),
+    endCurvedText: String? = null,
+    content: @Composable BoxScope.(ScalingLazyColumnState) -> Unit
+) {
 
     ScreenScaffold(
-        timeText = { CustomTimeText(columnState = columnState)},
+        timeText = { CustomTimeText(
+            columnState = columnState,
+            endCurvedText = endCurvedText
+        )},
         scrollState = columnState.state,
         positionIndicator = { PositionIndicator(scalingLazyListState = columnState.state) },
         modifier = Modifier

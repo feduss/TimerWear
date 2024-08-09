@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
 import androidx.wear.compose.material.TimeTextDefaults
 import androidx.wear.compose.material.curvedText
+import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ResponsiveTimeText
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -15,18 +16,16 @@ import java.util.Locale
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun CustomTimeText(columnState: ScalingLazyColumnState) {
+fun CustomTimeText(columnState: ScalingLazyColumnState, endCurvedText: String?) {
     val timeSource = TimeTextDefaults.timeSource(
         DateFormat.getBestDateTimePattern(Locale.getDefault(), "HH:mm")
     )
 
-    val textColor = Color("#FF8133".toColorInt())
-
-    val endCurvedText = ""
+    val textColor = Color.PurpleCustom
 
     val modifier = Modifier.scrollAway(columnState)
 
-    if (endCurvedText.isNotEmpty()) {
+    if (endCurvedText?.isNotEmpty() == true) {
         ResponsiveTimeText(
             modifier = modifier,
             timeSource = timeSource,

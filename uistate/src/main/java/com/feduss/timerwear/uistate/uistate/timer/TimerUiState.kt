@@ -5,6 +5,20 @@ import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
 
 data class TimerUiState(
+    val timerCountdownUiState: TimerCountdownUiState?,
+    val timerViewUiState: TimerViewUiState?,
+    val alertDialogUiState: TimerAlertDialogUiState?
+)
+
+data class TimerCountdownUiState(
+    val preCountdownTextId: Int,
+    val preCountdownDuration: Int,
+    val countdown: Int,
+    val postCountdownTextId: Int,
+    val postCountdownSeconds: Int
+)
+
+data class TimerViewUiState(
     val customWorkoutModel: CustomWorkoutModel,
     val currentTimerId: Int = 0,
     val currentTimerName: String,
@@ -14,6 +28,7 @@ data class TimerUiState(
     val timerSecondsRemaining: Int,
     val circularSliderColor: Color,
     val circularSliderProgress: Double = 0.0,
+    val currentProgress: String,
     val middleTimerStatusValueText: String,
     val bottomLeftButtonId: Int,
     val bottomLeftButtonDescription: String,
@@ -21,7 +36,11 @@ data class TimerUiState(
     val bottomRightButtonId: Int,
     val bottomRightButtonDescription: String,
     val bottomRightButtonColor: Color = Color.Black,
-    val isAlertDialogVisible: Boolean,
+    val timeText: String
+)
+
+data class TimerAlertDialogUiState(
+    val isAlertDialogVisible: Boolean = false,
     val alertDialogType: AlertDialogType? = null,
     val alertDialogSkipTitleId: Int,
     val alertDialogSkipPositiveIconId: Int,
@@ -32,7 +51,5 @@ data class TimerUiState(
     val alertDialogStopPositiveIconId: Int,
     val alertDialogStopPositiveIconDescription: String,
     val alertDialogStopNegativeIconId: Int,
-    val alertDialogStopNegativeIconDescription: String,
-    val repetitionTitleId: Int
-
+    val alertDialogStopNegativeIconDescription: String
 )

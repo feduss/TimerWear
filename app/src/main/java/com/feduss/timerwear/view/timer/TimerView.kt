@@ -2,14 +2,17 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -27,12 +30,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.ButtonDefaults
@@ -42,8 +46,12 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
+import com.feduss.timerwear.uistate.extension.PurpleCustom
+import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
+import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
-import java.util.Calendar
+import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
+import kotlin.math.ceil
 
 
 @Composable
@@ -58,17 +66,23 @@ fun TimerView(
     val navUiState by viewModel.navUiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadUiState(context)
+        viewModel.loadTimerCountdownUiState()
     }
 
     navUiState?.let {
         viewModel.navStateFired()
         when (it) {
+            TimerViewModel.NavUiState.TimerStarted -> {
+                viewModel.loadTimerUiState(
+                    context = context
+                )
+            }
             is TimerViewModel.NavUiState.GoBackToCustomWorkoutList ->
                 goBackToWorkoutList(
                     context = context,
                     viewModel = viewModel,
-                    navController = navController
+                    navController = navController,
+                    onTimerSet = onTimerSet
                 )
 
             is TimerViewModel.NavUiState.GoToNextTimer -> {
@@ -86,7 +100,8 @@ fun TimerView(
             is TimerViewModel.NavUiState.ChangeTimerState -> {
                 viewModel.setTimerState(
                     timerSecondsRemaining = it.timerSecondsRemaining,
-                    isTimerActive = it.isTimerActive
+                    isTimerActive = it.isTimerActive,
+                    completion = it.completion
                 )
             }
 
@@ -103,244 +118,412 @@ fun TimerView(
 
     dataUiState?.let { state ->
 
-        var newTimerSecondsRemaining by remember {
-            mutableIntStateOf(state.timerSecondsRemaining)
-        }
-        val timer by remember(state.currentTimerId, state.timerSecondsRemaining) {
-            mutableStateOf(object : CountDownTimer(
-                state.timerSecondsRemaining * 1000L, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    val currentTimerSecondsRemaining = (millisUntilFinished / 1000).toInt()
+        val timerCountdownUiState = state.timerCountdownUiState
+        val alertDialogUiState = state.alertDialogUiState
+        val timerViewUiState = state.timerViewUiState
 
-                    val progress = (1f - (1f - currentTimerSecondsRemaining.toFloat().div(state.maxTimerSeconds))).toDouble()
-                    viewModel.updateCircularProgressBarProgress(progress = progress)
-                    viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = currentTimerSecondsRemaining)
-
-                    viewModel.saveCurrentTimerData(
-                        context,
-                        currentTimerName = state.currentTimerName,
-                        currentTimerId = state.currentTimerId,
-                        currentRepetition = state.currentRepetition,
-                        currentTimerSecondsRemaining = currentTimerSecondsRemaining
-                    )
-                    newTimerSecondsRemaining = currentTimerSecondsRemaining
-
-                }
-                override fun onFinish() {
-                    viewModel.userGoToNextTimer(
-                        currentTimerIndex = state.currentTimerId,
-                        currentRepetition = state.currentRepetition
-                    )
-                }
-
-            }.start())
-        }
-
-        val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
-
-        //Update the timetext label once for timer
-        updateTimeText(
-            secondsRemaining = state.timerSecondsRemaining,
-            onTimerSet = onTimerSet
-        )
-
-        val swipeBackClosure = {
-            viewModel.userChangeAlertDialogState(
-                isAlertDialogVisible = !state.isAlertDialogVisible,
-                alertDialogType = if (!state.isAlertDialogVisible) AlertDialogType.StopTimer else null,
-                completion = {
-                    viewModel.userChangedTimerState(
-                        timerSecondsRemaining = newTimerSecondsRemaining,
-                        isTimerActive = false
-                    )
-                }
+        if (timerCountdownUiState != null) {
+            TimerCountdownView(
+                timerCountdownUiState = timerCountdownUiState,
+                viewModel = viewModel,
+                context = context,
+                onTimerSet = onTimerSet
             )
-        }
+        } else if (timerViewUiState != null) {
 
-        BackHandler {
-            userSwippedBack(swipeBackClosure)
-        }
-
-        SwipeToDismissBox(
-            state = swipeToDismissBoxState,
-            onDismissed = {
-                userSwippedBack(swipeBackClosure)
+            val newTimerSecondsRemaining = remember {
+                mutableIntStateOf(timerViewUiState.timerSecondsRemaining)
             }
-        ) {
-            if (state.isAlertDialogVisible) {
-                onTimerSet("")
-                timer.cancel()
 
-                val resumeTimer = {
-                    viewModel.userChangeAlertDialogState(
-                        isAlertDialogVisible = false,
-                        alertDialogType = null,
-                        completion = {
-                            viewModel.userChangedTimerState(
-                                timerSecondsRemaining = newTimerSecondsRemaining,
-                                isTimerActive = true,
-                            )
-                        }
-                    )
-                }
+            var timer: CountDownTimer? by remember {
+                mutableStateOf(null)
+            }
 
-                when(state.alertDialogType) {
-                    AlertDialogType.SkipTimer -> {
-                        AlertDialog(
-                            titleId = state.alertDialogSkipTitleId,
-                            negativeButtonIconId = state.alertDialogSkipNegativeIconId,
-                            negativeButtonIconDesc = state.alertDialogSkipNegativeIconDescription,
-                            negativeButtonClicked = resumeTimer,
-                            positiveButtonIconId = state.alertDialogSkipPositiveIconId,
-                            positiveButtonIconDesc = state.alertDialogSkipPositiveIconDescription,
-                            positiveButtonClicked = {
-                                viewModel.userChangeAlertDialogState(
-                                    isAlertDialogVisible = false,
-                                    alertDialogType = null,
-                                    completion = {
-                                        viewModel.userSkipToNextTimer(
-                                            currentTimerIndex = state.currentTimerId,
-                                            currentRepetition = state.currentRepetition
-                                        )
-                                    }
-                                )
-                            }
+            val isAlertDialogVisible by remember(alertDialogUiState?.isAlertDialogVisible) {
+                mutableStateOf(alertDialogUiState?.isAlertDialogVisible == true)
+            }
+
+            val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
+            val swipeBackClosure = {
+                //Log.e("TEST123: ", "timer $timer resumed = $isAlertDialogVisible, stopped = ${!isAlertDialogVisible}, timerSecondsRemaining: ${newTimerSecondsRemaining.intValue}")
+
+                viewModel.userChangedTimerState(
+                    timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                    isTimerActive = isAlertDialogVisible,
+                    completion = {
+                        viewModel.userChangeAlertDialogState(
+                            isAlertDialogVisible = !isAlertDialogVisible,
+                            alertDialogType = if (!isAlertDialogVisible) AlertDialogType.StopTimer else null,
+                            completion = {}
                         )
                     }
-
-                    AlertDialogType.StopTimer -> {
-                        AlertDialog(
-                            titleId = state.alertDialogStopTitleId,
-                            negativeButtonIconId = state.alertDialogStopNegativeIconId,
-                            negativeButtonIconDesc = state.alertDialogStopNegativeIconDescription,
-                            negativeButtonClicked = resumeTimer,
-                            positiveButtonIconId = state.alertDialogStopPositiveIconId,
-                            positiveButtonIconDesc = state.alertDialogStopPositiveIconDescription,
-                            positiveButtonClicked = {
-                                viewModel.userChangeAlertDialogState(
-                                    isAlertDialogVisible = false,
-                                    alertDialogType = null,
-                                    completion = {
-                                        viewModel.userGoBackToWorkoutList()
-                                    }
-                                )
-                            }
-                        )
-                    }
-
-                    null -> {}
-                }
-
-            }
-            else {
-                CircularProgressIndicator(
-                    progress = { state.circularSliderProgress.toFloat() },
-                    modifier = Modifier.fillMaxSize(),
-                    color = state.circularSliderColor,
-                    strokeWidth = 4.dp,
                 )
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = state.currentTimerName,
-                        color = Color("#E3BAFF".toColorInt()),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = stringResource(
-                            state.repetitionTitleId,
-                            state.currentRepetition + 1,
-                            state.customWorkoutModel.repetition
-                        ),
-                        color = Color("#E3BAFF".toColorInt()),
-                        textAlign = TextAlign.Center,
-                        fontSize = TextUnit(10f, TextUnitType.Sp)
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(1f),
-                        text = state.middleTimerStatusValueText,
-                        color = Color("#E3BAFF".toColorInt()),
-                        textAlign = TextAlign.Center
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
-                    ) {
-                        val color = Color("#E3BAFF".toColorInt())
-                        CompactButton(
-                            modifier = Modifier
-                                .width(24.dp)
-                                .aspectRatio(1f)
-                                .background(
-                                    color = color,
-                                    shape = CircleShape
-                                ),
-                            colors = ButtonDefaults.primaryButtonColors(color, color),
-                            content = {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = state.bottomLeftButtonId),
-                                    contentDescription = state.bottomLeftButtonDescription,
-                                    tint = state.bottomLeftButtonColor
-                                )
-                            },
-                            onClick = {
-                                //Pause/Play button
-                                if (state.isTimerActive) {
-                                    timer.cancel()
-                                }
-                                viewModel.userChangedTimerState(
-                                    timerSecondsRemaining = newTimerSecondsRemaining,
-                                    isTimerActive = !state.isTimerActive
-                                )
-                            }
+            }
+
+            //Back button
+            BackHandler {
+                swipeBackClosure()
+            }
+
+            SwipeToDismissBox(
+                state = swipeToDismissBoxState,
+                onDismissed = swipeBackClosure, //swipe to dismiss gesture
+            ) { isBackGround ->
+
+                if (isBackGround) {
+                    if (alertDialogUiState != null) {
+                        TimerAlertDialogView(
+                            alertDialogUiState = alertDialogUiState,
+                            viewModel = viewModel,
+                            newTimerSecondsRemaining = newTimerSecondsRemaining,
+                            currentTimerIndex = timerViewUiState.currentTimerId,
+                            currentRepetition = timerViewUiState.currentRepetition,
+                            userGoBack = swipeBackClosure,
+                            onTimerSet = onTimerSet
                         )
-                        val isLastTimer =
-                            state.currentTimerId == state.customWorkoutModel.timers.last().id &&
-                            state.currentRepetition == state.customWorkoutModel.repetition - 1
-                        if (!isLastTimer) {
-                            CompactButton(
-                                modifier = Modifier
-                                    .width(24.dp)
-                                    .aspectRatio(1f)
-                                    .background(
-                                        color = color,
-                                        shape = CircleShape
-                                    ),
-                                colors = ButtonDefaults.primaryButtonColors(color, color),
-                                content = {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = state.bottomRightButtonId),
-                                        contentDescription = state.bottomRightButtonDescription,
-                                        tint = state.bottomRightButtonColor
+                    }
+                } else {
+                    LaunchedEffect(
+                        timerViewUiState.isTimerActive
+                    ) {
+                        if (timerViewUiState.isTimerActive) {
+                            timer = (object : CountDownTimer(
+                                timerViewUiState.timerSecondsRemaining * 1000L, 1000
+                            ) {
+                                override fun onTick(millisUntilFinished: Long) {
+                                    val currentTimerSecondsRemaining = ceil((millisUntilFinished).toDouble() / 1000).toInt()
+
+                                    val progress = (1f - (1f - currentTimerSecondsRemaining.toFloat()
+                                        .div(timerViewUiState.maxTimerSeconds))).toDouble()
+                                    viewModel.updateCircularProgressBarProgress(progress = progress)
+                                    viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = currentTimerSecondsRemaining)
+
+                                    viewModel.saveCurrentTimerData(
+                                        context,
+                                        currentTimerName = timerViewUiState.currentTimerName,
+                                        currentTimerId = timerViewUiState.currentTimerId,
+                                        currentRepetition = timerViewUiState.currentRepetition,
+                                        currentTimerSecondsRemaining = currentTimerSecondsRemaining
                                     )
-                                },
-                                onClick = {
-                                    //Skip button
-                                    viewModel.userChangeAlertDialogState(
-                                        isAlertDialogVisible = true,
-                                        alertDialogType = AlertDialogType.SkipTimer,
-                                        completion = {
-                                            viewModel.userChangedTimerState(
-                                                timerSecondsRemaining = newTimerSecondsRemaining,
-                                                isTimerActive = false
-                                            )
-                                        }
+                                    newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
+
+                                }
+
+                                override fun onFinish() {
+                                    viewModel.updateCircularProgressBarProgress(progress = 0.0)
+                                    viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = 0)
+                                    viewModel.userGoToNextTimer(
+                                        currentTimerIndex = timerViewUiState.currentTimerId,
+                                        currentRepetition = timerViewUiState.currentRepetition
                                     )
                                 }
-                            )
+
+                            })
+                            timer?.start()
+                            //Log.e("TEST123: ", "LaunchedEffect: timer $timer created (started), timerSecondsRemaining: ${timerViewUiState.timerSecondsRemaining}")
+                        } else {
+                            //Log.e("TEST123: ", "LaunchedEffect: timer $timer destroyed (paused), timerSecondsRemaining: ${timerViewUiState.timerSecondsRemaining}")
+                            timer?.cancel()
                         }
+                    }
+
+                    if (alertDialogUiState != null && isAlertDialogVisible) {
+                        TimerAlertDialogView(
+                            alertDialogUiState = alertDialogUiState,
+                            viewModel = viewModel,
+                            newTimerSecondsRemaining = newTimerSecondsRemaining,
+                            currentTimerIndex = timerViewUiState.currentTimerId,
+                            currentRepetition = timerViewUiState.currentRepetition,
+                            userGoBack = swipeBackClosure,
+                            onTimerSet = onTimerSet
+                        )
+                    } else {
+                        TimerViewMainContent(
+                            timerViewUiState = timerViewUiState,
+                            viewModel = viewModel,
+                            context = context,
+                            newTimerSecondsRemaining = newTimerSecondsRemaining,
+                            onTimerSet = onTimerSet
+                        )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun TimerCountdownView(
+    timerCountdownUiState: TimerCountdownUiState,
+    viewModel: TimerViewModel,
+    context: Context,
+    onTimerSet: (String) -> Unit
+) {
+
+    onTimerSet("")
+    val preCountdownText by remember {
+        mutableStateOf(context.getString(timerCountdownUiState.preCountdownTextId))
+    }
+
+    val postCountdownText by remember {
+        mutableStateOf(context.getString(timerCountdownUiState.postCountdownTextId))
+    }
+
+    var centeredText by remember {
+        mutableStateOf(preCountdownText)
+    }
+
+    val postCountDownTimer by remember(Unit) {
+        mutableStateOf(object : CountDownTimer(
+            timerCountdownUiState.postCountdownSeconds * 1000L, 1000
+        ) {
+            override fun onTick(millisUntilFinished: Long) {
+            }
+
+            override fun onFinish() {
+                viewModel.countdownFinished()
+            }
+        })
+    }
+
+    val countDownTimer by remember(Unit) {
+        mutableStateOf(object : CountDownTimer(
+            timerCountdownUiState.countdown * 1000L, 1000
+        ) {
+            override fun onTick(millisUntilFinished: Long) {
+                val currentTimerSecondsRemaining = ceil((millisUntilFinished).toDouble() / 1000).toInt()
+
+                centeredText = currentTimerSecondsRemaining.toString()
+
+
+                //TODO: add vibration / sound every seconds
+
+            }
+
+            override fun onFinish() {
+                centeredText = postCountdownText
+                postCountDownTimer.start()
+            }
+        })
+    }
+
+    val preCountDownTimer by remember(Unit) {
+        mutableStateOf(object : CountDownTimer(
+            timerCountdownUiState.preCountdownDuration * 1000L, 1000
+        ) {
+            override fun onTick(millisUntilFinished: Long) {
+            }
+
+            override fun onFinish() {
+                centeredText = timerCountdownUiState.postCountdownSeconds.toString()
+                countDownTimer.start()
+            }
+        }.start())
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 12.dp)
+        ,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = centeredText,
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            fontSize = TextUnit(40f, TextUnitType.Sp),
+            lineHeight = TextUnit(40f, TextUnitType.Sp)
+        )
+    }
+}
+
+@Composable
+private fun TimerAlertDialogView(
+    alertDialogUiState: TimerAlertDialogUiState,
+    viewModel: TimerViewModel,
+    newTimerSecondsRemaining: MutableIntState,
+    currentTimerIndex: Int,
+    currentRepetition: Int,
+    onTimerSet: (String) -> Unit,
+    userGoBack: () -> Unit
+) {
+    onTimerSet("")
+
+    when (alertDialogUiState.alertDialogType) {
+        AlertDialogType.SkipTimer -> {
+            AlertDialog(
+                titleId = alertDialogUiState.alertDialogSkipTitleId,
+                negativeButtonIconId = alertDialogUiState.alertDialogSkipNegativeIconId,
+                negativeButtonIconDesc = alertDialogUiState.alertDialogSkipNegativeIconDescription,
+                negativeButtonClicked = userGoBack,
+                positiveButtonIconId = alertDialogUiState.alertDialogSkipPositiveIconId,
+                positiveButtonIconDesc = alertDialogUiState.alertDialogSkipPositiveIconDescription,
+                positiveButtonClicked = {
+                    viewModel.userChangeAlertDialogState(
+                        isAlertDialogVisible = false,
+                        alertDialogType = null,
+                        completion = {
+                            viewModel.userSkipToNextTimer(
+                                currentTimerIndex = currentTimerIndex,
+                                currentRepetition = currentRepetition
+                            )
+                        }
+                    )
+                }
+            )
+        }
+
+        AlertDialogType.StopTimer -> {
+            AlertDialog(
+                titleId = alertDialogUiState.alertDialogStopTitleId,
+                negativeButtonIconId = alertDialogUiState.alertDialogStopNegativeIconId,
+                negativeButtonIconDesc = alertDialogUiState.alertDialogStopNegativeIconDescription,
+                negativeButtonClicked = userGoBack,
+                positiveButtonIconId = alertDialogUiState.alertDialogStopPositiveIconId,
+                positiveButtonIconDesc = alertDialogUiState.alertDialogStopPositiveIconDescription,
+                positiveButtonClicked = {
+                    viewModel.userChangeAlertDialogState(
+                        isAlertDialogVisible = false,
+                        alertDialogType = null,
+                        completion = {
+                            viewModel.userGoBackToWorkoutList()
+                        }
+                    )
+                }
+            )
+        }
+
+        null -> {}
+    }
+}
+
+@Composable
+private fun TimerViewMainContent(
+    timerViewUiState: TimerViewUiState,
+    viewModel: TimerViewModel,
+    context: Context,
+    newTimerSecondsRemaining: MutableIntState,
+    onTimerSet: (String) -> Unit
+) {
+
+    //Update the timetext label once for timer
+    LaunchedEffect(
+        timerViewUiState.currentTimerId,
+        timerViewUiState.timerSecondsRemaining
+    ) {
+        onTimerSet(timerViewUiState.timeText)
+    }
+
+
+    CircularProgressIndicator(
+        progress = { timerViewUiState.circularSliderProgress.toFloat() },
+        modifier = Modifier.fillMaxSize(),
+        color = timerViewUiState.circularSliderColor,
+        strokeWidth = 4.dp,
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = timerViewUiState.currentTimerName,
+            color = Color.PurpleCustom,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = timerViewUiState.currentProgress,
+            color = Color.PurpleCustom,
+            textAlign = TextAlign.Center,
+            fontSize = TextUnit(10f, TextUnitType.Sp)
+        )
+        
+        Box(modifier = Modifier.height(12.dp))
+        
+        Text(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f),
+            text = timerViewUiState.middleTimerStatusValueText,
+            color = Color.PurpleCustom,
+            textAlign = TextAlign.Center,
+            fontSize = TextUnit(20.0f, TextUnitType.Sp)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                16.dp,
+                Alignment.CenterHorizontally
+            )
+        ) {
+            val color = Color.PurpleCustom
+            CompactButton(
+                modifier = Modifier
+                    .width(24.dp)
+                    .aspectRatio(1f)
+                    .background(
+                        color = color,
+                        shape = CircleShape
+                    ),
+                colors = ButtonDefaults.primaryButtonColors(color, color),
+                content = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = timerViewUiState.bottomLeftButtonId),
+                        contentDescription = timerViewUiState.bottomLeftButtonDescription,
+                        tint = timerViewUiState.bottomLeftButtonColor
+                    )
+                },
+                onClick = {
+                    //Pause/Play button
+                    viewModel.userChangedTimerState(
+                        timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                        isTimerActive = !timerViewUiState.isTimerActive,
+                        completion = {}
+                    )
+                }
+            )
+            val isLastTimer =
+                timerViewUiState.currentTimerId == timerViewUiState.customWorkoutModel.timers.last().id &&
+                        timerViewUiState.currentRepetition == timerViewUiState.customWorkoutModel.repetition - 1
+            if (!isLastTimer) {
+                CompactButton(
+                    modifier = Modifier
+                        .width(24.dp)
+                        .aspectRatio(1f)
+                        .background(
+                            color = color,
+                            shape = CircleShape
+                        ),
+                    colors = ButtonDefaults.primaryButtonColors(color, color),
+                    content = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = timerViewUiState.bottomRightButtonId),
+                            contentDescription = timerViewUiState.bottomRightButtonDescription,
+                            tint = timerViewUiState.bottomRightButtonColor
+                        )
+                    },
+                    onClick = {
+                        //Skip button
+                        viewModel.userChangedTimerState(
+                            timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                            isTimerActive = false,
+                            completion = {
+                                viewModel.userChangeAlertDialogState(
+                                    isAlertDialogVisible = true,
+                                    alertDialogType = AlertDialogType.SkipTimer,
+                                    completion = {}
+                                )
+                            }
+                        )
+                    }
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -382,7 +565,7 @@ private fun AlertDialog(
             )
         },
         positiveButton = {
-            val color = Color("#E3BAFF".toColorInt())
+            val color = Color.PurpleCustom
             CompactButton(
                 modifier = Modifier
                     .width(48.dp)
@@ -407,26 +590,11 @@ private fun AlertDialog(
     )
 }
 
-private fun updateTimeText(
-    secondsRemaining: Int,
+fun goBackToWorkoutList(
+    context: Context, viewModel: TimerViewModel, navController: NavHostController,
     onTimerSet: (String) -> Unit
-) {
-    val calendar = Calendar.getInstance()
-    calendar.add(Calendar.SECOND, secondsRemaining)
-
-    val calendarHour = calendar.get(Calendar.HOUR_OF_DAY)
-    val calendarMinutes = calendar.get(Calendar.MINUTE)
-    val calendarSeconds = calendar.get(Calendar.SECOND)
-    val minutes = if (calendarMinutes < 10) "0$calendarMinutes" else calendarMinutes
-    val seconds = if (calendarMinutes < 10) "0$calendarSeconds" else calendarSeconds
-    onTimerSet("$calendarHour:$minutes:$seconds")
-}
-
-private fun userSwippedBack(swipeBackClosure: () -> Unit) {
-    swipeBackClosure()
-}
-
-fun goBackToWorkoutList(context: Context, viewModel: TimerViewModel, navController: NavHostController){
+){
+    onTimerSet("")
     viewModel.cancelTimer(context)
     navController.popBackStack()
 }

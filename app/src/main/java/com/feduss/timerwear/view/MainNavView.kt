@@ -1,6 +1,10 @@
 package com.feduss.timerwear.view
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -31,6 +35,10 @@ fun MainNavView(
     val navController = rememberSwipeDismissableNavController()
 
     val startDestination = Section.Navigation.baseRoute
+
+    var endCurvedText: String? by remember {
+        mutableStateOf(null)
+    }
 
     AppScaffold {
         SwipeDismissableNavHost(
@@ -120,7 +128,9 @@ fun MainNavView(
                 if (workoutId == null) {
                     navController.popBackStack()
                 } else {
-                    PageView {
+                    PageView(
+                        endCurvedText = endCurvedText
+                    ) {
                         TimerView(
                             context = mainActivity,
                             navController = navController,
@@ -130,7 +140,10 @@ fun MainNavView(
                                 currentTimerIndex = currentTimerIndex?.toIntOrNull(),
                                 currentRepetition = currentRepetition?.toIntOrNull(),
                                 currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
-                            )
+                            ),
+                            onTimerSet = { hourTimerEnd: String ->
+                                endCurvedText = hourTimerEnd
+                            },
                         )
                     }
                 }

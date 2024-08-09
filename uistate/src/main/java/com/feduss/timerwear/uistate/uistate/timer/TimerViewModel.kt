@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.feduss.timerwear.entity.CustomTimerModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.uistate.R
@@ -59,6 +60,7 @@ class TimerViewModel @AssistedInject constructor(
     }
 
     sealed class NavUiState {
+        data object TimerStarted: NavUiState()
         data object GoToEndOfWorkout: NavUiState()
         data object GoBackToCustomWorkoutList: NavUiState()
         data class GoToNextTimer(val currentTimerIndex: Int, val currentRepetition: Int): NavUiState()
@@ -69,7 +71,8 @@ class TimerViewModel @AssistedInject constructor(
         ): NavUiState()
         data class ChangeTimerState(
             val timerSecondsRemaining: Int,
-            val isTimerActive: Boolean
+            val isTimerActive: Boolean,
+            val completion: () -> Unit
         ): NavUiState()
     }
 
@@ -82,9 +85,10 @@ class TimerViewModel @AssistedInject constructor(
     private var customWorkoutModel: CustomWorkoutModel? = null
 
     //Copies
+    private val preCountdownTextId = R.string.timer_pre_countdown
+    private val postCountdownTextId = R.string.timer_post_countdown
     private val alertDialogSkipTitleId = R.string.timer_skip_timer
     private val alertDialogStopTitleId = R.string.timer_stop_timer_question
-    private val repetitionTitleId = R.string.timer_repetition_title
 
     //Assets
     private val playIconId = R.drawable.ic_play
@@ -101,42 +105,71 @@ class TimerViewModel @AssistedInject constructor(
     private val inactiveColor = Color.InactiveTimer
 
     //State
-    fun loadUiState(context: Context) {
+    fun loadTimerCountdownUiState() {
 
         if (_dataUiState.value != null) return
 
-        val id = workoutId.toInt()
-        customWorkoutModel = getCustomWorkoutModels(context = context)?.first { it.id == id }
-
-        _dataUiState.value = customWorkoutModel?.let {
-            val currentTimer = it.timers[currentTimerIndex ?: 0]
-            TimerUiState(
-                customWorkoutModel = it,
-                currentTimerId = currentTimerIndex ?: 0,
-                currentTimerName = currentTimer.name,
-                currentRepetition = currentRepetition ?:0,
-                middleTimerStatusValueText = currentTimer.duration.toString(),
-                isTimerActive = true,
-                maxTimerSeconds = currentTimer.duration.toSeconds(),
-                timerSecondsRemaining = currentTimerSecondsRemaining ?: currentTimer.duration.toSeconds(),
-                bottomLeftButtonId = pauseIconId,
-                bottomLeftButtonDescription = pauseIconDescription,
-                bottomRightButtonId = skipNextIcon,
-                bottomRightButtonDescription = skipNextIconDescription,
-                circularSliderColor = activeColor,
-                isAlertDialogVisible = false,
-                alertDialogSkipTitleId = alertDialogSkipTitleId,
-                alertDialogSkipNegativeIconId = closeIconId,
-                alertDialogSkipNegativeIconDescription = "Close icon",
-                alertDialogSkipPositiveIconId = checkIconId,
-                alertDialogSkipPositiveIconDescription = "Check icon",
-                alertDialogStopTitleId = alertDialogStopTitleId,
-                alertDialogStopNegativeIconId = closeIconId,
-                alertDialogStopNegativeIconDescription = "Close icon",
-                alertDialogStopPositiveIconId = checkIconId,
-                alertDialogStopPositiveIconDescription = "Check icon",
-                repetitionTitleId = repetitionTitleId
+        _dataUiState.value = TimerUiState(
+            timerViewUiState = null,
+            alertDialogUiState = null,
+            timerCountdownUiState = TimerCountdownUiState(
+                preCountdownTextId = preCountdownTextId,
+                preCountdownDuration = 1,
+                countdown = 3,
+                postCountdownTextId = postCountdownTextId,
+                postCountdownSeconds = 1
             )
+        )
+    }
+
+    fun loadTimerUiState(context: Context) {
+        customWorkoutModel = getCustomWorkoutModels(context = context)?.first { it.id == workoutId }
+
+        customWorkoutModel?.let { workout ->
+            val currentTimer = workout.timers[currentTimerIndex ?: 0]
+            val timerIndex = currentTimerIndex ?: 0
+            val repetition = currentRepetition ?: 0
+            _dataUiState.update {
+                it?.copy(
+                    timerCountdownUiState = null,
+                    timerViewUiState = TimerViewUiState(
+                        customWorkoutModel = workout,
+                        currentTimerId = timerIndex,
+                        currentTimerName = currentTimer.name,
+                        currentRepetition = repetition,
+                        currentProgress = "${(repetition * workout.timers.size) + (timerIndex + 1)}/${workout.repetition * workout.timers.size}",
+                        middleTimerStatusValueText = currentTimer.duration.toString(),
+                        isTimerActive = true,
+                        maxTimerSeconds = currentTimer.duration.toSeconds(),
+                        timerSecondsRemaining = currentTimerSecondsRemaining
+                            ?: currentTimer.duration.toSeconds(),
+                        bottomLeftButtonId = pauseIconId,
+                        bottomLeftButtonDescription = pauseIconDescription,
+                        bottomRightButtonId = skipNextIcon,
+                        bottomRightButtonDescription = skipNextIconDescription,
+                        circularSliderColor = activeColor,
+                        timeText = getTimeText(
+                            timers = workout.timers,
+                            currentTimerIndex = timerIndex,
+                            currentRepetition = repetition,
+                            totalRepetitions = workout.repetition
+                        )
+                    ),
+                    alertDialogUiState = TimerAlertDialogUiState(
+                        alertDialogSkipTitleId = alertDialogSkipTitleId,
+                        alertDialogSkipNegativeIconId = closeIconId,
+                        alertDialogSkipNegativeIconDescription = "Close icon",
+                        alertDialogSkipPositiveIconId = checkIconId,
+                        alertDialogSkipPositiveIconDescription = "Check icon",
+                        alertDialogStopTitleId = alertDialogStopTitleId,
+                        alertDialogStopNegativeIconId = closeIconId,
+                        alertDialogStopNegativeIconDescription = "Close icon",
+                        alertDialogStopPositiveIconId = checkIconId,
+                        alertDialogStopPositiveIconDescription = "Check icon",
+                        alertDialogType = AlertDialogType.StopTimer
+                    )
+                )
+            }
         }
     }
 
@@ -167,8 +200,10 @@ class TimerViewModel @AssistedInject constructor(
         isAlertDialogVisible: Boolean, alertDialogType: AlertDialogType?, completion: () -> Unit) {
         _dataUiState.update {
             it?.copy(
-                isAlertDialogVisible = isAlertDialogVisible,
-                alertDialogType = alertDialogType
+                alertDialogUiState = it.alertDialogUiState?.copy(
+                    isAlertDialogVisible = isAlertDialogVisible,
+                    alertDialogType = alertDialogType
+                )
             )
         }
         completion()
@@ -179,18 +214,23 @@ class TimerViewModel @AssistedInject constructor(
     }
 
     fun userChangedTimerState(
-        timerSecondsRemaining: Int, isTimerActive: Boolean
+        timerSecondsRemaining: Int,
+        isTimerActive: Boolean,
+        completion: () -> Unit
     ) {
         _navUiState.value = NavUiState.ChangeTimerState(
             timerSecondsRemaining = timerSecondsRemaining,
-            isTimerActive = isTimerActive
+            isTimerActive = isTimerActive,
+            completion = completion
         )
     }
 
     fun updateCircularProgressBarProgress(progress: Double) {
         _dataUiState.update {
             it?.copy(
-                circularSliderProgress = progress
+                timerViewUiState = it.timerViewUiState?.copy(
+                    circularSliderProgress = progress
+                )
             )
         }
     }
@@ -245,17 +285,21 @@ class TimerViewModel @AssistedInject constructor(
 
     fun setTimerState(
         timerSecondsRemaining: Int,
-        isTimerActive: Boolean
+        isTimerActive: Boolean,
+        completion: () -> Unit
     ) {
         _dataUiState.update {
             it?.copy(
-                timerSecondsRemaining = if (isTimerActive) timerSecondsRemaining else it.timerSecondsRemaining,
-                isTimerActive = isTimerActive,
-                bottomLeftButtonId = if (isTimerActive) pauseIconId else playIconId,
-                bottomLeftButtonDescription = if (isTimerActive) pauseIconDescription else playIconDescription,
-                circularSliderColor = if (isTimerActive) activeColor else inactiveColor
+                timerViewUiState = it.timerViewUiState?.copy(
+                    timerSecondsRemaining = timerSecondsRemaining,
+                    isTimerActive = isTimerActive,
+                    bottomLeftButtonId = if (isTimerActive) pauseIconId else playIconId,
+                    bottomLeftButtonDescription = if (isTimerActive) pauseIconDescription else playIconDescription,
+                    circularSliderColor = if (isTimerActive) activeColor else inactiveColor
+                )
             )
         }
+        completion()
     }
 
     fun setNextTimer(context: Context, currentTimerIndex: Int, currentRepetition: Int) {
@@ -282,16 +326,25 @@ class TimerViewModel @AssistedInject constructor(
                 customWorkoutModel?.let { workout ->
                     val newTimer = workout.timers[newCurrentTimerIndex]
                     state?.copy(
-                        currentTimerId = newCurrentTimerIndex,
-                        currentTimerName = newTimer.name,
-                        currentRepetition = newCurrentRepetition,
-                        isTimerActive = true,
-                        maxTimerSeconds = newTimer.duration.toSeconds(),
-                        timerSecondsRemaining = newTimer.duration.toSeconds(),
-                        circularSliderColor = activeColor,
-                        circularSliderProgress = 1.0,
-                        bottomLeftButtonId = pauseIconId,
-                        bottomLeftButtonDescription = pauseIconDescription
+                        timerViewUiState = state.timerViewUiState?.copy(
+                            currentTimerId = newCurrentTimerIndex,
+                            currentTimerName = newTimer.name,
+                            currentRepetition = newCurrentRepetition,
+                            isTimerActive = true,
+                            maxTimerSeconds = newTimer.duration.toSeconds(),
+                            timerSecondsRemaining = newTimer.duration.toSeconds(),
+                            circularSliderColor = activeColor,
+                            circularSliderProgress = 1.0,
+                            currentProgress = "${(newCurrentRepetition * workout.timers.size) + (newCurrentTimerIndex + 1)}/${workout.repetition * workout.timers.size}",
+                            bottomLeftButtonId = pauseIconId,
+                            bottomLeftButtonDescription = pauseIconDescription,
+                            timeText = getTimeText(
+                                timers = it.timers,
+                                currentTimerIndex = newCurrentTimerIndex,
+                                currentRepetition = newCurrentRepetition,
+                                totalRepetitions = totalRepetitions
+                            )
+                        )
                     )
                 }
             }
@@ -304,7 +357,31 @@ class TimerViewModel @AssistedInject constructor(
         }
     }
 
+    private fun getTimeText(
+        timers: List<CustomTimerModel>,
+        currentTimerIndex: Int,
+        currentRepetition: Int,
+        totalRepetitions: Int
+    ): String {
+        val totalTimers = timers.size
+        var timeText = "Next: "
+        if (currentTimerIndex == totalTimers - 1) {
+            if (currentRepetition < totalRepetitions) {
+                timeText += timers[currentRepetition + 1].name
+            }
+        } else {
+
+            if (currentRepetition == totalRepetitions && currentTimerIndex == totalTimers - 2) {
+                timeText = ""
+            } else {
+                timeText += timers[currentRepetition + 1].name
+            }
+        }
+        return timeText
+    }
+
     fun cancelTimer(context: Context) {
+        _dataUiState
         PrefsUtils.cancelTimerInPrefs(context)
     }
 
@@ -326,9 +403,15 @@ class TimerViewModel @AssistedInject constructor(
 
         _dataUiState.update {
             it?.copy(
-                middleTimerStatusValueText = "$minutesString:$secondsString"
+                timerViewUiState = it.timerViewUiState?.copy(
+                    middleTimerStatusValueText = "$minutesString:$secondsString"
+                )
             )
         }
+    }
+
+    fun countdownFinished() {
+        _navUiState.value = NavUiState.TimerStarted
     }
 
 }

@@ -2,13 +2,14 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,10 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
+import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import kotlin.math.ceil
@@ -95,7 +97,7 @@ fun TimerView(
             }
 
             TimerViewModel.NavUiState.GoToEndOfWorkout -> {
-                TODO()
+                viewModel.setTYPState()
             }
             is TimerViewModel.NavUiState.ChangeTimerState -> {
                 viewModel.setTimerState(
@@ -121,12 +123,18 @@ fun TimerView(
         val timerCountdownUiState = state.timerCountdownUiState
         val alertDialogUiState = state.alertDialogUiState
         val timerViewUiState = state.timerViewUiState
+        val timerTYPViewUiState = state.timerTYPViewUiState
 
         if (timerCountdownUiState != null) {
             TimerCountdownView(
                 timerCountdownUiState = timerCountdownUiState,
                 viewModel = viewModel,
                 context = context,
+                onTimerSet = onTimerSet
+            )
+        } else if(timerTYPViewUiState != null) {
+            TimerTYPView(
+                timerTYPViewUiState = timerTYPViewUiState,
                 onTimerSet = onTimerSet
             )
         } else if (timerViewUiState != null) {
@@ -249,6 +257,33 @@ fun TimerView(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TimerTYPView(timerTYPViewUiState: TimerTYPViewUiState, onTimerSet: (String) -> Unit) {
+
+    onTimerSet("")
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            modifier = Modifier.height(96.dp),
+            painter = painterResource(timerTYPViewUiState.imageId),
+            contentDescription = timerTYPViewUiState.imageDescription
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(id = timerTYPViewUiState.titleId),
+            textAlign = TextAlign.Center,
+            fontSize = TextUnit(20f, TextUnitType.Sp),
+            color = Color.White
+        )
     }
 }
 

@@ -7,7 +7,8 @@ import com.feduss.timerwear.entity.enums.AlertDialogType
 data class TimerUiState(
     val timerCountdownUiState: TimerCountdownUiState?,
     val timerViewUiState: TimerViewUiState?,
-    val alertDialogUiState: TimerAlertDialogUiState?
+    val alertDialogUiState: TimerAlertDialogUiState?,
+    val timerTYPViewUiState: TimerTYPViewUiState?
 )
 
 data class TimerCountdownUiState(
@@ -52,4 +53,10 @@ data class TimerAlertDialogUiState(
     val alertDialogStopPositiveIconDescription: String,
     val alertDialogStopNegativeIconId: Int,
     val alertDialogStopNegativeIconDescription: String
+)
+
+data class TimerTYPViewUiState(
+    val imageId: Int,
+    val imageDescription: String,
+    val titleId: Int
 )

@@ -89,6 +89,7 @@ class TimerViewModel @AssistedInject constructor(
     private val postCountdownTextId = R.string.timer_post_countdown
     private val alertDialogSkipTitleId = R.string.timer_skip_timer
     private val alertDialogStopTitleId = R.string.timer_stop_timer_question
+    private val typTitleId = R.string.timer_typ_title
 
     //Assets
     private val playIconId = R.drawable.ic_play
@@ -99,6 +100,8 @@ class TimerViewModel @AssistedInject constructor(
     private val skipNextIconDescription = "ic_skip_next"
     private val closeIconId = R.drawable.ic_close
     private val checkIconId = R.drawable.ic_check
+    private val typImageId = R.drawable.ic_win;
+    private val typImageDescription = "ic_win"
 
     //Colors
     private val activeColor = Color.ActiveTimer
@@ -118,7 +121,8 @@ class TimerViewModel @AssistedInject constructor(
                 countdown = 3,
                 postCountdownTextId = postCountdownTextId,
                 postCountdownSeconds = 1
-            )
+            ),
+            timerTYPViewUiState = null
         )
     }
 
@@ -310,7 +314,7 @@ class TimerViewModel @AssistedInject constructor(
             val newCurrentTimerIndex: Int
             val newCurrentRepetition: Int
             if (currentTimerIndex == totalTimers - 1) {
-                if (currentRepetition == totalRepetitions) {
+                if (currentRepetition == totalRepetitions - 1) {
                     _navUiState.value = NavUiState.GoToEndOfWorkout
                     return
                 } else {
@@ -366,16 +370,15 @@ class TimerViewModel @AssistedInject constructor(
         val totalTimers = timers.size
         var timeText = "Next: "
         if (currentTimerIndex == totalTimers - 1) {
-            if (currentRepetition < totalRepetitions) {
-                timeText += timers[currentRepetition + 1].name
+            if (currentRepetition < totalRepetitions - 1) {
+                timeText += timers[0].name
+            } else {
+                // end of workout
+                timeText += "Fine"
             }
         } else {
 
-            if (currentRepetition == totalRepetitions && currentTimerIndex == totalTimers - 2) {
-                timeText = ""
-            } else {
-                timeText += timers[currentRepetition + 1].name
-            }
+            timeText += timers[currentTimerIndex + 1].name
         }
         return timeText
     }
@@ -412,6 +415,20 @@ class TimerViewModel @AssistedInject constructor(
 
     fun countdownFinished() {
         _navUiState.value = NavUiState.TimerStarted
+    }
+
+    fun setTYPState() {
+        _dataUiState.update {
+            it?.copy(
+                timerViewUiState = null,
+                alertDialogUiState = null,
+                timerTYPViewUiState = TimerTYPViewUiState(
+                    imageId = typImageId,
+                    imageDescription = typImageDescription,
+                    titleId = typTitleId
+                )
+            )
+        }
     }
 
 }

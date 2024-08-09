@@ -39,4 +39,5 @@
     <string name="timer_stop_timer_question">Vuoi terminare il timer?</string>
     <string name="timer_pre_countdown">Get ready</string>
     <string name="timer_post_countdown">Go!</string>
+    <string name="timer_typ_title">Fine!</string>
 </resources>

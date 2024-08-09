@@ -287,7 +287,7 @@ private fun ContentBody(
         leftText = state.name,
         bottomText = state.duration,
         onCardClick = {
-            state.onCardClicked
+            state.onCardClicked()
         }
     )
 }

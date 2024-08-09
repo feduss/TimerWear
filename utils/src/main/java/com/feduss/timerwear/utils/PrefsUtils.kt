@@ -3,6 +3,7 @@ package com.feduss.timerwear.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.feduss.timerwear.entity.enums.TimerType
 
 class PrefsUtils {
 
@@ -36,5 +37,40 @@ class PrefsUtils {
                 getSharedPreferences(context).edit().putStringSet(pref, newValue).apply()
             }
         }
+
+        fun cancelTimerInPrefs(context: Context) {
+            setStringPref(context, PrefParam.CurrentTimerIndex.value, null)
+            setStringPref(context, PrefParam.CurrentRepetition.value, null)
+            setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
+        }
+
+        fun setNextTimerInPrefs(context: Context, newCurrentTimerIndex: Int, newCurrentRepetition: Int) {
+
+            setStringPref(
+                context,
+                PrefParam.CurrentTimerIndex.value,
+                newCurrentTimerIndex.toString()
+            )
+
+            setStringPref(
+                context,
+                PrefParam.CurrentRepetition.value,
+                newCurrentRepetition.toString()
+            )
+
+            setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
+        }
+
+        fun isTimerActive(context: Context) = getStringPref(
+            context,
+            PrefParam.IsTimerActive.value
+        ) == "true"
+
+        fun getTimerType(context: Context) = TimerType.fromString(
+            getStringPref(
+                context,
+                PrefParam.TimerType.value
+            )
+        )
     }
 }

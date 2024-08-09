@@ -11,10 +11,12 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.entity.enums.Section
+import com.feduss.timerwear.uistate.factory.getTimerViewModel
 import com.feduss.timerwear.view.component.MenuView
 import com.feduss.timerwear.view.component.PageView
 import com.feduss.timerwear.view.custom_workout.AddCustomWorkoutView
 import com.feduss.timerwear.view.custom_workout.CustomWorkoutView
+import com.feduss.timerwear.view.timer.TimerView
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.AppScaffold
 
@@ -40,6 +42,7 @@ fun MainNavView(
             composable(route = startDestination) {
                 PageView {
                     MenuView(
+                        context = mainActivity,
                         columnState = it,
                         navController = navController
                     )
@@ -60,22 +63,79 @@ fun MainNavView(
             composable(
                 route = Section.AddCustomWorkout.parametricRoute,
                 arguments = listOf(
-                    navArgument(Params.WorkoutId.name) { type = NavType.StringType },
+                    navArgument(Params.WorkoutId.name) {
+                        nullable = true
+                        type = NavType.StringType
+                    },
                 )
             ) { navBackStackEntry ->
-                val workoutId: String =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutId.name) ?: ""
+                val workoutId =
+                    navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
                 PageView {
                     AddCustomWorkoutView(
                         viewModel = getAddCustomWorkoutViewModel(
                             activity = mainActivity,
-                            workoutId = workoutId
+                            workoutId = workoutId?.toIntOrNull()
                         ),
                         context = mainActivity,
                         columnState = it,
                         navController = navController
                     )
                 }
+            }
+
+            composable(
+                route = Section.Timer.parametricRoute,
+                arguments = listOf(
+                    navArgument(Params.WorkoutId.name) { type = NavType.StringType },
+                    navArgument(Params.CurrentTimerIndex.name) {
+                        nullable = true
+                        type = NavType.StringType
+                    },
+                    navArgument(Params.CurrentRepetition.name) {
+                        nullable = true
+                        type = NavType.StringType
+                    },
+                    navArgument(Params.CurrentTimerSecondsRemaining.name) {
+                        nullable = true
+                        type = NavType.StringType
+                    },
+                )
+            ) { navBackStackEntry ->
+                val workoutId =
+                    navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
+
+
+                val currentTimerIndex =
+                    navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
+
+
+                val currentRepetition =
+                    navBackStackEntry.arguments?.getString(Params.CurrentRepetition.name)
+
+
+                val currentTimerSecondsRemaining =
+                    navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
+
+                if (workoutId == null) {
+                    navController.popBackStack()
+                } else {
+                    PageView {
+                        TimerView(
+                            context = mainActivity,
+                            navController = navController,
+                            viewModel = getTimerViewModel(
+                                activity = mainActivity,
+                                workoutId = workoutId.toInt(),
+                                currentTimerIndex = currentTimerIndex?.toIntOrNull(),
+                                currentRepetition = currentRepetition?.toIntOrNull(),
+                                currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
+                            )
+                        )
+                    }
+                }
+
+
             }
         }
     }

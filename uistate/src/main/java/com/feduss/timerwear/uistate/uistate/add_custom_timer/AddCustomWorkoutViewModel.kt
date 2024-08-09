@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class AddCustomWorkoutViewModel @AssistedInject constructor(
-    @Assisted("workoutId") val workoutId: String,
+    @Assisted("workoutId") val workoutId: Int?,
 ) : ViewModel() {
 
     //DI
@@ -34,7 +34,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            @Assisted("workoutId") workoutId: String
+            @Assisted("workoutId") workoutId: Int?
         ): AddCustomWorkoutViewModel
     }
 
@@ -42,7 +42,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         @Suppress("UNCHECKED_CAST")
         fun provideFactory(
             assistedFactory: Factory,
-            workoutId: String
+            workoutId: Int?
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return assistedFactory.create(workoutId) as T
@@ -114,9 +114,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         var workoutRepetitions = ""
         var workoutIntermediumRest: TimerPickerModel? = null
         var timers: List<CustomTimerUiState> = listOf()
-        if (workoutId.isNotEmpty()) {
-            val id = workoutId.toInt()
-            var customWorkout = customWorkoutModels.first { it.id == id }
+        if (workoutId != null) {
+            val customWorkout = customWorkoutModels.first { it.id == workoutId }
 
             workoutTitle = customWorkout.name
             workoutRepetitions = customWorkout.repetition.toString()
@@ -476,10 +475,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         val maxId = customWorkoutModels.maxOfOrNull { it.id }
         val state = _dataUiState.value ?: return
 
-        val oldId = workoutId.toIntOrNull()
-
         val newCustomWorkoutModel = CustomWorkoutModel(
-            id = oldId ?: (maxId?.plus(1)) ?: 0,
+            id = workoutId ?: (maxId?.plus(1)) ?: 0,
             name = state.titleUiState.value,
             repetition = state.repetitionsUiState.value.toInt(),
             intermediumRest = state.intermediumRestUiState.value,
@@ -494,9 +491,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
             }
         )
 
-        if (workoutId.isNotEmpty()) {
-            val id = workoutId.toInt()
-            val index = customWorkoutModels.indexOfFirst { it.id == id }
+        if (workoutId != null) {
+            val index = customWorkoutModels.indexOfFirst { it.id == workoutId }
             customWorkoutModels[index] = newCustomWorkoutModel
         } else {
             customWorkoutModels.add(newCustomWorkoutModel)

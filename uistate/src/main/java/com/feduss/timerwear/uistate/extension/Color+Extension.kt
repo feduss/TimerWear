@@ -25,6 +25,14 @@ val Color.Companion.Teal200: Color
 val Color.Companion.DarkGrayNew: Color
     get() { return Color("#232323".toColorInt()) }
 
+//TODO: find another name
+val Color.Companion.ActiveTimer: Color
+    get() { return Color("#649e5d".toColorInt()) }
+
+//TODO: find another name
+val Color.Companion.InactiveTimer: Color
+    get() { return Color("#a15757".toColorInt()) }
+
 fun Color.toHexString(): String {
     return String.format("#%06X", 0xFFFFFF and this.toArgb())
 }

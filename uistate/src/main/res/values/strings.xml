@@ -35,4 +35,7 @@
     <string name="custom_workout_card_swipe_primary_action_title">Modifica</string>
     <string name="custom_workout_card_swipe_secondary_action_undo_button">Annulla</string>
     <string name="custom_workout_deleted_text">Workout rimosso con successo!</string>
+    <string name="timer_skip_timer">Vuoi davvero saltare questo timer?</string>
+    <string name="timer_stop_timer_question">Vuoi terminare il timer?</string>
+    <string name="timer_repetition_title">Giro %d / %d</string>
 </resources>

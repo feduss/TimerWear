@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,8 +22,6 @@ import com.feduss.timerwear.view.component.header.LeftIconTextHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
@@ -39,12 +36,8 @@ fun CustomWorkoutView(
     val dataUiState by viewModel.dataUiState.collectAsState()
     val navUiState by viewModel.navUiState.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope { Dispatchers.Main }
-
-    LaunchedEffect(coroutineScope) {
-        coroutineScope.launch {
-            viewModel.getCustomTimerList(context = context)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadUiState(context = context)
     }
 
     navUiState?.let {
@@ -60,7 +53,13 @@ fun CustomWorkoutView(
                     workoutId = it.id.toString()
                 )
             is CustomWorkoutViewModel.NavUiState.ExistingCustomWorkoutClicked -> {
-                TODO()
+                goToExistingWorkout(
+                    navController = navController,
+                    workoutId = it.workoutId.toString(),
+                    currentTimerIndex = it.currentTimerIndex?.toString(),
+                    currentRepetition = it.currentRepetition?.toString(),
+                    currentTimerSecondsRemaining = it.currentTimerSecondsRemaining?.toString()
+                )
             }
 
             is CustomWorkoutViewModel.NavUiState.BalloonDismissed -> {
@@ -97,7 +96,7 @@ fun CustomWorkoutView(
                 ) { state ->
 
                     state.onCardClicked = {
-                        //TODO:
+                        viewModel.userHasClickedExistingWorkout(state.id)
                     }
 
                     state.onEditWorkoutButtonClicked = {
@@ -140,13 +139,38 @@ fun CustomWorkoutView(
     }
 }
 
+fun goToExistingWorkout(
+    navController: NavController, workoutId: String, currentTimerIndex: String?,
+    currentRepetition: String?, currentTimerSecondsRemaining: String?
+) {
+
+    var optionalArgs: Map<String, String>? = null
+    if (currentTimerIndex != null && currentRepetition != null && currentTimerSecondsRemaining != null) {
+        optionalArgs = mapOf(
+            Params.CurrentTimerIndex.name to currentTimerIndex,
+            Params.CurrentRepetition.name to currentRepetition,
+            Params.CurrentTimerSecondsRemaining.name to currentTimerSecondsRemaining
+        )
+    }
+
+    navController.navigate(Section.Timer.withArgs(
+        args = listOf(workoutId),
+        optionalArgs = optionalArgs
+    ))
+}
+
 private fun goToAddCustomWorkoutPage(
     navController: NavController,
-    workoutId: String = ""
+    workoutId: String? = null
 ) {
+
+    var optionalArgs: Map<String, String>? = null
+    if (workoutId != null) {
+        optionalArgs = mapOf(Params.WorkoutId.name to workoutId)
+    }
     navController.navigate(
         Section.AddCustomWorkout.withArgs(
-            optionalArgs = mapOf(Params.WorkoutId.name to workoutId)
+            optionalArgs = optionalArgs
         )
     )
 }

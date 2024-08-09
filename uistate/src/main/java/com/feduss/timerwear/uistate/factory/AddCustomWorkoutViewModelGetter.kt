@@ -10,7 +10,7 @@ import dagger.hilt.android.EntryPointAccessors
 @Composable
 fun getAddCustomWorkoutViewModel(
     activity: Activity,
-    workoutId: String,
+    workoutId: Int?,
 ): AddCustomWorkoutViewModel = viewModel(
     factory = AddCustomWorkoutViewModel.provideFactory(
         assistedFactory = EntryPointAccessors.fromActivity(

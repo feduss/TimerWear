@@ -22,7 +22,12 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     sealed class NavUiState {
         data object AddCustomWorkoutClicked: NavUiState()
         data class EditCustomWorkoutClicked(val id: Int): NavUiState()
-        data class ExistingCustomWorkoutClicked(val customWorkoutCardUiState: CustomWorkoutCardUiState): NavUiState()
+        data class ExistingCustomWorkoutClicked(
+            val workoutId: Int,
+            val currentTimerIndex: Int? = null,
+            val currentRepetition: Int? = null,
+            val currentTimerSecondsRemaining: Int? = null
+        ): NavUiState()
         data object BalloonDismissed: NavUiState()
         data class CustomWorkoutDeleted(val textId: Int): NavUiState()
     }
@@ -45,8 +50,44 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     val addButtonIconId = R.drawable.ic_add
     val addButtonIconDescription = "ic_add"
 
-    fun getCustomTimerList(context: Context) {
+    fun loadUiState(context: Context) {
 
+        loadCustomWorkouts(context)
+
+        if (PrefsUtils.isTimerActive(context)) {
+
+            val activeWorkoutId = PrefsUtils.getStringPref(
+                context = context,
+                pref = PrefParam.CurrentWorkoutId.value
+            )
+
+            val activeTimerIndex = PrefsUtils.getStringPref(
+                context = context,
+                pref = PrefParam.CurrentTimerIndex.value
+            )
+
+            val activeWorkoutRepetition = PrefsUtils.getStringPref(
+                context = context,
+                pref = PrefParam.CurrentRepetition.value
+            )
+
+            val activeTimerSecondsRemaining = PrefsUtils.getStringPref(
+                context = context,
+                pref = PrefParam.CurrentTimerSecondsRemaining.value
+            )
+
+            _navUiState.value = activeWorkoutId?.toInt()?.let {
+                NavUiState.ExistingCustomWorkoutClicked(
+                    workoutId = it,
+                    currentTimerIndex = activeTimerIndex?.toIntOrNull(),
+                    currentRepetition = activeWorkoutRepetition?.toIntOrNull(),
+                    currentTimerSecondsRemaining = activeTimerSecondsRemaining?.toIntOrNull()
+                )
+            }
+        }
+    }
+
+    private fun loadCustomWorkouts(context: Context) {
         this.customWorkoutModels = ArrayList(getCustomWorkoutModels(context) ?: listOf())
 
         _dataUiState.value = CustomWorkoutUiState(
@@ -130,5 +171,11 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
             }
             _navUiState.value = NavUiState.CustomWorkoutDeleted(textId = R.string.custom_workout_deleted_text)
         }
+    }
+
+    fun userHasClickedExistingWorkout(id: Int) {
+        _navUiState.value = NavUiState.ExistingCustomWorkoutClicked(
+            workoutId = id
+        )
     }
 }

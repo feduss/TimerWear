@@ -1,7 +1,11 @@
 package com.feduss.timerwear.view.component
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -18,14 +22,34 @@ import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
 import com.feduss.timerwear.uistate.extension.Purple700
 import com.feduss.timerwear.uistate.extension.Teal200
+import com.feduss.timerwear.view.MainActivity
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MenuView(
+    context: Context,
     columnState: ScalingLazyColumnState,
     navController: NavController,
     viewModel: MenuViewModel = hiltViewModel()
 ) {
+
+    val navUiState by viewModel.navUiState.collectAsState()
+
+    navUiState?.let {
+        when(it) {
+            is MenuViewModel.NavUiState.GoToCustomWorkout -> {
+                goToCustomWorkoutList(
+                    navController = navController
+                )
+            }
+            is MenuViewModel.NavUiState.GoToEmom -> TODO()
+            is MenuViewModel.NavUiState.GoToTabata -> TODO()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadActiveTimer(context)
+    }
 
     ScalingLazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -44,7 +68,7 @@ fun MenuView(
                 leftIconContentDescription = "ic_timer",
                 leftIconTintColor = Color.Purple200,
                 onCardClick = {
-                    navController.navigate(Section.CustomWorkout.baseRoute)
+                    viewModel.userClickedOnCustomWorkout()
                 }
             )
         }
@@ -56,7 +80,7 @@ fun MenuView(
                 leftIconContentDescription = "ic_emom",
                 leftIconTintColor = Color.Teal200,
                 onCardClick = {
-                    //navController.navigate(Section.FavoritesLines.baseRoute)
+                    viewModel.userClickedOnEmom()
                 }
             )
         }
@@ -68,7 +92,7 @@ fun MenuView(
                 leftIconContentDescription = "ic_tabata",
                 leftIconTintColor = Color.Red,
                 onCardClick = {
-                    //navController.navigate(Section.NearestStop.baseRoute)
+                    viewModel.userClickedOnTabata()
                 }
             )
         }
@@ -85,4 +109,8 @@ fun MenuView(
             )
         }
     }
+}
+
+fun goToCustomWorkoutList(navController: NavController) {
+    navController.navigate(Section.CustomWorkout.baseRoute)
 }

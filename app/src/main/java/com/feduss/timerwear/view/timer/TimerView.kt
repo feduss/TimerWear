@@ -79,17 +79,20 @@ fun TimerView(
         viewModel.navStateFired()
         when (it) {
             TimerViewModel.NavUiState.TimerStarted -> {
+                onKeepScreenOn(true)
                 viewModel.loadTimerUiState(
                     context = context
                 )
             }
-            is TimerViewModel.NavUiState.GoBackToCustomWorkoutList ->
+            is TimerViewModel.NavUiState.GoBackToCustomWorkoutList -> {
+                onKeepScreenOn(false)
                 goBackToWorkoutList(
                     context = context,
                     viewModel = viewModel,
                     navController = navController,
                     onTimerSet = onTimerSet
                 )
+            }
 
             is TimerViewModel.NavUiState.GoToNextTimer -> {
                 viewModel.setNextTimer(
@@ -100,6 +103,7 @@ fun TimerView(
             }
 
             TimerViewModel.NavUiState.GoToEndOfWorkout -> {
+                onKeepScreenOn(false)
                 viewModel.setTYPState()
             }
             is TimerViewModel.NavUiState.ChangeTimerState -> {
@@ -450,6 +454,10 @@ private fun TimerViewMainContent(
 
     var keepScreenOn by remember {
         mutableStateOf(timerViewUiState.isCheckboxSelected)
+    }
+
+    LaunchedEffect(keepScreenOn) {
+        onKeepScreenOn(keepScreenOn)
     }
 
     //Update the timetext label once for timer

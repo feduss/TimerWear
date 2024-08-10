@@ -90,6 +90,7 @@ class TimerViewModel @AssistedInject constructor(
     private val alertDialogSkipTitleId = R.string.timer_skip_timer
     private val alertDialogStopTitleId = R.string.timer_stop_timer_question
     private val typTitleId = R.string.timer_typ_title
+    private val checkboxTextId = R.string.timer_checkbox_text
 
     //Assets
     private val playIconId = R.drawable.ic_play
@@ -143,6 +144,8 @@ class TimerViewModel @AssistedInject constructor(
                         currentRepetition = repetition,
                         currentProgress = "${(repetition * workout.timers.size) + (timerIndex + 1)}/${workout.repetition * workout.timers.size}",
                         middleTimerStatusValueText = currentTimer.duration.toString(),
+                        checkboxTextId = checkboxTextId,
+                        isCheckboxSelected = getKeepScreenOnPref(context),
                         isTimerActive = true,
                         maxTimerSeconds = currentTimer.duration.toSeconds(),
                         timerSecondsRemaining = currentTimerSecondsRemaining
@@ -177,6 +180,11 @@ class TimerViewModel @AssistedInject constructor(
         }
     }
 
+    // User action
+    fun countdownFinished() {
+        _navUiState.value = NavUiState.TimerStarted
+    }
+
     fun userGoToNextTimer(currentTimerIndex: Int, currentRepetition: Int) {
         _navUiState.value = NavUiState.GoToNextTimer(
             currentTimerIndex = currentTimerIndex,
@@ -189,121 +197,6 @@ class TimerViewModel @AssistedInject constructor(
             currentTimerIndex = currentTimerIndex,
             currentRepetition = currentRepetition
         )
-    }
-
-    fun userChangeAlertDialogState(
-        isAlertDialogVisible: Boolean, alertDialogType: AlertDialogType?, completion: () -> Unit) {
-        _navUiState.value = NavUiState.ChangeAlertDialogState(
-            isAlertDialogVisible = isAlertDialogVisible,
-            alertDialogType = alertDialogType,
-            completion = completion
-        )
-    }
-
-    fun changeAlertDialogState(
-        isAlertDialogVisible: Boolean, alertDialogType: AlertDialogType?, completion: () -> Unit) {
-        _dataUiState.update {
-            it?.copy(
-                alertDialogUiState = it.alertDialogUiState?.copy(
-                    isAlertDialogVisible = isAlertDialogVisible,
-                    alertDialogType = alertDialogType
-                )
-            )
-        }
-        completion()
-    }
-
-    fun userGoBackToWorkoutList() {
-        _navUiState.value = NavUiState.GoBackToCustomWorkoutList
-    }
-
-    fun userChangedTimerState(
-        timerSecondsRemaining: Int,
-        isTimerActive: Boolean,
-        completion: () -> Unit
-    ) {
-        _navUiState.value = NavUiState.ChangeTimerState(
-            timerSecondsRemaining = timerSecondsRemaining,
-            isTimerActive = isTimerActive,
-            completion = completion
-        )
-    }
-
-    fun updateCircularProgressBarProgress(progress: Double) {
-        _dataUiState.update {
-            it?.copy(
-                timerViewUiState = it.timerViewUiState?.copy(
-                    circularSliderProgress = progress
-                )
-            )
-        }
-    }
-
-    fun navStateFired() {
-        _navUiState.value = null
-    }
-
-    //
-
-    fun saveCurrentTimerData(
-        context: Context, currentTimerId: Int, currentTimerName: String?,
-        currentRepetition: Int?, currentTimerSecondsRemaining: Int?
-    ) {
-
-        //Save the current workout id
-        PrefsUtils.setStringPref(
-            context = context,
-            pref = PrefParam.CurrentWorkoutId.value,
-            newValue = workoutId.toString()
-        )
-
-        //Save the current timer id
-        PrefsUtils.setStringPref(
-            context = context,
-            pref = PrefParam.CurrentTimerIndex.value,
-            newValue = currentTimerId.toString()
-        )
-
-        //Save the current timer title (used in notification)
-        PrefsUtils.setStringPref(
-            context = context,
-            pref = PrefParam.CurrentTimerName.value,
-            newValue = currentTimerName
-        )
-
-        //Save the current repetition
-        PrefsUtils.setStringPref(
-            context = context,
-            pref = PrefParam.CurrentRepetition.value,
-            newValue = currentRepetition?.toString()
-        )
-
-
-        //Save the current timer seconds remaining
-        PrefsUtils.setStringPref(
-            context = context,
-            pref = PrefParam.CurrentTimerSecondsRemaining.value,
-            newValue = currentTimerSecondsRemaining?.toString()
-        )
-    }
-
-    fun setTimerState(
-        timerSecondsRemaining: Int,
-        isTimerActive: Boolean,
-        completion: () -> Unit
-    ) {
-        _dataUiState.update {
-            it?.copy(
-                timerViewUiState = it.timerViewUiState?.copy(
-                    timerSecondsRemaining = timerSecondsRemaining,
-                    isTimerActive = isTimerActive,
-                    bottomLeftButtonId = if (isTimerActive) pauseIconId else playIconId,
-                    bottomLeftButtonDescription = if (isTimerActive) pauseIconDescription else playIconDescription,
-                    circularSliderColor = if (isTimerActive) activeColor else inactiveColor
-                )
-            )
-        }
-        completion()
     }
 
     fun setNextTimer(context: Context, currentTimerIndex: Int, currentRepetition: Int) {
@@ -361,6 +254,165 @@ class TimerViewModel @AssistedInject constructor(
         }
     }
 
+    fun userChangeAlertDialogState(
+        isAlertDialogVisible: Boolean, alertDialogType: AlertDialogType?, completion: () -> Unit) {
+        _navUiState.value = NavUiState.ChangeAlertDialogState(
+            isAlertDialogVisible = isAlertDialogVisible,
+            alertDialogType = alertDialogType,
+            completion = completion
+        )
+    }
+
+    fun changeAlertDialogState(
+        isAlertDialogVisible: Boolean, alertDialogType: AlertDialogType?, completion: () -> Unit) {
+        _dataUiState.update {
+            it?.copy(
+                alertDialogUiState = it.alertDialogUiState?.copy(
+                    isAlertDialogVisible = isAlertDialogVisible,
+                    alertDialogType = alertDialogType
+                )
+            )
+        }
+        completion()
+    }
+
+    fun userGoBackToWorkoutList() {
+        _navUiState.value = NavUiState.GoBackToCustomWorkoutList
+    }
+
+    fun userChangedTimerState(
+        timerSecondsRemaining: Int,
+        isTimerActive: Boolean,
+        completion: () -> Unit
+    ) {
+        _navUiState.value = NavUiState.ChangeTimerState(
+            timerSecondsRemaining = timerSecondsRemaining,
+            isTimerActive = isTimerActive,
+            completion = completion
+        )
+    }
+
+    fun setTimerState(
+        timerSecondsRemaining: Int,
+        isTimerActive: Boolean,
+        completion: () -> Unit
+    ) {
+        _dataUiState.update {
+            it?.copy(
+                timerViewUiState = it.timerViewUiState?.copy(
+                    timerSecondsRemaining = timerSecondsRemaining,
+                    isTimerActive = isTimerActive,
+                    bottomLeftButtonId = if (isTimerActive) pauseIconId else playIconId,
+                    bottomLeftButtonDescription = if (isTimerActive) pauseIconDescription else playIconDescription,
+                    circularSliderColor = if (isTimerActive) activeColor else inactiveColor
+                )
+            )
+        }
+        completion()
+    }
+
+    fun setTYPState() {
+        _dataUiState.update {
+            it?.copy(
+                timerViewUiState = null,
+                alertDialogUiState = null,
+                timerTYPViewUiState = TimerTYPViewUiState(
+                    imageId = typImageId,
+                    imageDescription = typImageDescription,
+                    titleId = typTitleId
+                )
+            )
+        }
+    }
+
+    fun updateCircularProgressBarProgress(progress: Double) {
+        _dataUiState.update {
+            it?.copy(
+                timerViewUiState = it.timerViewUiState?.copy(
+                    circularSliderProgress = progress
+                )
+            )
+        }
+    }
+
+    fun navStateFired() {
+        _navUiState.value = null
+    }
+
+    // Prefs utils
+
+    fun saveCurrentTimerData(
+        context: Context, currentTimerId: Int, currentTimerName: String?,
+        currentRepetition: Int?, currentTimerSecondsRemaining: Int?
+    ) {
+
+        //Save the current workout id
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentWorkoutId.value,
+            newValue = workoutId.toString()
+        )
+
+        //Save the current timer id
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentTimerIndex.value,
+            newValue = currentTimerId.toString()
+        )
+
+        //Save the current timer title (used in notification)
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentTimerName.value,
+            newValue = currentTimerName
+        )
+
+        //Save the current repetition
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentRepetition.value,
+            newValue = currentRepetition?.toString()
+        )
+
+
+        //Save the current timer seconds remaining
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentTimerSecondsRemaining.value,
+            newValue = currentTimerSecondsRemaining?.toString()
+        )
+    }
+
+    fun cancelTimer(context: Context) {
+        _dataUiState
+        PrefsUtils.cancelTimerInPrefs(context)
+    }
+
+    fun saveKeepScreenOnPref(context: Context, keepScreenOn: Boolean) {
+        _dataUiState.update {
+            it?.copy(
+                timerViewUiState = it.timerViewUiState?.copy(
+                    isCheckboxSelected = keepScreenOn
+                )
+            )
+        }
+
+        PrefsUtils.setStringPref(
+            context = context,
+            PrefParam.KeepScreenOn.value,
+            keepScreenOn.toString()
+        )
+    }
+
+    private fun getKeepScreenOnPref(context: Context): Boolean {
+        return PrefsUtils.getStringPref(
+            context = context,
+            PrefParam.KeepScreenOn.value
+        ) == "true"
+    }
+
+    //
+
     private fun getTimeText(
         timers: List<CustomTimerModel>,
         currentTimerIndex: Int,
@@ -381,11 +433,6 @@ class TimerViewModel @AssistedInject constructor(
             timeText += timers[currentTimerIndex + 1].name
         }
         return timeText
-    }
-
-    fun cancelTimer(context: Context) {
-        _dataUiState
-        PrefsUtils.cancelTimerInPrefs(context)
     }
 
     private fun getCustomWorkoutModels(context: Context): List<CustomWorkoutModel>? {
@@ -412,23 +459,4 @@ class TimerViewModel @AssistedInject constructor(
             )
         }
     }
-
-    fun countdownFinished() {
-        _navUiState.value = NavUiState.TimerStarted
-    }
-
-    fun setTYPState() {
-        _dataUiState.update {
-            it?.copy(
-                timerViewUiState = null,
-                alertDialogUiState = null,
-                timerTYPViewUiState = TimerTYPViewUiState(
-                    imageId = typImageId,
-                    imageDescription = typImageDescription,
-                    titleId = typTitleId
-                )
-            )
-        }
-    }
-
 }

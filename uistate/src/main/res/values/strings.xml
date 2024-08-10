@@ -40,4 +40,5 @@
     <string name="timer_pre_countdown">Get ready</string>
     <string name="timer_post_countdown">Go!</string>
     <string name="timer_typ_title">Fine!</string>
+    <string name="timer_checkbox_text">Schermo acceso</string>
 </resources>

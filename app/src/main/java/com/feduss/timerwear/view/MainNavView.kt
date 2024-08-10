@@ -1,5 +1,6 @@
 package com.feduss.timerwear.view
 
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -152,4 +153,14 @@ fun MainNavView(
             }
         }
     }
+}
+
+fun keepScreenOn(activity: MainActivity) {
+    val window = activity.window
+    window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+}
+
+fun restoreScreenTimeout(activity: MainActivity) {
+    val window = activity.window
+    window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }

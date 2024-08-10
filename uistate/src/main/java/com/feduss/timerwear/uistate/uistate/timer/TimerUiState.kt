@@ -31,6 +31,8 @@ data class TimerViewUiState(
     val circularSliderProgress: Double = 0.0,
     val currentProgress: String,
     val middleTimerStatusValueText: String,
+    val checkboxTextId: Int,
+    val isCheckboxSelected: Boolean,
     val bottomLeftButtonId: Int,
     val bottomLeftButtonDescription: String,
     val bottomLeftButtonColor: Color = Color.Black,

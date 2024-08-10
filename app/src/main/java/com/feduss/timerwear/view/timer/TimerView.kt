@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -47,6 +49,7 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
+import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
@@ -62,6 +65,7 @@ fun TimerView(
     navController: NavHostController,
     viewModel: TimerViewModel,
     onTimerSet: (String) -> Unit = {},
+    onKeepScreenOn: (Boolean) -> Unit = {}
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
@@ -88,9 +92,8 @@ fun TimerView(
                 )
 
             is TimerViewModel.NavUiState.GoToNextTimer -> {
-                goToNextTimer(
+                viewModel.setNextTimer(
                     context = context,
-                    viewModel = viewModel,
                     currentTimerIndex = it.currentTimerIndex,
                     currentRepetition = it.currentRepetition
                 )
@@ -192,6 +195,7 @@ fun TimerView(
                     }
                 } else {
                     LaunchedEffect(
+                        timerViewUiState.currentTimerId,
                         timerViewUiState.isTimerActive
                     ) {
                         if (timerViewUiState.isTimerActive) {
@@ -251,7 +255,8 @@ fun TimerView(
                             viewModel = viewModel,
                             context = context,
                             newTimerSecondsRemaining = newTimerSecondsRemaining,
-                            onTimerSet = onTimerSet
+                            onTimerSet = onTimerSet,
+                            onKeepScreenOn = onKeepScreenOn
                         )
                     }
                 }
@@ -439,8 +444,13 @@ private fun TimerViewMainContent(
     viewModel: TimerViewModel,
     context: Context,
     newTimerSecondsRemaining: MutableIntState,
-    onTimerSet: (String) -> Unit
+    onTimerSet: (String) -> Unit,
+    onKeepScreenOn: (Boolean) -> Unit
 ) {
+
+    var keepScreenOn by remember {
+        mutableStateOf(timerViewUiState.isCheckboxSelected)
+    }
 
     //Update the timetext label once for timer
     LaunchedEffect(
@@ -461,7 +471,7 @@ private fun TimerViewMainContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -469,24 +479,54 @@ private fun TimerViewMainContent(
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center
         )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = timerViewUiState.currentProgress,
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center,
             fontSize = TextUnit(10f, TextUnitType.Sp)
         )
-        
-        Box(modifier = Modifier.height(12.dp))
-        
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
             text = timerViewUiState.middleTimerStatusValueText,
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center,
             fontSize = TextUnit(20.0f, TextUnitType.Sp)
         )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Checkbox(
+                modifier = Modifier.scale(0.75f),
+                checked = keepScreenOn,
+                onCheckedChange = {
+                    keepScreenOn = it
+                    onKeepScreenOn(it)
+                    viewModel.saveKeepScreenOnPref(
+                        context = context,
+                        keepScreenOn = it
+                    )
+                }
+            )
+            Text(
+                modifier = Modifier.infiniteMarquee,
+                text = stringResource(id = timerViewUiState.checkboxTextId),
+                color = Color.White,
+                textAlign = TextAlign.Left,
+                fontSize = TextUnit(12f, TextUnitType.Sp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
@@ -632,14 +672,4 @@ fun goBackToWorkoutList(
     onTimerSet("")
     viewModel.cancelTimer(context)
     navController.popBackStack()
-}
-
-private fun goToNextTimer(
-    context: Context, viewModel: TimerViewModel, currentTimerIndex: Int, currentRepetition: Int
-) {
-    viewModel.setNextTimer(
-        context = context,
-        currentTimerIndex = currentTimerIndex,
-        currentRepetition = currentRepetition
-    )
 }

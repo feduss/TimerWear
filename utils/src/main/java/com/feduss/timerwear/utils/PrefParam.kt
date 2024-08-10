@@ -10,6 +10,7 @@ sealed class PrefParam(val value: String) {
     data object CurrentTimerSecondsRemaining: PrefParam(value = "CurrentTimerSecondsRemaining")
     data object IsTimerActive: PrefParam(value = "IsTimerActive")
     data object TimerType: PrefParam(value = "TimerType")
+    data object KeepScreenOn: PrefParam(value = "KeepScreenOn")
     data object AlarmSetTime: PrefParam(value = "AlarmSetTime")
     data object OngoingNotificationStartTime: PrefParam(value = "OngoingNotificationStartTime")
 }

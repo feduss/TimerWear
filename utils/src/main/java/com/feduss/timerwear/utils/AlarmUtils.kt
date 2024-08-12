@@ -12,6 +12,7 @@ import android.os.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.feduss.timerwear.entity.enums.Consts
+import com.feduss.timerwear.entity.enums.VibrationType
 
 class AlarmUtils {
 
@@ -70,10 +71,10 @@ class AlarmUtils {
         }
 
         @SuppressLint("MissingPermission")
-        fun vibrate(context: Context) {
-            val vibrationPattern = longArrayOf(500, 50, 500, 50, 0, 0 ,0, 500, 50, 500, 50)
+        fun vibrate(context: Context, vibrationType: VibrationType) {
+            val vibrationPattern = vibrationType.toPattern()
             val vibrator: Vibrator = getVibrator(context)
-            Log.e("LogTest: ", "has vibration? ${vibrator.hasVibrator()}")
+            Log.e("TEST123: ", "has vibration? ${vibrator.hasVibrator()}")
             if (vibrator.hasVibrator()) {
                 vibrator.vibrate(
                     VibrationEffect.createWaveform(

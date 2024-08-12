@@ -2,6 +2,7 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -52,6 +52,7 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
+import com.feduss.timerwear.entity.enums.VibrationType
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
@@ -59,6 +60,7 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
+import com.feduss.timerwear.utils.AlarmUtils
 import kotlin.math.ceil
 
 
@@ -193,14 +195,22 @@ fun TimerView(
                         TimerAlertDialogView(
                             alertDialogUiState = alertDialogUiState,
                             viewModel = viewModel,
-                            newTimerSecondsRemaining = newTimerSecondsRemaining,
                             currentTimerIndex = timerViewUiState.currentTimerId,
                             currentRepetition = timerViewUiState.currentRepetition,
-                            userGoBack = swipeBackClosure,
-                            onTimerSet = onTimerSet
+                            onTimerSet = onTimerSet,
+                            userGoBack = swipeBackClosure
                         )
                     }
                 } else {
+                    var hasVibrateOnMiddleTimer by remember {
+                        mutableStateOf(false)
+                    }
+
+                    LaunchedEffect(timerViewUiState.currentTimerId) {
+                        Log.e("Test123: ", "hasVibrateOnMiddleTimer = false")
+                        hasVibrateOnMiddleTimer = false
+                    }
+
                     LaunchedEffect(
                         timerViewUiState.currentTimerId,
                         timerViewUiState.isTimerActive
@@ -226,6 +236,15 @@ fun TimerView(
                                     )
                                     newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
 
+                                    if (!hasVibrateOnMiddleTimer && currentTimerSecondsRemaining == timerViewUiState.maxTimerSeconds / 2) {
+                                        hasVibrateOnMiddleTimer = true
+                                        AlarmUtils.vibrate(
+                                            context = context,
+                                            vibrationType = VibrationType.DoubleShort
+                                        )
+                                        //TODO: sound every
+                                    }
+
                                 }
 
                                 override fun onFinish() {
@@ -235,6 +254,11 @@ fun TimerView(
                                         currentTimerIndex = timerViewUiState.currentTimerId,
                                         currentRepetition = timerViewUiState.currentRepetition
                                     )
+                                    AlarmUtils.vibrate(
+                                        context = context,
+                                        vibrationType = VibrationType.SingleLong
+                                    )
+                                    //TODO: sound every
                                 }
 
                             })
@@ -250,11 +274,10 @@ fun TimerView(
                         TimerAlertDialogView(
                             alertDialogUiState = alertDialogUiState,
                             viewModel = viewModel,
-                            newTimerSecondsRemaining = newTimerSecondsRemaining,
                             currentTimerIndex = timerViewUiState.currentTimerId,
                             currentRepetition = timerViewUiState.currentRepetition,
-                            userGoBack = swipeBackClosure,
-                            onTimerSet = onTimerSet
+                            onTimerSet = onTimerSet,
+                            userGoBack = swipeBackClosure
                         )
                     } else {
                         TimerViewMainContent(
@@ -325,6 +348,14 @@ private fun TimerCountdownView(
             timerCountdownUiState.postCountdownSeconds * 1000L, 1000
         ) {
             override fun onTick(millisUntilFinished: Long) {
+                val currentTimerSecondsRemaining = ceil((millisUntilFinished).toDouble() / 1000).toInt()
+                if (currentTimerSecondsRemaining == 1) {
+                    AlarmUtils.vibrate(
+                        context = context,
+                        vibrationType = VibrationType.SingleLong
+                    )
+                    //TODO: sound
+                }
             }
 
             override fun onFinish() {
@@ -342,8 +373,11 @@ private fun TimerCountdownView(
 
                 centeredText = currentTimerSecondsRemaining.toString()
 
-
-                //TODO: add vibration / sound every seconds
+                AlarmUtils.vibrate(
+                    context = context,
+                    vibrationType = VibrationType.SingleShort
+                )
+                //TODO: sound every seconds
 
             }
 
@@ -389,7 +423,6 @@ private fun TimerCountdownView(
 private fun TimerAlertDialogView(
     alertDialogUiState: TimerAlertDialogUiState,
     viewModel: TimerViewModel,
-    newTimerSecondsRemaining: MutableIntState,
     currentTimerIndex: Int,
     currentRepetition: Int,
     onTimerSet: (String) -> Unit,

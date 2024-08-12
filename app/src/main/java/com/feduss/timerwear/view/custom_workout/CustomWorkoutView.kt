@@ -15,6 +15,7 @@ import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.lazy.items
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.entity.enums.Section
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
 import com.feduss.timerwear.view.component.card.CustomWorkoutCardView
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
@@ -36,8 +37,10 @@ fun CustomWorkoutView(
     val dataUiState by viewModel.dataUiState.collectAsState()
     val navUiState by viewModel.navUiState.collectAsState()
 
+    viewModel.loadUiState(context = context)
+
     LaunchedEffect(Unit) {
-        viewModel.loadUiState(context = context)
+        viewModel.checkActiveTimer(context)
     }
 
     navUiState?.let {
@@ -154,7 +157,7 @@ fun goToExistingWorkout(
     }
 
     navController.navigate(Section.Timer.withArgs(
-        args = listOf(workoutId),
+        args = listOf(workoutId, TimerType.CustomWorkout.toString()),
         optionalArgs = optionalArgs
     ))
 }

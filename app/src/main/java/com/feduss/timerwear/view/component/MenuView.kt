@@ -1,15 +1,23 @@
 package com.feduss.timerwear.view.component
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
@@ -33,6 +41,8 @@ fun MenuView(
     viewModel: MenuViewModel = hiltViewModel()
 ) {
 
+    requestNotificationPermission()
+
     val navUiState by viewModel.navUiState.collectAsState()
 
     navUiState?.let {
@@ -42,8 +52,8 @@ fun MenuView(
                     navController = navController
                 )
             }
-            is MenuViewModel.NavUiState.GoToEmom -> TODO()
-            is MenuViewModel.NavUiState.GoToTabata -> TODO()
+            is MenuViewModel.NavUiState.GoToEmom -> {//TODO}
+            is MenuViewModel.NavUiState.GoToTabata -> {//TODO}
         }
     }
 
@@ -107,6 +117,46 @@ fun MenuView(
                     //navController.navigate(Section.SettingsView.baseRoute)
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun requestNotificationPermission() {
+    val notificationPermissionRequest = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false) -> {
+
+            }
+
+            else -> {
+
+            }
+        }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    notificationPermissionRequest.launch(
+                        arrayOf(
+                            Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    )
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }

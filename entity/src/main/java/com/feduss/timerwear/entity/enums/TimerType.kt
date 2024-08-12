@@ -15,7 +15,7 @@ enum class TimerType {
 
     companion object {
         fun fromString(raw: String?): TimerType? {
-            return when(raw?.lowercase()) {
+            return when(raw) {
                 CustomWorkout.toString() -> CustomWorkout
                 Emom.toString() -> Emom
                 Tabata.toString() -> Tabata

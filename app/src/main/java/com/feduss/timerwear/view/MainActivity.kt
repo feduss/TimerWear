@@ -11,12 +11,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material.MaterialTheme
-import com.feduss.timerwear.R
 import com.feduss.timerwear.entity.enums.Consts
+import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.receivers.TimerReceiver
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.NotificationUtils
-import com.feduss.timerwear.utils.PrefParam
 import com.feduss.timerwear.utils.PrefsUtils
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -66,7 +65,7 @@ class MainActivity : ComponentActivity() {
             )
             NotificationUtils.setOngoingNotification(
                 context,
-                iconId = R.mipmap.ic_app
+                iconId = R.drawable.ic_app
             )
         }
     }

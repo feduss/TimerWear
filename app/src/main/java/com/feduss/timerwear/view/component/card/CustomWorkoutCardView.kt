@@ -84,7 +84,7 @@ fun CustomWorkoutCardView(
         setMarginHorizontal(12)
         setCornerRadius(8f)
         setTextColor(Color.White.toArgb())
-        setBackgroundColor(Color.Black.toArgb())
+        setBackgroundColor(Color.Gray.toArgb())
         setBalloonAnimation(BalloonAnimation.ELASTIC)
         setIsVisibleOverlay(true)
         setOverlayColorResource(R.color.overlay)

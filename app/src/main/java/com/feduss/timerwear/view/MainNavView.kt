@@ -16,6 +16,7 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.entity.enums.Section
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.uistate.factory.getTimerViewModel
 import com.feduss.timerwear.view.component.MenuView
 import com.feduss.timerwear.view.component.PageView
@@ -114,6 +115,10 @@ fun MainNavView(
                 val workoutId =
                     navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
 
+                val timerTypeRaw =
+                    navBackStackEntry.arguments?.getString(Params.TimerType.name)
+
+                val timerType = TimerType.fromString(timerTypeRaw)
 
                 val currentTimerIndex =
                     navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
@@ -126,7 +131,7 @@ fun MainNavView(
                 val currentTimerSecondsRemaining =
                     navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
 
-                if (workoutId == null) {
+                if (workoutId == null || timerType == null) {
                     navController.popBackStack()
                 } else {
                     PageView(
@@ -138,6 +143,7 @@ fun MainNavView(
                             viewModel = getTimerViewModel(
                                 activity = mainActivity,
                                 workoutId = workoutId.toInt(),
+                                timerType = timerType,
                                 currentTimerIndex = currentTimerIndex?.toIntOrNull(),
                                 currentRepetition = currentRepetition?.toIntOrNull(),
                                 currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()

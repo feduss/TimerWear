@@ -39,9 +39,14 @@ class PrefsUtils {
         }
 
         fun cancelTimerInPrefs(context: Context) {
+            setStringPref(context, PrefParam.CurrentWorkoutId.value, null)
             setStringPref(context, PrefParam.CurrentTimerIndex.value, null)
+            setStringPref(context, PrefParam.CurrentTimerName.value, null)
             setStringPref(context, PrefParam.CurrentRepetition.value, null)
             setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
+            setStringPref(context, PrefParam.TimerType.value, null)
+            setStringPref(context, PrefParam.OngoingNotificationStartTime.value, null)
+            setStringPref(context, PrefParam.IsTimerActive.value, "false")
         }
 
         fun setNextTimerInPrefs(context: Context, newCurrentTimerIndex: Int, newCurrentRepetition: Int) {
@@ -72,5 +77,12 @@ class PrefsUtils {
                 PrefParam.TimerType.value
             )
         )
+
+        fun isAppInBackground(context: Context): Boolean {
+            return getStringPref(
+                context = context,
+                pref = PrefParam.AlarmSetTime.value
+            ) != null
+        }
     }
 }

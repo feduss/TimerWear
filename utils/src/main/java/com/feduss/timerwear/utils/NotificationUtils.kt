@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.SystemClock
+import android.text.Html
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
@@ -47,14 +48,15 @@ class NotificationUtils {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val runStartTime = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timerSecondsRemaining)
-
             val channel = NotificationChannel(
                 Consts.MainChannelId.value,
                 Consts.MainNotificationVisibleChannel.value,
                 NotificationManager.IMPORTANCE_HIGH
             )
             notificationManager.createNotificationChannel(channel)
+
+            val bigTextStyle = NotificationCompat.BigTextStyle()
+                .bigText(timerName)
 
             val notificationBuilder = NotificationCompat.Builder(
                 context,
@@ -65,13 +67,13 @@ class NotificationUtils {
             //.setColor(Color.Red.toArgb())
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setStyle(bigTextStyle)
             .setOngoing(true)
 
-            val ongoingActivityStatus = Status.Builder()
-                .addTemplate("#timerType#: #time#")
-                .addPart("timerType", Status.TextPart(timerName))
-                .addPart("time", Status.StopwatchPart(runStartTime))
-                .build()
+            val status = getOngoingStatus(
+                timerSecondsRemaining,
+                timerName
+            )
 
             val ongoingActivity =
                 OngoingActivity.Builder(
@@ -81,7 +83,8 @@ class NotificationUtils {
                 )
                 .setStaticIcon(iconId)
                 .setTouchIntent(appPendingIntent)
-                .setStatus(ongoingActivityStatus)
+                .setStatus(status)
+                    .setOngoingActivityId(Consts.OngoingActivityId.value.toInt())
                 .build()
 
             ongoingActivity.apply(context.applicationContext)
@@ -90,6 +93,17 @@ class NotificationUtils {
                 Consts.MainNotificationId.value.toInt(),
                 notificationBuilder.build()
             )
+        }
+
+        fun getOngoingStatus(timerSecondsRemaining: Long, timerName: String): Status {
+            val runStartTime = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timerSecondsRemaining)
+            val status = Status.Builder()
+                .addTemplate("#timerSeconds# (#timerName#)")
+                .addPart("timerSeconds", Status.StopwatchPart(runStartTime))
+                .addPart("timerName", Status.TextPart(timerName))
+                .build()
+
+            return status
         }
 
         fun removeOngoingNotification(context: Context) {

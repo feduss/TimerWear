@@ -27,7 +27,7 @@ class MenuViewModel @Inject constructor() : ViewModel() {
                 TimerType.CustomWorkout -> _navUiState.value = NavUiState.GoToCustomWorkout(true)
                 TimerType.Emom -> _navUiState.value = NavUiState.GoToEmom(true)
                 TimerType.Tabata -> _navUiState.value = NavUiState.GoToTabata(true)
-                null -> return
+                null -> _navUiState.value = null
             }
         }
     }

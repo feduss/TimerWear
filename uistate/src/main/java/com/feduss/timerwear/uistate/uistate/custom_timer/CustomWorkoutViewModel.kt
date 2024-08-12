@@ -50,10 +50,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     val addButtonIconId = R.drawable.ic_add
     val addButtonIconDescription = "ic_add"
 
-    fun loadUiState(context: Context) {
-
-        loadCustomWorkouts(context)
-
+    fun checkActiveTimer(context: Context) {
         if (PrefsUtils.isTimerActive(context)) {
 
             val activeWorkoutId = PrefsUtils.getStringPref(
@@ -87,7 +84,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun loadCustomWorkouts(context: Context) {
+    fun loadUiState(context: Context) {
         this.customWorkoutModels = ArrayList(getCustomWorkoutModels(context) ?: listOf())
 
         _dataUiState.value = CustomWorkoutUiState(

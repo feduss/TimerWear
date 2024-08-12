@@ -5,10 +5,10 @@ import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
 
 data class TimerUiState(
-    val timerCountdownUiState: TimerCountdownUiState?,
-    val timerViewUiState: TimerViewUiState?,
-    val alertDialogUiState: TimerAlertDialogUiState?,
-    val timerTYPViewUiState: TimerTYPViewUiState?
+    val timerCountdownUiState: TimerCountdownUiState? = null,
+    val timerViewUiState: TimerViewUiState? = null,
+    val alertDialogUiState: TimerAlertDialogUiState? = null,
+    val timerTYPViewUiState: TimerTYPViewUiState? = null
 )
 
 data class TimerCountdownUiState(

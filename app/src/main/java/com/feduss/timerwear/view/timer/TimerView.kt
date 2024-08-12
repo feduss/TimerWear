@@ -77,7 +77,9 @@ fun TimerView(
     val navUiState by viewModel.navUiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadTimerCountdownUiState()
+        viewModel.loadTimerCountdownUiState(
+            context = context
+        )
     }
 
     navUiState?.let {
@@ -109,10 +111,13 @@ fun TimerView(
 
             TimerViewModel.NavUiState.GoToEndOfWorkout -> {
                 onKeepScreenOn(false)
-                viewModel.setTYPState()
+                viewModel.setTYPState(
+                    context = context
+                )
             }
             is TimerViewModel.NavUiState.ChangeTimerState -> {
                 viewModel.setTimerState(
+                    context = context,
                     timerSecondsRemaining = it.timerSecondsRemaining,
                     isTimerActive = it.isTimerActive,
                     completion = it.completion
@@ -207,7 +212,7 @@ fun TimerView(
                     }
 
                     LaunchedEffect(timerViewUiState.currentTimerId) {
-                        Log.e("Test123: ", "hasVibrateOnMiddleTimer = false")
+                        //Log.e("Test123: ", "hasVibrateOnMiddleTimer = false")
                         hasVibrateOnMiddleTimer = false
                     }
 
@@ -497,13 +502,7 @@ private fun TimerViewMainContent(
         onKeepScreenOn(keepScreenOn)
     }
 
-    //Update the timetext label once for timer
-    LaunchedEffect(
-        timerViewUiState.currentTimerId,
-        timerViewUiState.timerSecondsRemaining
-    ) {
-        onTimerSet(timerViewUiState.timeText)
-    }
+    onTimerSet(timerViewUiState.timeText)
 
 
     CircularProgressIndicator(

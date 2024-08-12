@@ -19,7 +19,7 @@ class AlarmUtils {
     companion object {
 
         fun<T> setBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
-            removeBackgroundAlert(context, timerReceiverClass)
+            //removeBackgroundAlert(context, timerReceiverClass)
 
             val timerSecondsRemaining = PrefsUtils.getStringPref(
                 context,
@@ -74,7 +74,7 @@ class AlarmUtils {
         fun vibrate(context: Context, vibrationType: VibrationType) {
             val vibrationPattern = vibrationType.toPattern()
             val vibrator: Vibrator = getVibrator(context)
-            Log.e("TEST123: ", "has vibration? ${vibrator.hasVibrator()}")
+            //Log.e("TEST123: ", "has vibration? ${vibrator.hasVibrator()}")
             if (vibrator.hasVibrator()) {
                 vibrator.vibrate(
                     VibrationEffect.createWaveform(

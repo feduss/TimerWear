@@ -2,6 +2,7 @@ package com.feduss.timerwear.view.custom_workout
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -252,11 +253,13 @@ fun AddCustomWorkoutView(
                                     
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    CustomTimerType.entries.forEachIndexed { index, type ->
+                                    val timerTypes = CustomTimerType.entries.filter { type -> type != CustomTimerType.IntermediumRest }
+                                    timerTypes.forEachIndexed { index, type ->
                                         val iconId: Int =
                                             when(type) {
                                                 CustomTimerType.Work -> R.drawable.ic_run
                                                 CustomTimerType.Rest -> R.drawable.ic_bed
+                                                CustomTimerType.IntermediumRest -> R.drawable.ic_bed
                                             }
                                         val isChecked = it.typeUiState.value == type
                                         ToggleChip(
@@ -303,11 +306,25 @@ fun AddCustomWorkoutView(
                                             }
                                         )
 
-                                        if (index < CustomTimerType.entries.count() - 1) {
+                                        if (index < timerTypes.count() - 1) {
                                             Spacer(modifier = Modifier.height(4.dp))
                                         }
                                     }
                                 }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    modifier = Modifier.clickable {
+                                        viewModel.userHasRemovedTimer(
+                                            context = context,
+                                            id = it.id
+                                        )
+                                    },
+                                    text = stringResource(id = it.removeButtonTextId),
+                                    textAlign = TextAlign.Center,
+                                    color = Color.Red
+                                )
 
                             }
                         }

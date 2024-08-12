@@ -32,6 +32,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
@@ -442,6 +445,7 @@ private fun TimerAlertDialogView(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimerViewMainContent(
     timerViewUiState: TimerViewUiState,
@@ -478,11 +482,14 @@ private fun TimerViewMainContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
+            .padding(vertical = 32.dp, horizontal = 8.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .infiniteMarquee,
             text = timerViewUiState.currentTimerName,
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center
@@ -512,18 +519,20 @@ private fun TimerViewMainContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Checkbox(
-                modifier = Modifier.scale(0.75f),
-                checked = keepScreenOn,
-                onCheckedChange = {
-                    keepScreenOn = it
-                    onKeepScreenOn(it)
-                    viewModel.saveKeepScreenOnPref(
-                        context = context,
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                Checkbox(
+                    modifier = Modifier.scale(0.75f),
+                    checked = keepScreenOn,
+                    onCheckedChange = {
                         keepScreenOn = it
-                    )
-                }
-            )
+                        onKeepScreenOn(it)
+                        viewModel.saveKeepScreenOnPref(
+                            context = context,
+                            keepScreenOn = it
+                        )
+                    }
+                )
+            }
             Text(
                 modifier = Modifier.infiniteMarquee,
                 text = stringResource(id = timerViewUiState.checkboxTextId),

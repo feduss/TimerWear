@@ -17,6 +17,7 @@ data class CustomTimerUiState(
     val nameUiState: GenericTextInputUiState,
     val durationUiState: TimerPickerInputUiState,
     val typeUiState: CustomTimerTypeUiState,
+    val removeButtonTextId: Int,
     val isValid: Boolean = nameUiState.errorTextId == null && durationUiState.errorTextId == null
 )
 

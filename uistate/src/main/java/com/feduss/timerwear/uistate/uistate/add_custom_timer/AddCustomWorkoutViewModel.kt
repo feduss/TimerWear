@@ -24,6 +24,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.time.Duration
 
 class AddCustomWorkoutViewModel @AssistedInject constructor(
     @Assisted("workoutId") val workoutId: Int?,
@@ -83,7 +84,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     private val workoutIntermediumRestTextFieldPlaceholder = R.string.add_custom_workout_intermedium_rest_text_field_placeholder
     val timerSectionTitleId = R.string.add_custom_workout_timer_section_title
     private val timerNameTextFieldTitle = R.string.add_custom_workout_timer_name_text_field_title
-    private val timerNameTextFieldPlaceholder = R.string.add_custom_workout_timer_name_text_field_placeholder
+    private val timerNameWorkTextFieldPlaceholder = R.string.add_custom_workout_timer_name_work_text_field_placeholder
+    private val timerNameRestTextFieldPlaceholder = R.string.add_custom_workout_timer_name_rest_text_field_placeholder
     private val timerDurationTextFieldTitle: Int = R.string.add_custom_workout_timer_duration_text_field_title
     private val timerDurationTextFieldPlaceholder = R.string.add_custom_workout_timer_duration_text_field_placeholder
     private val timerTypeTitle = R.string.add_custom_workout_timer_type_text_field_title
@@ -240,35 +242,55 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     private fun getNewCustomTimerUiState(
         context: Context,
         id: Int,
-        name: String = context.getString(timerNameTextFieldPlaceholder),
-        duration: TimerPickerModel = TimerPickerModel(minutes = 0, seconds = 30),
+        name: String? = null,
+        duration: TimerPickerModel? = null,
         type: CustomTimerType = if (id % 2 == 0) CustomTimerType.Work else CustomTimerType.Rest
-    ) = CustomTimerUiState(
-        leftIconId = timerIconId,
-        leftIconDescription = timerIconDescription,
-        leftIconTintColor = Color.White,
-        rightIconId = arrowDropDownIconId,
-        rightIconDescription = arrowDropDownIconContentDescription,
-        rightIconTintColor = Color.White,
-        isExpanded = false,
-        id = id,
-        nameUiState = GenericTextInputUiState(
-            value = name,
-            titleId = timerNameTextFieldTitle,
-            placeholderId = timerNameTextFieldPlaceholder,
-            keyboardType = KeyboardType.Text,
-        ),
-        durationUiState = TimerPickerInputUiState(
-            value = duration,
-            titleId = timerDurationTextFieldTitle,
-            placeholderId = timerDurationTextFieldPlaceholder
-        ),
-        typeUiState = CustomTimerTypeUiState(
-            value = type,
-            titleId = timerTypeTitle
-        ),
-        removeButtonTextId = removeTimerButtonTextId
-    )
+    ): CustomTimerUiState {
+        val defaultName = when (type) {
+            CustomTimerType.Work -> {
+                context.getString(timerNameWorkTextFieldPlaceholder)
+            }
+            CustomTimerType.Rest -> {
+                context.getString(timerNameRestTextFieldPlaceholder)
+            }
+            else -> {
+                ""
+            }
+        }
+
+        val defaultDuration = TimerPickerModel(minutes = 0, seconds = 30)
+        val lastSameTypeTimer =
+            _dataUiState.value?.customTimerUiStates?.lastOrNull { it.typeUiState.value == type }
+
+        val lastSameTypeTimerDuration = lastSameTypeTimer?.durationUiState?.value
+
+        return CustomTimerUiState(
+            leftIconId = timerIconId,
+            leftIconDescription = timerIconDescription,
+            leftIconTintColor = Color.White,
+            rightIconId = arrowDropDownIconId,
+            rightIconDescription = arrowDropDownIconContentDescription,
+            rightIconTintColor = Color.White,
+            isExpanded = false,
+            id = id,
+            nameUiState = GenericTextInputUiState(
+                value = name ?: defaultName,
+                titleId = timerNameTextFieldTitle,
+                placeholderId = timerNameWorkTextFieldPlaceholder,
+                keyboardType = KeyboardType.Text,
+            ),
+            durationUiState = TimerPickerInputUiState(
+                value = duration ?: lastSameTypeTimerDuration ?: defaultDuration,
+                titleId = timerDurationTextFieldTitle,
+                placeholderId = timerDurationTextFieldPlaceholder
+            ),
+            typeUiState = CustomTimerTypeUiState(
+                value = type,
+                titleId = timerTypeTitle
+            ),
+            removeButtonTextId = removeTimerButtonTextId
+        )
+    }
 
     fun userHasClickedOnTimer(id: Int) {
         _dataUiState.update {

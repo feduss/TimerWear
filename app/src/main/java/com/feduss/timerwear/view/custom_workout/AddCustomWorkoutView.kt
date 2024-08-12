@@ -145,7 +145,7 @@ fun AddCustomWorkoutView(
                 }
 
                 val repetitionsValue = state.repetitionsUiState.value
-                if (repetitionsValue.isNotEmpty() && repetitionsValue.toInt() > 0) {
+                if (repetitionsValue.isNotEmpty() && repetitionsValue.toInt() > 1) {
                     item {
                         val titleId = state.intermediumRestUiState.titleId
                         val value: String =

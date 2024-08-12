@@ -12,6 +12,7 @@ import android.os.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.feduss.timerwear.entity.enums.Consts
+import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
 
 class AlarmUtils {
@@ -97,7 +98,17 @@ class AlarmUtils {
             return vibrator
         }
 
-        fun sound(context: Context) {
+        fun playSound(context: Context, soundId: Int) {
+            val mediaPlayer = MediaPlayer.create(context, soundId)
+            mediaPlayer.setOnPreparedListener{
+                mediaPlayer.start()
+            }
+            mediaPlayer.setOnCompletionListener {
+                mediaPlayer.stop()
+            }
+        }
+
+        /*fun sound(context: Context) {
             val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val mp: MediaPlayer? = MediaPlayer.create(context, alarmSound)
 
@@ -107,6 +118,6 @@ class AlarmUtils {
                     mp.release()
                 }, 5000)
             }
-        }
+        }*/
     }
 }

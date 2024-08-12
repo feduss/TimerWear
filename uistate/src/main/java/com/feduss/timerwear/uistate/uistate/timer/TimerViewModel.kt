@@ -69,6 +69,7 @@ class TimerViewModel @AssistedInject constructor(
         data object GoToEndOfWorkout: NavUiState()
         data object GoBackToCustomWorkoutList: NavUiState()
         data class GoToNextTimer(val currentTimerIndex: Int, val currentRepetition: Int): NavUiState()
+        data class SkipToNextTimer(val currentTimerIndex: Int, val currentRepetition: Int): NavUiState()
         data class ChangeAlertDialogState(
             val isAlertDialogVisible: Boolean,
             val alertDialogType: AlertDialogType?,
@@ -160,6 +161,7 @@ class TimerViewModel @AssistedInject constructor(
                         maxTimerSeconds = currentTimer.duration.toSeconds(),
                         timerSecondsRemaining = currentTimerSecondsRemaining
                             ?: currentTimer.duration.toSeconds(),
+                        timerType = currentTimer.type,
                         bottomLeftButtonId = pauseIconId,
                         bottomLeftButtonDescription = pauseIconDescription,
                         bottomRightButtonId = skipNextIcon,
@@ -208,7 +210,7 @@ class TimerViewModel @AssistedInject constructor(
     }
 
     fun userSkipToNextTimer(currentTimerIndex: Int, currentRepetition: Int) {
-        _navUiState.value = NavUiState.GoToNextTimer(
+        _navUiState.value = NavUiState.SkipToNextTimer(
             currentTimerIndex = currentTimerIndex,
             currentRepetition = currentRepetition
         )
@@ -246,6 +248,7 @@ class TimerViewModel @AssistedInject constructor(
                             isTimerActive = true,
                             maxTimerSeconds = newTimer.duration.toSeconds(),
                             timerSecondsRemaining = newTimer.duration.toSeconds(),
+                            timerType = newTimer.type,
                             circularSliderColor = activeColor,
                             circularSliderProgress = 1.0,
                             currentProgress = "${(newCurrentRepetition * workout.timers.size) + (newCurrentTimerIndex + 1)}/${workout.repetition * workout.timers.size}",

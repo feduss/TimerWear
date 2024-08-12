@@ -52,9 +52,12 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
+import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.PurpleCustom
+import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
@@ -75,6 +78,10 @@ fun TimerView(
 
     val dataUiState by viewModel.dataUiState.collectAsState()
     val navUiState by viewModel.navUiState.collectAsState()
+
+    var userHasSkippedTimer by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadTimerCountdownUiState(
@@ -102,6 +109,15 @@ fun TimerView(
             }
 
             is TimerViewModel.NavUiState.GoToNextTimer -> {
+                viewModel.setNextTimer(
+                    context = context,
+                    currentTimerIndex = it.currentTimerIndex,
+                    currentRepetition = it.currentRepetition
+                )
+            }
+
+            is TimerViewModel.NavUiState.SkipToNextTimer -> {
+                userHasSkippedTimer = true
                 viewModel.setNextTimer(
                     context = context,
                     currentTimerIndex = it.currentTimerIndex,
@@ -151,6 +167,7 @@ fun TimerView(
             )
         } else if(timerTYPViewUiState != null) {
             TimerTYPView(
+                context = context,
                 timerTYPViewUiState = timerTYPViewUiState,
                 onTimerSet = onTimerSet
             )
@@ -208,6 +225,27 @@ fun TimerView(
                     }
                 } else {
 
+                    LaunchedEffect(timerViewUiState.currentTimerId) {
+
+                        if (!userHasSkippedTimer) {
+                            AlarmUtils.vibrate(
+                                context = context,
+                                vibrationType = VibrationType.SingleLong
+                            )
+
+                            val soundType = when(timerViewUiState.timerType) {
+                                CustomTimerType.Work -> SoundType.Work
+                                CustomTimerType.Rest -> SoundType.Rest
+                                CustomTimerType.IntermediumRest -> SoundType.Rest
+                            }
+
+                            AlarmUtils.playSound(
+                                context = context,
+                                soundId = soundType.getRawMp3()
+                            )
+                        }
+                    }
+
                     LaunchedEffect(
                         timerViewUiState.currentTimerId,
                         timerViewUiState.isTimerActive
@@ -232,20 +270,27 @@ fun TimerView(
                                         currentTimerSecondsRemaining = currentTimerSecondsRemaining
                                     )
                                     newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
+
+                                    if (currentTimerSecondsRemaining < 3) {
+                                        AlarmUtils.vibrate(
+                                            context = context,
+                                            vibrationType = VibrationType.SingleShort
+                                        )
+                                    }
                                 }
 
                                 override fun onFinish() {
+                                    AlarmUtils.vibrate(
+                                        context = context,
+                                        vibrationType = VibrationType.SingleShort
+                                    )
+                                    userHasSkippedTimer = false
                                     viewModel.updateCircularProgressBarProgress(progress = 0.0)
                                     viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = 0)
                                     viewModel.userGoToNextTimer(
                                         currentTimerIndex = timerViewUiState.currentTimerId,
                                         currentRepetition = timerViewUiState.currentRepetition
                                     )
-                                    AlarmUtils.vibrate(
-                                        context = context,
-                                        vibrationType = VibrationType.SingleLong
-                                    )
-                                    AlarmUtils.sound(context)
                                 }
 
                             })
@@ -283,9 +328,16 @@ fun TimerView(
 }
 
 @Composable
-fun TimerTYPView(timerTYPViewUiState: TimerTYPViewUiState, onTimerSet: (String) -> Unit) {
+fun TimerTYPView(context: Context, timerTYPViewUiState: TimerTYPViewUiState, onTimerSet: (String) -> Unit) {
 
     onTimerSet("")
+
+    LaunchedEffect(Unit) {
+        AlarmUtils.playSound(
+            context = context,
+            soundId = SoundType.Finish.getRawMp3()
+        )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -337,11 +389,6 @@ private fun TimerCountdownView(
             override fun onTick(millisUntilFinished: Long) {}
 
             override fun onFinish() {
-                AlarmUtils.vibrate(
-                    context = context,
-                    vibrationType = VibrationType.SingleLong
-                )
-                AlarmUtils.sound(context)
                 viewModel.countdownFinished()
             }
         })
@@ -383,21 +430,38 @@ private fun TimerCountdownView(
         }.start())
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 12.dp)
-        ,
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = centeredText,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            fontSize = TextUnit(40f, TextUnitType.Sp),
-            lineHeight = TextUnit(40f, TextUnitType.Sp)
-        )
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
+
+    //Back button
+    BackHandler {
+        cancelCountdownTimers(listOf(preCountDownTimer, countDownTimer, postCountDownTimer))
     }
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        onDismissed = {
+            cancelCountdownTimers(listOf(preCountDownTimer, countDownTimer, postCountDownTimer))
+        }, //swipe to dismiss gesture
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = centeredText,
+                textAlign = TextAlign.Center,
+                color = Color.White,
+                fontSize = TextUnit(40f, TextUnitType.Sp),
+                lineHeight = TextUnit(40f, TextUnitType.Sp)
+            )
+        }
+    }
+}
+
+private fun cancelCountdownTimers(timers: List<CountDownTimer?>) {
+    timers.forEach { it?.cancel() }
 }
 
 @Composable

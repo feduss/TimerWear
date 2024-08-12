@@ -12,8 +12,11 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
 import com.feduss.timerwear.entity.enums.Consts
+import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
 import com.feduss.timerwear.uistate.R
+import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel.NavUiState
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.NotificationUtils
@@ -75,6 +78,11 @@ class TimerReceiver : BroadcastReceiver() {
         newCurrentRepetition = pair.first
         newCurrentTimerIndex = pair.second
 
+        AlarmUtils.vibrate(
+            context = context,
+            vibrationType = VibrationType.SingleLong
+        )
+
         //end of timer
         if (newCurrentTimerIndex == -1 && newCurrentRepetition == -1) {
             PrefsUtils.setStringPref(
@@ -87,14 +95,14 @@ class TimerReceiver : BroadcastReceiver() {
                 TimerReceiver::class.java
             )
             NotificationUtils.removeOngoingNotification(context)
+
+            AlarmUtils.playSound(
+                context = context,
+                soundId = SoundType.Finish.getRawMp3()
+            )
             return
         }
         else {
-            AlarmUtils.vibrate(
-                context = context,
-                vibrationType = VibrationType.SingleLong
-            )
-            AlarmUtils.sound(context)
 
             if (PrefsUtils.isAppInBackground(context)) {
                 //Log.e("TEST123: ", "app in background: newCurrentTimerIndex $newCurrentTimerIndex, newCurrentRepetition: $newCurrentRepetition")
@@ -108,6 +116,17 @@ class TimerReceiver : BroadcastReceiver() {
             val newTimer = currentWorkoutModel.timers[newCurrentTimerIndex]
             val duration = newTimer.duration.toSeconds()
             val name = newTimer.name
+
+            val soundType = when (newTimer.type) {
+                CustomTimerType.Work -> SoundType.Work
+                CustomTimerType.Rest -> SoundType.Rest
+                CustomTimerType.IntermediumRest -> SoundType.Rest
+            }
+
+            AlarmUtils.playSound(
+                context = context,
+                soundId = soundType.getRawMp3()
+            )
 
             val ongoingActivity = OngoingActivity.recoverOngoingActivity(
                 context,

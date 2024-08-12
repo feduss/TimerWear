@@ -94,7 +94,7 @@ class TimerReceiver : BroadcastReceiver() {
                 context = context,
                 vibrationType = VibrationType.SingleLong
             )
-            //TODO: sound
+            AlarmUtils.sound(context)
 
             if (PrefsUtils.isAppInBackground(context)) {
                 //Log.e("TEST123: ", "app in background: newCurrentTimerIndex $newCurrentTimerIndex, newCurrentRepetition: $newCurrentRepetition")

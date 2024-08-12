@@ -247,7 +247,7 @@ fun TimerView(
                                             context = context,
                                             vibrationType = VibrationType.DoubleShort
                                         )
-                                        //TODO: sound every
+                                        AlarmUtils.sound(context)
                                     }
 
                                 }
@@ -263,7 +263,7 @@ fun TimerView(
                                         context = context,
                                         vibrationType = VibrationType.SingleLong
                                     )
-                                    //TODO: sound every
+                                    AlarmUtils.sound(context)
                                 }
 
                             })
@@ -359,7 +359,7 @@ private fun TimerCountdownView(
                         context = context,
                         vibrationType = VibrationType.SingleLong
                     )
-                    //TODO: sound
+                    AlarmUtils.sound(context)
                 }
             }
 
@@ -382,7 +382,7 @@ private fun TimerCountdownView(
                     context = context,
                     vibrationType = VibrationType.SingleShort
                 )
-                //TODO: sound every seconds
+                AlarmUtils.sound(context)
 
             }
 

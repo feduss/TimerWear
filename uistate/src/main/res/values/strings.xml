@@ -42,4 +42,7 @@
     <string name="timer_typ_title">Fine!</string>
     <string name="timer_checkbox_text">Schermo acceso</string>
     <string name="add_custom_workout_remove_timer_button_text">Rimuovi</string>
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_app_version">Versione %1$s (%2$s) by Federico Saccà</string>
+    <string name="settings_feedback_title">Feedback:</string>
 </resources>

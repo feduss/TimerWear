@@ -52,8 +52,18 @@ fun MenuView(
                     navController = navController
                 )
             }
-            is MenuViewModel.NavUiState.GoToEmom -> {//TODO}
-            is MenuViewModel.NavUiState.GoToTabata -> {//TODO}
+            is MenuViewModel.NavUiState.GoToEmom -> {
+                //TODO
+            }
+            is MenuViewModel.NavUiState.GoToTabata -> {
+                //TODO
+            }
+
+            MenuViewModel.NavUiState.GoToSettings -> {
+                goToSettings(
+                    navController = navController
+                )
+            }
         }
     }
 
@@ -114,11 +124,17 @@ fun MenuView(
                 leftIconContentDescription = "ic_settings",
                 leftIconTintColor = Color.White,
                 onCardClick = {
-                    //navController.navigate(Section.SettingsView.baseRoute)
+                    viewModel.userClickedOnSettings()
                 }
             )
         }
     }
+}
+
+fun goToSettings(navController: NavController) {
+    navController.navigate(
+        Section.Settings.baseRoute
+    )
 }
 
 @Composable

@@ -16,6 +16,7 @@ class MenuViewModel @Inject constructor() : ViewModel() {
         data class GoToCustomWorkout(val isTimerActive: Boolean): NavUiState()
         data class GoToEmom(val isTimerActive: Boolean): NavUiState()
         data class GoToTabata(val isTimerActive: Boolean): NavUiState()
+        data object GoToSettings : NavUiState()
     }
 
     private var _navUiState = MutableStateFlow<NavUiState?>(null)
@@ -43,6 +44,11 @@ class MenuViewModel @Inject constructor() : ViewModel() {
     fun userClickedOnTabata() {
         _navUiState.value = NavUiState.GoToTabata(false)
     }
+
+    fun userClickedOnSettings() {
+        _navUiState.value = NavUiState.GoToSettings
+    }
+
 
     fun navStateFired() {
         _navUiState.value = null

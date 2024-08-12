@@ -1,11 +1,14 @@
 package com.feduss.timerwear.view
 
+import android.content.Intent
+import android.net.Uri
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -13,6 +16,8 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
+import androidx.wear.remote.interactions.RemoteActivityHelper
+import androidx.wear.widget.ConfirmationOverlay
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.entity.enums.Section
@@ -22,9 +27,11 @@ import com.feduss.timerwear.view.component.MenuView
 import com.feduss.timerwear.view.component.PageView
 import com.feduss.timerwear.view.custom_workout.AddCustomWorkoutView
 import com.feduss.timerwear.view.custom_workout.CustomWorkoutView
+import com.feduss.timerwear.view.settings.SettingsView
 import com.feduss.timerwear.view.timer.TimerView
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.AppScaffold
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
@@ -151,11 +158,29 @@ fun MainNavView(
                             onTimerSet = { hourTimerEnd: String ->
                                 endCurvedText = hourTimerEnd
                             },
+                            onKeepScreenOn = {
+                                if (it) {
+                                    keepScreenOn(mainActivity)
+                                } else {
+                                    restoreScreenTimeout(mainActivity)
+                                }
+                            }
                         )
                     }
                 }
 
 
+            }
+
+            composable(route = Section.Settings.baseRoute) {
+                PageView {
+                    SettingsView(
+                        columnState = it,
+                        onEmailFeedbackTapped = {
+                            openEmail(mainActivity)
+                        }
+                    )
+                }
             }
         }
     }
@@ -169,4 +194,28 @@ fun keepScreenOn(activity: MainActivity) {
 fun restoreScreenTimeout(activity: MainActivity) {
     val window = activity.window
     window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+}
+
+private fun openEmail(activity: MainActivity) {
+    val uriText = "mailto:feduss96@gmail.co," +
+            "?subject=" + "TimerWear: feedback"
+    val uri = Uri.parse(uriText)
+    val sendIntent = Intent(Intent.ACTION_VIEW)
+    sendIntent.addCategory(Intent.CATEGORY_BROWSABLE)
+    sendIntent.data = uri
+
+    val remoteActivityHelper = RemoteActivityHelper(activity)
+
+    activity.lifecycleScope.launch {
+        try {
+            remoteActivityHelper.startRemoteActivity(sendIntent)
+            ConfirmationOverlay()
+                .setType(ConfirmationOverlay.OPEN_ON_PHONE_ANIMATION)
+                .showOn(activity)
+        } catch (throwable: Throwable) {
+            ConfirmationOverlay()
+                .setType(ConfirmationOverlay.FAILURE_ANIMATION)
+                .showOn(activity)
+        }
+    }
 }

@@ -207,14 +207,6 @@ fun TimerView(
                         )
                     }
                 } else {
-                    var hasVibrateOnMiddleTimer by remember {
-                        mutableStateOf(false)
-                    }
-
-                    LaunchedEffect(timerViewUiState.currentTimerId) {
-                        //Log.e("Test123: ", "hasVibrateOnMiddleTimer = false")
-                        hasVibrateOnMiddleTimer = false
-                    }
 
                     LaunchedEffect(
                         timerViewUiState.currentTimerId,
@@ -240,16 +232,6 @@ fun TimerView(
                                         currentTimerSecondsRemaining = currentTimerSecondsRemaining
                                     )
                                     newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
-
-                                    if (!hasVibrateOnMiddleTimer && currentTimerSecondsRemaining == timerViewUiState.maxTimerSeconds / 2) {
-                                        hasVibrateOnMiddleTimer = true
-                                        AlarmUtils.vibrate(
-                                            context = context,
-                                            vibrationType = VibrationType.DoubleShort
-                                        )
-                                        AlarmUtils.sound(context)
-                                    }
-
                                 }
 
                                 override fun onFinish() {
@@ -352,18 +334,14 @@ private fun TimerCountdownView(
         mutableStateOf(object : CountDownTimer(
             timerCountdownUiState.postCountdownSeconds * 1000L, 1000
         ) {
-            override fun onTick(millisUntilFinished: Long) {
-                val currentTimerSecondsRemaining = ceil((millisUntilFinished).toDouble() / 1000).toInt()
-                if (currentTimerSecondsRemaining == 1) {
-                    AlarmUtils.vibrate(
-                        context = context,
-                        vibrationType = VibrationType.SingleLong
-                    )
-                    AlarmUtils.sound(context)
-                }
-            }
+            override fun onTick(millisUntilFinished: Long) {}
 
             override fun onFinish() {
+                AlarmUtils.vibrate(
+                    context = context,
+                    vibrationType = VibrationType.SingleLong
+                )
+                AlarmUtils.sound(context)
                 viewModel.countdownFinished()
             }
         })
@@ -382,8 +360,6 @@ private fun TimerCountdownView(
                     context = context,
                     vibrationType = VibrationType.SingleShort
                 )
-                AlarmUtils.sound(context)
-
             }
 
             override fun onFinish() {

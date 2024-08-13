@@ -14,6 +14,7 @@ data class TimerUiState(
 )
 
 data class TimerCountdownUiState(
+    val workoutName: String,
     val preCountdownTextId: Int,
     val preCountdownDuration: Int,
     val countdown: Int,

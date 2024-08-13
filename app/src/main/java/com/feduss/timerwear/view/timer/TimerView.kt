@@ -399,7 +399,7 @@ private fun TimerCountdownView(
     onTimerSet: (String) -> Unit
 ) {
 
-    onTimerSet("")
+    onTimerSet(timerCountdownUiState.workoutName)
     val preCountdownText by remember {
         mutableStateOf(context.getString(timerCountdownUiState.preCountdownTextId))
     }

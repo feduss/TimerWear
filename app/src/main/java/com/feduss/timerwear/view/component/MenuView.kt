@@ -63,6 +63,7 @@ fun MenuView(
                 )
             }
         }
+        viewModel.navStateFired()
     }
 
     LaunchedEffect(Unit) {

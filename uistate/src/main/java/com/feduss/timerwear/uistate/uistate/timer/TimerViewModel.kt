@@ -129,6 +129,8 @@ class TimerViewModel @AssistedInject constructor(
 
         if (_dataUiState.value != null) return
 
+        customWorkoutModel = TimerUtils.getCustomWorkoutModels(context = context)?.first { it.id == workoutId }
+
         if (PrefsUtils.isTimerActive(context = context)) {
             _dataUiState.value = TimerUiState()
             loadTimerUiState(context = context)
@@ -137,6 +139,7 @@ class TimerViewModel @AssistedInject constructor(
                 timerViewUiState = null,
                 alertDialogUiState = null,
                 timerCountdownUiState = TimerCountdownUiState(
+                    workoutName = customWorkoutModel?.name ?: "",
                     preCountdownTextId = preCountdownTextId,
                     preCountdownDuration = 1,
                     countdown = 3,
@@ -149,8 +152,6 @@ class TimerViewModel @AssistedInject constructor(
     }
 
     fun loadTimerUiState(context: Context) {
-        customWorkoutModel = TimerUtils.getCustomWorkoutModels(context = context)?.first { it.id == workoutId }
-
         customWorkoutModel?.let { workout ->
             val timerIndex = currentTimerIndex ?: 0
             val repetition = currentRepetition ?: 0

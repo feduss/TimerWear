@@ -1,6 +1,5 @@
 package com.feduss.timerwear.view.settings
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 import com.feduss.timerwear.BuildConfig
 import com.feduss.timerwear.uistate.extension.PurpleCustom

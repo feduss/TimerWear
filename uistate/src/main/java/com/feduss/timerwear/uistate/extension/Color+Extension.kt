@@ -25,6 +25,12 @@ val Color.Companion.PurpleCustom: Color
 val Color.Companion.Teal200: Color
     get() { return Color("#03DAC5".toColorInt()) }
 
+val Color.Companion.Blue500: Color
+    get() { return Color("#2196F3".toColorInt()) }
+
+val Color.Companion.Indigo500: Color
+    get() { return Color("#3F51B5".toColorInt()) }
+
 val Color.Companion.DarkGrayNew: Color
     get() { return Color("#232323".toColorInt()) }
 

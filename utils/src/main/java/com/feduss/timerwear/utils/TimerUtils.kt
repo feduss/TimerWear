@@ -1,8 +1,9 @@
 package com.feduss.timerwear.utils
 
 import android.content.Context
-import android.util.Log
+import com.feduss.timerwear.entity.CustomTimerModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
+import com.feduss.timerwear.entity.enums.CustomTimerType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -45,7 +46,28 @@ class TimerUtils {
                     "totalRepetitions $totalRepetitions, currentTimerIndex $currentTimerIndex, " +
                     "currentRepetition $currentRepetition")*/
 
-            return Pair(newCurrentRepetition, newCurrentTimerIndex)
+            return Pair(newCurrentTimerIndex, newCurrentRepetition)
         }
+
+        fun needsToDisplayIntermediumRest(
+            timer: CustomTimerModel,
+            repetition: Int,
+            totalRepetitions: Int,
+            frequency: Int
+        ): Boolean {
+            return if (timer.type == CustomTimerType.IntermediumRest) {
+                // Skip last intermedium rest
+                if (repetition == totalRepetitions - 1) {
+                    false
+                } else if (frequency == 1) {
+                    true
+                } else {
+                    repetition > 0 && repetition % frequency == 1
+                }
+            } else {
+                false
+            }
+        }
+
     }
 }

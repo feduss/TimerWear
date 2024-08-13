@@ -3,6 +3,7 @@ package com.feduss.timerwear.uistate.uistate.custom_timer
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
+import com.feduss.timerwear.entity.enums.CustomTimerType
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.uistate.GenericButtonCardUiState
 import com.feduss.timerwear.utils.PrefParam
@@ -89,7 +90,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
 
         _dataUiState.value = CustomWorkoutUiState(
             customWorkouts = customWorkoutModels?.mapIndexed { index, customWorkout ->
-                val durationSecondsSum = customWorkout.timers.sumOf { it.duration.toSeconds() }
+                val durationSecondsSum = customWorkout.timers.filter { it.type != CustomTimerType.IntermediumRest }.sumOf { it.duration.toSeconds() }
                 val durationMins = durationSecondsSum / 60
                 val durationSecs = durationSecondsSum % 60
                 CustomWorkoutCardUiState(

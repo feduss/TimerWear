@@ -1,23 +1,17 @@
 package com.feduss.timerwear.uistate.receivers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.os.PowerManager
-import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
+import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.Consts
 import com.feduss.timerwear.entity.enums.CustomTimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
-import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.getRawMp3
-import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel.NavUiState
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.NotificationUtils
 import com.feduss.timerwear.utils.PrefParam
@@ -32,9 +26,9 @@ class TimerReceiver : BroadcastReceiver() {
         val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
         if (!powerManager.isInteractive) {
             val wl = powerManager.newWakeLock(
-        PowerManager.ACQUIRE_CAUSES_WAKEUP  or
-                    PowerManager.ON_AFTER_RELEASE  or
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+                PowerManager.ACQUIRE_CAUSES_WAKEUP  or
+                        PowerManager.ON_AFTER_RELEASE  or
+                        PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                 "id:wakeupscreen"
             )
             wl.acquire(1000)
@@ -67,6 +61,24 @@ class TimerReceiver : BroadcastReceiver() {
             return
         }
 
+        handleNextTimer(
+            totalTimers,
+            totalRepetitions,
+            currentTimerIndex,
+            currentRepetition,
+            currentWorkoutModel,
+            context
+        )
+    }
+
+    private fun handleNextTimer(
+        totalTimers: Int,
+        totalRepetitions: Int,
+        currentTimerIndex: Int,
+        currentRepetition: Int,
+        currentWorkoutModel: CustomWorkoutModel,
+        context: Context
+    ) {
         val newCurrentTimerIndex: Int
         val newCurrentRepetition: Int
         val pair = TimerUtils.getNextTimerIndexAndRepetition(
@@ -75,13 +87,8 @@ class TimerReceiver : BroadcastReceiver() {
             currentTimerIndex = currentTimerIndex,
             currentRepetition = currentRepetition
         )
-        newCurrentRepetition = pair.first
-        newCurrentTimerIndex = pair.second
-
-        AlarmUtils.vibrate(
-            context = context,
-            vibrationType = VibrationType.SingleLong
-        )
+        newCurrentTimerIndex = pair.first
+        newCurrentRepetition = pair.second
 
         //end of timer
         if (newCurrentTimerIndex == -1 && newCurrentRepetition == -1) {
@@ -102,55 +109,74 @@ class TimerReceiver : BroadcastReceiver() {
             )
             return
         }
-        else {
 
-            if (PrefsUtils.isAppInBackground(context)) {
-                //Log.e("TEST123: ", "app in background: newCurrentTimerIndex $newCurrentTimerIndex, newCurrentRepetition: $newCurrentRepetition")
-                PrefsUtils.setNextTimerInPrefs(
-                    context = context,
-                    newCurrentTimerIndex = newCurrentTimerIndex,
-                    newCurrentRepetition = newCurrentRepetition
-                )
-            }
-
-            val newTimer = currentWorkoutModel.timers[newCurrentTimerIndex]
-            val duration = newTimer.duration.toSeconds()
-            val name = newTimer.name
-
-            val soundType = when (newTimer.type) {
-                CustomTimerType.Work -> SoundType.Work
-                CustomTimerType.Rest -> SoundType.Rest
-                CustomTimerType.IntermediumRest -> SoundType.Rest
-            }
-
-            AlarmUtils.playSound(
-                context = context,
-                soundId = soundType.getRawMp3()
+        val newTimer = currentWorkoutModel.timers[newCurrentTimerIndex]
+        val needsToShowIntermediumRest = TimerUtils.needsToDisplayIntermediumRest(
+            timer = newTimer,
+            repetition = newCurrentRepetition,
+            totalRepetitions = totalRepetitions,
+            frequency = currentWorkoutModel.intermediumRestFrequency
+        )
+        if (!needsToShowIntermediumRest && newTimer.type == CustomTimerType.IntermediumRest) {
+            handleNextTimer(
+                totalTimers = totalTimers,
+                totalRepetitions = totalRepetitions,
+                currentTimerIndex = newCurrentTimerIndex,
+                currentRepetition = newCurrentRepetition,
+                currentWorkoutModel = currentWorkoutModel,
+                context = context
             )
-
-            val ongoingActivity = OngoingActivity.recoverOngoingActivity(
-                context,
-                Consts.OngoingActivityId.value.toInt()
-            )
-
-            PrefsUtils.setStringPref(
-                context = context,
-                pref = PrefParam.CurrentTimerSecondsRemaining.value,
-                newValue = duration.toString()
-            )
-
-            AlarmUtils.setBackgroundAlert(
-                context,
-                TimerReceiver::class.java
-            )
-
-            ongoingActivity?.update(
-                context,
-                NotificationUtils.getOngoingStatus(
-                    duration.toLong(),
-                    name
-                )
-            )
+            return
         }
+
+        AlarmUtils.vibrate(
+            context = context,
+            vibrationType = VibrationType.SingleLong
+        )
+
+        PrefsUtils.setNextTimerInPrefs(
+            context = context,
+            newCurrentTimerIndex = newCurrentTimerIndex,
+            newCurrentRepetition = newCurrentRepetition
+        )
+
+        val duration = newTimer.duration.toSeconds()
+        val name = newTimer.name
+
+        val soundType = when (newTimer.type) {
+            CustomTimerType.Work -> SoundType.Work
+            CustomTimerType.Rest -> SoundType.Rest
+            CustomTimerType.IntermediumRest -> SoundType.Rest
+        }
+
+        AlarmUtils.playSound(
+            context = context,
+            soundId = soundType.getRawMp3()
+        )
+
+        val ongoingActivity = OngoingActivity.recoverOngoingActivity(
+            context,
+            Consts.OngoingActivityId.value.toInt()
+        )
+
+        PrefsUtils.setStringPref(
+            context = context,
+            pref = PrefParam.CurrentTimerSecondsRemaining.value,
+            newValue = duration.toString()
+        )
+
+        AlarmUtils.setBackgroundAlert(
+            context,
+            TimerReceiver::class.java
+        )
+
+        ongoingActivity?.update(
+            context,
+            NotificationUtils.getOngoingStatus(
+                duration.toLong(),
+                name
+            )
+        )
+
     }
 }

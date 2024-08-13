@@ -8,6 +8,7 @@ data class AddCustomWorkoutUiState(
     val titleUiState: GenericTextInputUiState,
     val repetitionsUiState: GenericTextInputUiState,
     val intermediumRestUiState: TimerPickerInputUiState,
+    val intermediumRestFrequencyUiState: GenericTextInputUiState,
     val customTimerUiStates: List<CustomTimerUiState>,
     val addTimerButtonUiState: GenericButtonCardUiState,
     val addWorkoutConfirmButtonUiState: GenericButtonCardUiState,

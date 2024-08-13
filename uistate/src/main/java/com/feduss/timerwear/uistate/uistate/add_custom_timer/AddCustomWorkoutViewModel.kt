@@ -24,7 +24,6 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.time.Duration
 
 class AddCustomWorkoutViewModel @AssistedInject constructor(
     @Assisted("workoutId") val workoutId: Int?,
@@ -82,6 +81,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     private val workoutRepetitionsTextFieldPlaceholder = R.string.add_custom_workout_repetitions_text_field_placeholder
     private val workoutIntermediumRestTextFieldTitle = R.string.add_custom_workout_intermedium_rest_text_field_title
     private val workoutIntermediumRestTextFieldPlaceholder = R.string.add_custom_workout_intermedium_rest_text_field_placeholder
+    private val workoutIntermediumRestFrequencyTextFieldTitle = R.string.add_custom_workout_intermedium_rest_frequency_text_field_title
+    private val workoutIntermediumRestFrequencyTextFieldPlaceholder = R.string.add_custom_workout_intermedium_rest_frequency_text_field_placeholder
     val timerSectionTitleId = R.string.add_custom_workout_timer_section_title
     private val timerNameTextFieldTitle = R.string.add_custom_workout_timer_name_text_field_title
     private val timerNameWorkTextFieldPlaceholder = R.string.add_custom_workout_timer_name_work_text_field_placeholder
@@ -116,6 +117,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         var workoutTitle = ""
         var workoutRepetitions = ""
         var workoutIntermediumRest: TimerPickerModel? = null
+        var workoutIntermediumRestFrequency = ""
         var timers: List<CustomTimerUiState> = listOf()
         if (workoutId != null) {
             val customWorkout = customWorkoutModels.first { it.id == workoutId }
@@ -123,6 +125,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
             workoutTitle = customWorkout.name
             workoutRepetitions = customWorkout.repetition.toString()
             workoutIntermediumRest = customWorkout.intermediumRest
+            workoutIntermediumRestFrequency = customWorkout.intermediumRestFrequency.toString()
             timers = customWorkout.timers
                 .filter { it.type != CustomTimerType.IntermediumRest }
                 .map {
@@ -153,6 +156,12 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
                 value = workoutIntermediumRest,
                 titleId = workoutIntermediumRestTextFieldTitle,
                 placeholderId = workoutIntermediumRestTextFieldPlaceholder
+            ),
+            intermediumRestFrequencyUiState = GenericTextInputUiState(
+                value = workoutIntermediumRestFrequency,
+                titleId = workoutIntermediumRestFrequencyTextFieldTitle,
+                placeholderId = workoutIntermediumRestFrequencyTextFieldPlaceholder,
+                keyboardType = KeyboardType.Number
             ),
             customTimerUiStates = timers,
             addTimerButtonUiState = GenericButtonCardUiState(
@@ -224,6 +233,18 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
 
     fun userHasDismissedTimerPicker() {
         _timerPickerUiState.value = null
+    }
+
+    fun userHasEditedWorkoutIntermediumRestFrequency(context: Context, newValue: String) {
+        _dataUiState.update {
+            it?.copy(
+                intermediumRestFrequencyUiState = it.intermediumRestFrequencyUiState.copy(
+                    value = newValue,
+                    errorTextId = getWorkoutIntermediumRestFrequencyErrorId(newValue)
+                )
+            )
+        }
+        refreshConfirmButtonVisibility(context = context)
     }
 
     fun userHasAddedNewTimer(context: Context) {
@@ -429,6 +450,24 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         return (repetitionsValue.toInt() == 1 && intermediumRest == null) || (repetitionsValue.toInt() > 1 && intermediumRest != null)
     }
 
+    private fun isWorkoutIntermediumRestFrequencyValid(
+        intermediumRest: TimerPickerModel?,
+        isWorkoutIntermediumRestValid: Boolean,
+        frequency: String
+    ): Boolean {
+        if (frequency.isEmpty()) {
+            if (intermediumRest == null && isWorkoutIntermediumRestValid) return true
+            if (intermediumRest != null && isWorkoutIntermediumRestValid) return false
+            return false
+        } else if (intermediumRest != null && intermediumRest.toSeconds() > 0) {
+            return frequency.toInt() > 0
+        } else {
+            return true
+        }
+
+    }
+
+
     private fun isTimerNameValid(name: String) = name.trim().isNotEmpty()
 
     private fun isTimerDurationValid(duration: TimerPickerModel?): Boolean {
@@ -445,6 +484,11 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
             repetitionsValue = state.repetitionsUiState.value,
             intermediumRest = state.intermediumRestUiState.value
         )
+        val isWorkoutIntermediumRestFrequencyValid = isWorkoutIntermediumRestFrequencyValid(
+            intermediumRest = state.intermediumRestUiState.value,
+            isWorkoutIntermediumRestValid = isWorkoutIntermediumRestValid,
+            frequency = state.intermediumRestFrequencyUiState.value
+        )
 
         val timers = state.customTimerUiStates
         val areTimersValid = timers.isNotEmpty() && timers.map {
@@ -454,7 +498,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         }.all { it }
 
         val isCustomWorkoutValid = isWorkoutTitleValid && areWorkoutRepetitionsValid &&
-                isWorkoutIntermediumRestValid && areTimersValid
+                isWorkoutIntermediumRestValid && isWorkoutIntermediumRestFrequencyValid && areTimersValid
         return isCustomWorkoutValid
     }
 
@@ -497,6 +541,23 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         return if (isValid) null else R.string.add_custom_workout_intermedium_rest_error
     }
 
+    private fun getWorkoutIntermediumRestFrequencyErrorId(value: String): Int? {
+        val state = dataUiState.value
+        val repetitionsValue = state?.repetitionsUiState?.value
+
+        if (repetitionsValue.isNullOrEmpty()) return null
+
+        val intermediumRest = state.intermediumRestUiState.value
+        val isIntermediumRestValid = isWorkoutIntermediumRestValid(repetitionsValue, intermediumRest)
+        val isValid = isWorkoutIntermediumRestFrequencyValid(
+            intermediumRest = intermediumRest,
+            isWorkoutIntermediumRestValid = isIntermediumRestValid,
+            frequency = value
+        )
+
+        return if (isValid) null else R.string.add_custom_workout_intermedium_rest_frequency_error
+    }
+
     private fun getTimerNameErrorId(name: String): Int? {
         val isValid = isTimerNameValid(name)
         return if (isValid) null else R.string.add_custom_workout_timer_name_error
@@ -510,12 +571,14 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     fun confirmButtonClicked(context: Context) {
         val maxId = customWorkoutModels.maxOfOrNull { it.id }
         val state = _dataUiState.value ?: return
+        val intermediumRestFrequencyRaw = state.intermediumRestFrequencyUiState.value
 
         var newCustomWorkoutModel = CustomWorkoutModel(
             id = workoutId ?: (maxId?.plus(1)) ?: 0,
             name = state.titleUiState.value,
             repetition = state.repetitionsUiState.value.toInt(),
             intermediumRest = state.intermediumRestUiState.value,
+            intermediumRestFrequency = if (intermediumRestFrequencyRaw.isEmpty()) 0 else intermediumRestFrequencyRaw.toInt(),
             timers = state.customTimerUiStates.mapNotNull {
                 val duration = it.durationUiState.value ?: return@mapNotNull null
                 return@mapNotNull CustomTimerModel(

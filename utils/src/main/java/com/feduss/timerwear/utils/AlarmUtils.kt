@@ -104,7 +104,7 @@ class AlarmUtils {
                 mediaPlayer.start()
             }
             mediaPlayer.setOnCompletionListener {
-                mediaPlayer.stop()
+                mediaPlayer.release()
             }
         }
 

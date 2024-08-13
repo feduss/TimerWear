@@ -28,9 +28,7 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
-import com.feduss.timerwear.uistate.extension.Purple700
 import com.feduss.timerwear.uistate.extension.Teal200
-import com.feduss.timerwear.view.MainActivity
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
@@ -41,7 +39,7 @@ fun MenuView(
     viewModel: MenuViewModel = hiltViewModel()
 ) {
 
-    requestNotificationPermission()
+    RequestPermission()
 
     val navUiState by viewModel.navUiState.collectAsState()
 
@@ -138,12 +136,16 @@ fun goToSettings(navController: NavController) {
 }
 
 @Composable
-private fun requestNotificationPermission() {
+private fun RequestPermission() {
     val notificationPermissionRequest = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
             permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false) -> {
+
+            }
+
+            permissions.getOrDefault(Manifest.permission.VIBRATE, false) -> {
 
             }
 
@@ -166,6 +168,12 @@ private fun requestNotificationPermission() {
                         )
                     )
                 }
+
+                notificationPermissionRequest.launch(
+                    arrayOf(
+                        Manifest.permission.VIBRATE,
+                    )
+                )
             }
         }
 

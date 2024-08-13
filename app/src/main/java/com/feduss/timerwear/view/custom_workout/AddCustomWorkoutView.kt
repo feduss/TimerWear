@@ -25,31 +25,26 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
-import androidx.wear.compose.material.SwipeToDismissBox
-import androidx.wear.compose.material.Text
 import androidx.wear.compose.foundation.lazy.items
-import androidx.wear.compose.material.Checkbox
-import androidx.wear.compose.material.CheckboxDefaults
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.RadioButton
-import androidx.wear.compose.material.RadioButtonColors
 import androidx.wear.compose.material.RadioButtonDefaults
+import androidx.wear.compose.material.SwipeToDismissBox
+import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.material.ToggleChipDefaults
 import com.feduss.timerwear.entity.enums.CustomTimerType
-import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.extension.infiniteMarquee
+import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.uistate.add_custom_timer.AddCustomWorkoutViewModel
+import com.feduss.timerwear.uistate.uistate.picker.TimerPickerUiState
 import com.feduss.timerwear.view.component.button.TextButton
 import com.feduss.timerwear.view.component.card.GenericOtherInputCard
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.view.component.card.GenericTextInputCard
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
 import com.feduss.timerwear.view.component.picker.TimerPicker
-import com.feduss.timerwear.uistate.R
-import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
-import com.feduss.timerwear.uistate.uistate.picker.TimerPickerUiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -164,6 +159,22 @@ fun AddCustomWorkoutView(
                                     context = context,
                                     titleId = titleId,
                                     newModel = state.intermediumRestUiState.value
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        GenericTextInputCard(
+                            titleId = state.intermediumRestFrequencyUiState.titleId,
+                            placeholderId = state.intermediumRestFrequencyUiState.placeholderId,
+                            value = state.intermediumRestFrequencyUiState.value,
+                            keyboardType = state.intermediumRestFrequencyUiState.keyboardType,
+                            errorTextId = state.intermediumRestFrequencyUiState.errorTextId,
+                            onValueChange = {
+                                viewModel.userHasEditedWorkoutIntermediumRestFrequency(
+                                    context = context,
+                                    newValue = it
                                 )
                             }
                         )

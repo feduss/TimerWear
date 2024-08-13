@@ -7,9 +7,9 @@ enum class VibrationType {
 
     fun toPattern(): LongArray {
         return when(this) {
-            SingleShort -> longArrayOf(500)
-            SingleLong -> longArrayOf(1000)
-            DoubleShort -> longArrayOf(500, 500)
+            SingleShort -> longArrayOf(0, 500)
+            SingleLong -> longArrayOf(0, 1000)
+            DoubleShort -> longArrayOf(0, 500, 0, 500)
         }
     }
 }

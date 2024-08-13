@@ -2,7 +2,6 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.ButtonDefaults
@@ -64,6 +64,8 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.utils.AlarmUtils
+import com.feduss.timerwear.utils.PrefsUtils
+import com.feduss.timerwear.utils.TimerUtils
 import kotlin.math.ceil
 
 
@@ -162,6 +164,7 @@ fun TimerView(
             TimerCountdownView(
                 timerCountdownUiState = timerCountdownUiState,
                 viewModel = viewModel,
+                navController = navController,
                 context = context,
                 onTimerSet = onTimerSet
             )
@@ -219,6 +222,7 @@ fun TimerView(
                             viewModel = viewModel,
                             currentTimerIndex = timerViewUiState.currentTimerId,
                             currentRepetition = timerViewUiState.currentRepetition,
+                            currentTimerType = timerViewUiState.timerType,
                             onTimerSet = onTimerSet,
                             userGoBack = swipeBackClosure
                         )
@@ -228,7 +232,7 @@ fun TimerView(
                     LaunchedEffect(timerViewUiState.currentTimerId) {
 
                         if (!userHasSkippedTimer) {
-                            AlarmUtils.vibrate(
+                            vibrate(
                                 context = context,
                                 vibrationType = VibrationType.SingleLong
                             )
@@ -239,9 +243,9 @@ fun TimerView(
                                 CustomTimerType.IntermediumRest -> SoundType.Rest
                             }
 
-                            AlarmUtils.playSound(
+                            playSound(
                                 context = context,
-                                soundId = soundType.getRawMp3()
+                                soundType = soundType
                             )
                         }
                     }
@@ -271,8 +275,8 @@ fun TimerView(
                                     )
                                     newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
 
-                                    if (currentTimerSecondsRemaining < 3) {
-                                        AlarmUtils.vibrate(
+                                    if (currentTimerSecondsRemaining < 4) {
+                                        vibrate(
                                             context = context,
                                             vibrationType = VibrationType.SingleShort
                                         )
@@ -280,7 +284,7 @@ fun TimerView(
                                 }
 
                                 override fun onFinish() {
-                                    AlarmUtils.vibrate(
+                                    vibrate(
                                         context = context,
                                         vibrationType = VibrationType.SingleShort
                                     )
@@ -308,6 +312,7 @@ fun TimerView(
                             viewModel = viewModel,
                             currentTimerIndex = timerViewUiState.currentTimerId,
                             currentRepetition = timerViewUiState.currentRepetition,
+                            currentTimerType = timerViewUiState.timerType,
                             onTimerSet = onTimerSet,
                             userGoBack = swipeBackClosure
                         )
@@ -327,15 +332,39 @@ fun TimerView(
     }
 }
 
+private fun vibrate(
+    context: Context,
+    vibrationType: VibrationType
+) {
+    if (!PrefsUtils.isAppInBackground(context)) {
+        AlarmUtils.vibrate(
+            context = context,
+            vibrationType = vibrationType
+        )
+    }
+}
+
+private fun playSound(
+    context: Context,
+    soundType: SoundType
+) {
+    if (!PrefsUtils.isAppInBackground(context)) {
+        AlarmUtils.playSound(
+            context = context,
+            soundId = soundType.getRawMp3()
+        )
+    }
+}
+
 @Composable
 fun TimerTYPView(context: Context, timerTYPViewUiState: TimerTYPViewUiState, onTimerSet: (String) -> Unit) {
 
     onTimerSet("")
 
     LaunchedEffect(Unit) {
-        AlarmUtils.playSound(
+        playSound(
             context = context,
-            soundId = SoundType.Finish.getRawMp3()
+            soundType = SoundType.Finish
         )
     }
 
@@ -365,6 +394,7 @@ fun TimerTYPView(context: Context, timerTYPViewUiState: TimerTYPViewUiState, onT
 private fun TimerCountdownView(
     timerCountdownUiState: TimerCountdownUiState,
     viewModel: TimerViewModel,
+    navController: NavController,
     context: Context,
     onTimerSet: (String) -> Unit
 ) {
@@ -403,13 +433,17 @@ private fun TimerCountdownView(
 
                 centeredText = currentTimerSecondsRemaining.toString()
 
-                AlarmUtils.vibrate(
+                vibrate(
                     context = context,
                     vibrationType = VibrationType.SingleShort
                 )
             }
 
             override fun onFinish() {
+                vibrate(
+                    context = context,
+                    vibrationType = VibrationType.SingleLong
+                )
                 centeredText = postCountdownText
                 postCountDownTimer.start()
             }
@@ -434,13 +468,19 @@ private fun TimerCountdownView(
 
     //Back button
     BackHandler {
-        cancelCountdownTimers(listOf(preCountDownTimer, countDownTimer, postCountDownTimer))
+        cancelCountdownTimers(
+            timers = listOf(preCountDownTimer, countDownTimer, postCountDownTimer),
+            navigationController = navController
+        )
     }
 
     SwipeToDismissBox(
         state = swipeToDismissBoxState,
         onDismissed = {
-            cancelCountdownTimers(listOf(preCountDownTimer, countDownTimer, postCountDownTimer))
+            cancelCountdownTimers(
+                timers = listOf(preCountDownTimer, countDownTimer, postCountDownTimer),
+                navigationController = navController
+            )
         }, //swipe to dismiss gesture
     ) {
         Box(
@@ -460,8 +500,9 @@ private fun TimerCountdownView(
     }
 }
 
-private fun cancelCountdownTimers(timers: List<CountDownTimer?>) {
+private fun cancelCountdownTimers(timers: List<CountDownTimer?>, navigationController: NavController) {
     timers.forEach { it?.cancel() }
+    navigationController.popBackStack()
 }
 
 @Composable
@@ -470,6 +511,7 @@ private fun TimerAlertDialogView(
     viewModel: TimerViewModel,
     currentTimerIndex: Int,
     currentRepetition: Int,
+    currentTimerType: CustomTimerType,
     onTimerSet: (String) -> Unit,
     userGoBack: () -> Unit
 ) {
@@ -558,11 +600,12 @@ private fun TimerViewMainContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val timerName = timerViewUiState.currentTimerName
         Text(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
                 .infiniteMarquee,
-            text = timerViewUiState.currentTimerName,
+            text = timerName,
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center
         )

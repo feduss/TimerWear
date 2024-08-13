@@ -17,7 +17,7 @@
     <string name="add_custom_workout_timer_section_title">Lista timer</string>
     <string name="add_custom_workout_name_text_field_placeholder">Es.: Circuito 20min</string>
     <string name="add_custom_workout_repetitions_text_field_placeholder">Quante volte ripetere la lista dei timer</string>
-    <string name="add_custom_workout_intermedium_rest_text_field_placeholder">Tempo di attesa tra una ripetizione e l\'altra, se i timer si ripetono</string>
+    <string name="add_custom_workout_intermedium_rest_text_field_placeholder">Tempo di attesa tra una o più ripetizioni, se i timer si ripetono</string>
     <string name="add_custom_workout_timer_name_text_field_title">Nome</string>
     <string name="add_custom_workout_timer_name_work_text_field_placeholder">Nuovo timer</string>
     <string name="add_custom_workout_timer_duration_text_field_title">Durata</string>
@@ -45,5 +45,10 @@
     <string name="settings_title">Impostazioni</string>
     <string name="settings_app_version">Versione %1$s (%2$s) by Federico Saccà</string>
     <string name="settings_feedback_title">Feedback:</string>
-    <string name="add_custom_workout_timer_name_rest_text_field_placeholder">Pausa\n</string>
+    <string name="add_custom_workout_timer_name_rest_text_field_placeholder">Pausa</string>
+    <string name="add_custom_workout_intermedium_rest_frequency_text_field_title">Frequenza riposo lungo</string>
+    <string name="add_custom_workout_intermedium_rest_frequency_text_field_placeholder">Ogni quante ripetizioni effettuare un riposo lungo</string>
+    <string name="add_custom_workout_intermedium_rest_frequency_error">La frequenza del riposo lungo non è valida</string>
+    <string name="timer_intermedium_rest_title">Riposo lungo</string>
+    <string name="timer_end_timetext_title">Fine</string>
 </resources>

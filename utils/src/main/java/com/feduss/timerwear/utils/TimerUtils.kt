@@ -37,8 +37,13 @@ class TimerUtils {
                     newCurrentRepetition = currentRepetition + 1
                 }
             } else {
-                newCurrentTimerIndex = currentTimerIndex + 1
-                newCurrentRepetition = currentRepetition
+                if (totalTimers > 1) {
+                    newCurrentTimerIndex = currentTimerIndex + 1
+                    newCurrentRepetition = currentRepetition
+                } else {
+                    newCurrentTimerIndex = 0
+                    newCurrentRepetition = currentRepetition + 1
+                }
             }
 
             /*Log.e("TEST123: ", "func: newCurrentTimerIndex $newCurrentTimerIndex, " +
@@ -62,7 +67,7 @@ class TimerUtils {
                 } else if (frequency == 1) {
                     true
                 } else {
-                    repetition > 0 && repetition % frequency == 1
+                    repetition > 0 && (repetition + 1) % frequency == 0
                 }
             } else {
                 false

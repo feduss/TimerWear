@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.entity.enums.CustomTimerType
-import com.feduss.timerwear.entity.enums.TimerType
+import java.util.UUID
 
 data class TimerUiState(
     val timerCountdownUiState: TimerCountdownUiState? = null,
@@ -24,6 +24,7 @@ data class TimerCountdownUiState(
 
 data class TimerViewUiState(
     val customWorkoutModel: CustomWorkoutModel,
+    val uuid: UUID,
     val currentTimerId: Int = 0,
     val currentTimerName: String,
     val currentRepetition: Int = 0,

@@ -65,7 +65,6 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.PrefsUtils
-import com.feduss.timerwear.utils.TimerUtils
 import kotlin.math.ceil
 
 
@@ -251,7 +250,7 @@ fun TimerView(
                     }
 
                     LaunchedEffect(
-                        timerViewUiState.currentTimerId,
+                        timerViewUiState.uuid,
                         timerViewUiState.isTimerActive
                     ) {
                         if (timerViewUiState.isTimerActive) {
@@ -692,42 +691,37 @@ private fun TimerViewMainContent(
                     )
                 }
             )
-            val isLastTimer =
-                timerViewUiState.currentTimerId == timerViewUiState.customWorkoutModel.timers.last().id &&
-                        timerViewUiState.currentRepetition == timerViewUiState.customWorkoutModel.repetition - 1
-            if (!isLastTimer) {
-                CompactButton(
-                    modifier = Modifier
-                        .width(24.dp)
-                        .aspectRatio(1f)
-                        .background(
-                            color = color,
-                            shape = CircleShape
-                        ),
-                    colors = ButtonDefaults.primaryButtonColors(color, color),
-                    content = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = timerViewUiState.bottomRightButtonId),
-                            contentDescription = timerViewUiState.bottomRightButtonDescription,
-                            tint = timerViewUiState.bottomRightButtonColor
-                        )
-                    },
-                    onClick = {
-                        //Skip button
-                        viewModel.userChangedTimerState(
-                            timerSecondsRemaining = newTimerSecondsRemaining.intValue,
-                            isTimerActive = false,
-                            completion = {
-                                viewModel.userChangeAlertDialogState(
-                                    isAlertDialogVisible = true,
-                                    alertDialogType = AlertDialogType.SkipTimer,
-                                    completion = {}
-                                )
-                            }
-                        )
-                    }
-                )
-            }
+            CompactButton(
+                modifier = Modifier
+                    .width(24.dp)
+                    .aspectRatio(1f)
+                    .background(
+                        color = color,
+                        shape = CircleShape
+                    ),
+                colors = ButtonDefaults.primaryButtonColors(color, color),
+                content = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = timerViewUiState.bottomRightButtonId),
+                        contentDescription = timerViewUiState.bottomRightButtonDescription,
+                        tint = timerViewUiState.bottomRightButtonColor
+                    )
+                },
+                onClick = {
+                    //Skip button
+                    viewModel.userChangedTimerState(
+                        timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                        isTimerActive = false,
+                        completion = {
+                            viewModel.userChangeAlertDialogState(
+                                isAlertDialogVisible = true,
+                                alertDialogType = AlertDialogType.SkipTimer,
+                                completion = {}
+                            )
+                        }
+                    )
+                }
+            )
         }
     }
 

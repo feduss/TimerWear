@@ -23,6 +23,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 class TimerViewModel @AssistedInject constructor(
     @Assisted("workoutId") val workoutId: Int,
@@ -199,6 +200,7 @@ class TimerViewModel @AssistedInject constructor(
                 timerCountdownUiState = null,
                 timerViewUiState = TimerViewUiState(
                     customWorkoutModel = workout,
+                    uuid = currentTimer.uuid,
                     currentTimerId = timerIndex,
                     currentTimerName = currentTimer.name,
                     currentRepetition = repetition,
@@ -309,7 +311,9 @@ class TimerViewModel @AssistedInject constructor(
                 return
             }
 
-            val newTimer = it.timers[newCurrentTimerIndex]
+            val newTimer = it.timers[newCurrentTimerIndex].copy(
+                uuid = UUID.randomUUID()
+            )
             val needsToShowIntermediumRest = TimerUtils.needsToDisplayIntermediumRest(
                 timer = newTimer,
                 repetition = newCurrentRepetition,
@@ -329,6 +333,7 @@ class TimerViewModel @AssistedInject constructor(
                 customWorkoutModel?.let { workout ->
                     state?.copy(
                         timerViewUiState = state.timerViewUiState?.copy(
+                            uuid = newTimer.uuid,
                             currentTimerId = newTimer.id,
                             currentTimerName = newTimer.name,
                             currentRepetition = newCurrentRepetition,

@@ -21,7 +21,8 @@ import androidx.wear.widget.ConfirmationOverlay
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.entity.enums.Section
-import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
+import com.feduss.timerwear.uistate.factory.getCustomWorkoutView
 import com.feduss.timerwear.uistate.factory.getTimerViewModel
 import com.feduss.timerwear.view.component.MenuView
 import com.feduss.timerwear.view.component.PageView
@@ -66,14 +67,29 @@ fun MainNavView(
                 }
             }
 
-            composable(route = Section.CustomWorkout.baseRoute) {
-                PageView {
-                    CustomWorkoutView(
-                        context = mainActivity,
-                        columnState = it,
-                        navController = navController,
-                        swipeToDismissBoxState = swipeToDismissBoxState
-                    )
+            composable(
+                route = Section.CustomWorkout.parametricRoute
+            ) { navBackStackEntry ->
+                val workoutTypeRaw =
+                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+
+                val workoutType = WorkoutType.fromString(workoutTypeRaw)
+
+                if (workoutType == null) {
+                    navController.popBackStack()
+                } else {
+                    PageView {
+                        CustomWorkoutView(
+                            context = mainActivity,
+                            viewModel = getCustomWorkoutView(
+                                activity = mainActivity,
+                                workoutType = workoutType
+                            ),
+                            columnState = it,
+                            navController = navController,
+                            swipeToDismissBoxState = swipeToDismissBoxState
+                        )
+                    }
                 }
             }
 
@@ -86,18 +102,30 @@ fun MainNavView(
                     },
                 )
             ) { navBackStackEntry ->
+                val workoutTypeRaw =
+                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+
+                val workoutType = WorkoutType.fromString(workoutTypeRaw)
+
                 val workoutId =
                     navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
-                PageView {
-                    AddCustomWorkoutView(
-                        viewModel = getAddCustomWorkoutViewModel(
-                            activity = mainActivity,
-                            workoutId = workoutId?.toIntOrNull()
-                        ),
-                        context = mainActivity,
-                        columnState = it,
-                        navController = navController
-                    )
+
+                if (workoutType == null) {
+                    navController.popBackStack()
+                } else {
+
+                    PageView {
+                        AddCustomWorkoutView(
+                            viewModel = getAddCustomWorkoutViewModel(
+                                activity = mainActivity,
+                                workoutType = workoutType,
+                                workoutId = workoutId?.toIntOrNull()
+                            ),
+                            context = mainActivity,
+                            columnState = it,
+                            navController = navController
+                        )
+                    }
                 }
             }
 
@@ -122,10 +150,10 @@ fun MainNavView(
                 val workoutId =
                     navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
 
-                val timerTypeRaw =
-                    navBackStackEntry.arguments?.getString(Params.TimerType.name)
+                val workoutTypeRaw =
+                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
 
-                val timerType = TimerType.fromString(timerTypeRaw)
+                val workoutType = WorkoutType.fromString(workoutTypeRaw)
 
                 val currentTimerIndex =
                     navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
@@ -138,7 +166,7 @@ fun MainNavView(
                 val currentTimerSecondsRemaining =
                     navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
 
-                if (workoutId == null || timerType == null) {
+                if (workoutId == null || workoutType == null) {
                     navController.popBackStack()
                 } else {
                     PageView(
@@ -150,7 +178,7 @@ fun MainNavView(
                             viewModel = getTimerViewModel(
                                 activity = mainActivity,
                                 workoutId = workoutId.toInt(),
-                                timerType = timerType,
+                                workoutType = workoutType,
                                 currentTimerIndex = currentTimerIndex?.toIntOrNull(),
                                 currentRepetition = currentRepetition?.toIntOrNull(),
                                 currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()

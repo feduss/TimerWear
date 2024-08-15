@@ -3,7 +3,7 @@ package com.feduss.timerwear.uistate.uistate.timer
 import androidx.compose.ui.graphics.Color
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
 import java.util.UUID
 
 data class TimerUiState(
@@ -31,7 +31,7 @@ data class TimerViewUiState(
     val isTimerActive: Boolean,
     val maxTimerSeconds: Int,
     val timerSecondsRemaining: Int,
-    val timerType: CustomTimerType,
+    val timerType: TimerType,
     val circularSliderColor: Color,
     val circularSliderProgress: Double = 0.0,
     val currentProgress: String,

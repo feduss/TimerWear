@@ -34,9 +34,10 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.material.ToggleChipDefaults
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.R
+import com.feduss.timerwear.uistate.extension.getStringId
 import com.feduss.timerwear.uistate.uistate.add_custom_timer.AddCustomWorkoutViewModel
 import com.feduss.timerwear.uistate.uistate.picker.TimerPickerUiState
 import com.feduss.timerwear.view.component.button.TextButton
@@ -140,25 +141,32 @@ fun AddCustomWorkoutView(
                 }
 
                 val repetitionsValue = state.repetitionsUiState.value
-                if (repetitionsValue.isNotEmpty() && repetitionsValue.toInt() > 1) {
+                val intermediumRestUiState = state.intermediumRestUiState
+                val intermediumRestFrequencyUiState = state.intermediumRestFrequencyUiState
+                if (
+                    intermediumRestUiState != null &&
+                    intermediumRestFrequencyUiState != null &&
+                    repetitionsValue.isNotEmpty() &&
+                    repetitionsValue.toInt() > 1
+                    ) {
                     item {
-                        val titleId = state.intermediumRestUiState.titleId
+                        val titleId = intermediumRestUiState.titleId
                         val value: String =
-                            if (state.intermediumRestUiState.value != null) {
-                                state.intermediumRestUiState.value.toString()
+                            if (intermediumRestUiState.value != null) {
+                                intermediumRestUiState.value.toString()
                             } else {
                                 ""
                             }
                         GenericOtherInputCard(
                             titleId = titleId,
-                            placeholderId = state.intermediumRestUiState.placeholderId,
+                            placeholderId = intermediumRestUiState.placeholderId,
                             value = value,
-                            errorTextId = state.intermediumRestUiState.errorTextId,
+                            errorTextId = intermediumRestUiState.errorTextId,
                             onCardClicked = {
                                 viewModel.userHasOpenedIntermediumRestPicker(
                                     context = context,
                                     titleId = titleId,
-                                    newModel = state.intermediumRestUiState.value
+                                    newModel = intermediumRestUiState.value
                                 )
                             }
                         )
@@ -166,11 +174,11 @@ fun AddCustomWorkoutView(
 
                     item {
                         GenericTextInputCard(
-                            titleId = state.intermediumRestFrequencyUiState.titleId,
-                            placeholderId = state.intermediumRestFrequencyUiState.placeholderId,
-                            value = state.intermediumRestFrequencyUiState.value,
-                            keyboardType = state.intermediumRestFrequencyUiState.keyboardType,
-                            errorTextId = state.intermediumRestFrequencyUiState.errorTextId,
+                            titleId = intermediumRestFrequencyUiState.titleId,
+                            placeholderId = intermediumRestFrequencyUiState.placeholderId,
+                            value = intermediumRestFrequencyUiState.value,
+                            keyboardType = intermediumRestFrequencyUiState.keyboardType,
+                            errorTextId = intermediumRestFrequencyUiState.errorTextId,
                             onValueChange = {
                                 viewModel.userHasEditedWorkoutIntermediumRestFrequency(
                                     context = context,
@@ -189,173 +197,185 @@ fun AddCustomWorkoutView(
                     )
                 }
 
-                items(
-                    items = state.customTimerUiStates,
-                    key = { it.id }
-                ) {
-                    GenericRoundedCard(
-                        leftIconId = it.leftIconId,
-                        leftIconContentDescription = it.leftIconDescription,
-                        leftIconTintColor = it.leftIconTintColor,
-                        leftText = it.nameUiState.value,
-                        rightIconId = it.rightIconId,
-                        rightIconContentDescription = it.rightIconDescription,
-                        rightIconTintColor = it.rightIconTintColor,
-                        bottomText = it.durationUiState.value?.toString(),
-                        isExpanded = it.isExpanded,
-                        hasValidationError = !it.isExpanded && !it.isValid,
-                        onCardClick =  {
-                            viewModel.userHasClickedOnTimer(id = it.id)
-                        },
-                        expandedContent = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                GenericTextInputCard(
-                                    titleId = it.nameUiState.titleId,
-                                    placeholderId = it.nameUiState.placeholderId,
-                                    value = it.nameUiState.value,
-                                    keyboardType = it.nameUiState.keyboardType,
-                                    errorTextId = it.nameUiState.errorTextId,
-                                    onValueChange = { newTitle ->
-                                        viewModel.userHasEditedTimerTitle(
-                                            context = context,
-                                            id = it.id,
-                                            newTitle = newTitle
-                                        )
-                                    }
-                                )
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
-                                val titleId = it.durationUiState.titleId
-                                val value: String =
-                                    if (it.durationUiState.value != null) {
-                                        it.durationUiState.value.toString()
-                                    } else {
-                                        ""
-                                    }
-                                GenericOtherInputCard(
-                                    titleId = titleId,
-                                    placeholderId = it.durationUiState.placeholderId,
-                                    value = value,
-                                    errorTextId = it.durationUiState.errorTextId,
-                                    onCardClicked = {
-                                        viewModel.userHasOpenedTimerDurationPicker(
-                                            context = context,
-                                            id = it.id,
-                                            titleId = titleId,
-                                            newModel = it.durationUiState.value
-                                        )
-                                    }
-                                )
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
+                val customTimerUiStates = state.customTimerUiStates
+                if (customTimerUiStates != null) {
+                    items(
+                        items = customTimerUiStates,
+                        key = { it.id }
+                    ) {
+                        GenericRoundedCard(
+                            leftIconId = it.leftIconId,
+                            leftIconContentDescription = it.leftIconDescription,
+                            leftIconTintColor = it.leftIconTintColor,
+                            leftText = it.nameUiState.value,
+                            rightIconId = it.rightIconId,
+                            rightIconContentDescription = it.rightIconDescription,
+                            rightIconTintColor = it.rightIconTintColor,
+                            bottomText = it.durationUiState.value?.toString(),
+                            isExpanded = it.isExpanded,
+                            hasValidationError = !it.isExpanded && !it.isValid,
+                            onCardClick = {
+                                viewModel.userHasClickedOnTimer(id = it.id)
+                            },
+                            expandedContent = {
                                 Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Text(
-                                        text = stringResource(id = it.typeUiState.titleId),
-                                        textAlign = TextAlign.Center
+                                    GenericTextInputCard(
+                                        titleId = it.nameUiState.titleId,
+                                        placeholderId = it.nameUiState.placeholderId,
+                                        value = it.nameUiState.value,
+                                        keyboardType = it.nameUiState.keyboardType,
+                                        isReadOnly = it.isNameReadOnly,
+                                        errorTextId = it.nameUiState.errorTextId,
+                                        onValueChange = { newTitle ->
+                                            viewModel.userHasEditedTimerTitle(
+                                                context = context,
+                                                id = it.id,
+                                                newTitle = newTitle
+                                            )
+                                        }
                                     )
-                                    
+
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    val timerTypes = CustomTimerType.entries.filter { type -> type != CustomTimerType.IntermediumRest }
-                                    timerTypes.forEachIndexed { index, type ->
-                                        val iconId: Int =
-                                            when(type) {
-                                                CustomTimerType.Work -> R.drawable.ic_run
-                                                CustomTimerType.Rest -> R.drawable.ic_bed
-                                                CustomTimerType.IntermediumRest -> R.drawable.ic_bed
-                                            }
-                                        val isChecked = it.typeUiState.value == type
-                                        ToggleChip(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            label = {
-                                                Text(
-                                                    text = type.toString(),
-                                                    textAlign = TextAlign.Center
-                                                )
-                                            },
-                                            checked = isChecked,
-                                            onCheckedChange = { isSelected ->
-                                                viewModel.userHasClickedWorkoutType(
-                                                    context = context,
-                                                    id = it.id,
-                                                    type = type,
-                                                    isSelected = isSelected
-                                                )
-                                            },
-                                            appIcon = {
-                                                Icon(
-                                                    imageVector = ImageVector.vectorResource(id = iconId),
-                                                    contentDescription = "$it icon"
-                                                )
-                                            },
-                                            colors = ToggleChipDefaults.toggleChipColors(
-                                                checkedStartBackgroundColor = Color.DarkGray,
-                                                checkedContentColor = Color.White,
-                                                checkedToggleControlColor = Color.White,
-                                                uncheckedContentColor = Color.White,
-                                                uncheckedToggleControlColor = Color.White
-                                            ),
-                                            toggleControl = {
+                                    val titleId = it.durationUiState.titleId
+                                    val value: String =
+                                        if (it.durationUiState.value != null) {
+                                            it.durationUiState.value.toString()
+                                        } else {
+                                            ""
+                                        }
+                                    GenericOtherInputCard(
+                                        titleId = titleId,
+                                        placeholderId = it.durationUiState.placeholderId,
+                                        value = value,
+                                        errorTextId = it.durationUiState.errorTextId,
+                                        onCardClicked = {
+                                            viewModel.userHasOpenedTimerDurationPicker(
+                                                context = context,
+                                                id = it.id,
+                                                titleId = titleId,
+                                                newModel = it.durationUiState.value
+                                            )
+                                        }
+                                    )
 
-                                                RadioButton(
-                                                    selected = isChecked,
-                                                    colors = RadioButtonDefaults.colors(
-                                                        selectedRingColor = Color.White,
-                                                        selectedDotColor = Color.White,
-                                                        unselectedRingColor = Color.White,
-                                                        unselectedDotColor = Color.White
-                                                    )
-                                                )
-                                            }
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = it.typeUiState.titleId),
+                                            textAlign = TextAlign.Center
                                         )
 
-                                        if (index < timerTypes.count() - 1) {
-                                            Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        val timerTypes =
+                                            TimerType.entries.filter { type -> type != TimerType.IntermediumRest }
+                                        timerTypes.forEachIndexed { index, type ->
+                                            val iconId: Int =
+                                                when (type) {
+                                                    TimerType.Work -> R.drawable.ic_run
+                                                    TimerType.Rest -> R.drawable.ic_bed
+                                                    TimerType.IntermediumRest -> R.drawable.ic_bed
+                                                }
+                                            val isChecked = it.typeUiState.value == type
+                                            ToggleChip(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                label = {
+                                                    Text(
+                                                        text = stringResource(id = type.getStringId()),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                },
+                                                enabled = !it.typeUiState.isReadOnly,
+                                                checked = isChecked,
+                                                onCheckedChange = { isSelected ->
+                                                    viewModel.userHasClickedWorkoutType(
+                                                        context = context,
+                                                        id = it.id,
+                                                        type = type,
+                                                        isSelected = isSelected
+                                                    )
+                                                },
+                                                appIcon = {
+                                                    Icon(
+                                                        imageVector = ImageVector.vectorResource(id = iconId),
+                                                        contentDescription = "$it icon"
+                                                    )
+                                                },
+                                                colors = ToggleChipDefaults.toggleChipColors(
+                                                    checkedStartBackgroundColor = Color.DarkGray,
+                                                    checkedContentColor = Color.White,
+                                                    checkedToggleControlColor = Color.White,
+                                                    uncheckedContentColor = Color.White,
+                                                    uncheckedToggleControlColor = Color.White
+                                                ),
+                                                toggleControl = {
+
+                                                    RadioButton(
+                                                        selected = isChecked,
+                                                        colors = RadioButtonDefaults.colors(
+                                                            selectedRingColor = Color.White,
+                                                            selectedDotColor = Color.White,
+                                                            unselectedRingColor = Color.White,
+                                                            unselectedDotColor = Color.White
+                                                        )
+                                                    )
+                                                }
+                                            )
+
+                                            if (index < timerTypes.count() - 1) {
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                            }
                                         }
                                     }
-                                }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
 
-                                Text(
-                                    modifier = Modifier.clickable {
-                                        viewModel.userHasRemovedTimer(
-                                            context = context,
-                                            id = it.id
+                                    // Delete timer buttons isn't visible for emom and tabata
+                                    val removeButtonTextId = it.removeButtonTextId
+                                    if (removeButtonTextId != null) {
+                                        Text(
+                                            modifier = Modifier.clickable {
+                                                viewModel.userHasRemovedTimer(
+                                                    context = context,
+                                                    id = it.id
+                                                )
+                                            },
+                                            text = stringResource(id = removeButtonTextId),
+                                            textAlign = TextAlign.Center,
+                                            color = Color.Red
                                         )
-                                    },
-                                    text = stringResource(id = it.removeButtonTextId),
-                                    textAlign = TextAlign.Center,
-                                    color = Color.Red
-                                )
+                                    }
 
+                                }
                             }
-                        }
 
-                    )
+                        )
+                    }
                 }
 
+                val addTimerButtonUiState = state.addTimerButtonUiState
+                if (addTimerButtonUiState != null) {
+                    item {
+                        GenericRoundedCard(
+                            leftIconId = addTimerButtonUiState.leftIconId,
+                            leftIconContentDescription = addTimerButtonUiState.leftIconDescription,
+                            leftIconTintColor = addTimerButtonUiState.leftIconTintColor,
+                            leftText = stringResource(id = addTimerButtonUiState.textId),
+                            isEnabled = isAddTimerButtonEnabled.value,
+                            onCardClick = {
+                                viewModel.userHasAddedNewTimer(context = context)
+                            }
 
-                item {
-                    GenericRoundedCard(
-                        leftIconId = state.addTimerButtonUiState.leftIconId,
-                        leftIconContentDescription = state.addTimerButtonUiState.leftIconDescription,
-                        leftIconTintColor = state.addTimerButtonUiState.leftIconTintColor,
-                        leftText = stringResource(id = state.addTimerButtonUiState.textId),
-                        isEnabled = isAddTimerButtonEnabled.value,
-                        onCardClick =  {
-                            viewModel.userHasAddedNewTimer(context = context)
-                        }
-
-                    )
+                        )
+                    }
                 }
 
                 item {

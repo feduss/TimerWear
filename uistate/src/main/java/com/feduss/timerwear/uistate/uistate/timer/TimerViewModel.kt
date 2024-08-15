@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.feduss.timerwear.entity.CustomTimerModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.AlertDialogType
-import com.feduss.timerwear.entity.enums.CustomTimerType
 import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.ActiveTimer
 import com.feduss.timerwear.uistate.extension.Blue500
@@ -27,7 +27,7 @@ import java.util.UUID
 
 class TimerViewModel @AssistedInject constructor(
     @Assisted("workoutId") val workoutId: Int,
-    @Assisted("timerType") val timerType: TimerType,
+    @Assisted("workoutType") val workoutType: WorkoutType,
     @Assisted("currentTimerIndex") val currentTimerIndex: Int?,
     @Assisted("currentRepetition") val currentRepetition: Int?,
     @Assisted("currentTimerSecondsRemaining") val currentTimerSecondsRemaining: Int?
@@ -38,7 +38,7 @@ class TimerViewModel @AssistedInject constructor(
     interface Factory {
         fun create(
             @Assisted("workoutId") workoutId: Int,
-            @Assisted("timerType") timerType: TimerType,
+            @Assisted("workoutType") workoutType: WorkoutType,
             @Assisted("currentTimerIndex") currentTimerIndex: Int?,
             @Assisted("currentRepetition") currentRepetition: Int?,
             @Assisted("currentTimerSecondsRemaining") currentTimerSecondsRemaining: Int?
@@ -50,7 +50,7 @@ class TimerViewModel @AssistedInject constructor(
         fun provideFactory(
             assistedFactory: Factory,
             workoutId: Int,
-            timerType: TimerType,
+            workoutType: WorkoutType,
             currentTimerIndex: Int?,
             currentRepetition: Int?,
             currentTimerSecondsRemaining: Int?
@@ -58,7 +58,7 @@ class TimerViewModel @AssistedInject constructor(
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return assistedFactory.create(
                     workoutId,
-                    timerType,
+                    workoutType,
                     currentTimerIndex,
                     currentRepetition,
                     currentTimerSecondsRemaining
@@ -130,7 +130,10 @@ class TimerViewModel @AssistedInject constructor(
 
         if (_dataUiState.value != null) return
 
-        customWorkoutModel = TimerUtils.getCustomWorkoutModels(context = context)?.first { it.id == workoutId }
+        customWorkoutModel = TimerUtils.getCustomWorkoutModels(
+            context = context,
+            workoutType = workoutType
+        )?.first { it.id == workoutId }
 
         if (PrefsUtils.isTimerActive(context = context)) {
             _dataUiState.value = TimerUiState()
@@ -185,7 +188,7 @@ class TimerViewModel @AssistedInject constructor(
             totalRepetitions = workout.repetition,
             frequency = workout.intermediumRestFrequency
         )
-        if (!needsToShowIntermediumRest && currentTimer.type == CustomTimerType.IntermediumRest) {
+        if (!needsToShowIntermediumRest && currentTimer.type == TimerType.IntermediumRest) {
             initTimerUiState(
                 workout = workout,
                 timerIndex = timerIndex,
@@ -253,12 +256,12 @@ class TimerViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getSliderColor(isTimerActive: Boolean, timerType: CustomTimerType): Color {
+    private fun getSliderColor(isTimerActive: Boolean, timerType: TimerType): Color {
         return if (isTimerActive) {
             when(timerType) {
-                CustomTimerType.Work -> activeColorWork
-                CustomTimerType.Rest -> activeColorRest
-                CustomTimerType.IntermediumRest -> activeColorIntermediumRest
+                TimerType.Work -> activeColorWork
+                TimerType.Rest -> activeColorRest
+                TimerType.IntermediumRest -> activeColorIntermediumRest
             }
         } else {
             inactiveColor
@@ -320,7 +323,7 @@ class TimerViewModel @AssistedInject constructor(
                 totalRepetitions = totalRepetitions,
                 frequency = it.intermediumRestFrequency
             )
-            if (!needsToShowIntermediumRest && newTimer.type == CustomTimerType.IntermediumRest) {
+            if (!needsToShowIntermediumRest && newTimer.type == TimerType.IntermediumRest) {
                 setNextTimer(
                     context = context,
                     currentTimerIndex = newCurrentTimerIndex,
@@ -387,7 +390,7 @@ class TimerViewModel @AssistedInject constructor(
         needsToShowIntermediumRest: Boolean
     ): String {
         return if (needsToShowIntermediumRest) "" else {
-            val totalTimers = timers.filter { it.type != CustomTimerType.IntermediumRest }.size
+            val totalTimers = timers.filter { it.type != TimerType.IntermediumRest }.size
             "${(currentRepetition * totalTimers) + (currentTimerIndex + 1)}/${totalTimers * totalRepetition}"
         }
     }
@@ -469,8 +472,8 @@ class TimerViewModel @AssistedInject constructor(
 
         PrefsUtils.setStringPref(
             context = context,
-            pref = PrefParam.TimerType.value,
-            newValue = timerType.toString()
+            pref = PrefParam.WorkoutType.value,
+            newValue = workoutType.toString()
         )
 
         PrefsUtils.setStringPref(
@@ -587,7 +590,7 @@ class TimerViewModel @AssistedInject constructor(
         currentTimerIndex: Int,
         currentRepetition: Int,
         totalRepetitions: Int,
-        intermediumRestFrequency: Int
+        intermediumRestFrequency: Int?
     ): String {
 
         val pair = TimerUtils.getNextTimerIndexAndRepetition(
@@ -606,7 +609,7 @@ class TimerViewModel @AssistedInject constructor(
         if (nextTimerIndex == -1 && nextRepetition == -1) {
             timeText += context.getString(R.string.timer_end_timetext_title)
         } else {
-            val totalTimers = timers.filter { it.type != CustomTimerType.IntermediumRest }.size
+            val totalTimers = timers.filter { it.type != TimerType.IntermediumRest }.size
             val nextTimer = timers[nextTimerIndex]
 
             val needsToDisplayIntermediumRest = TimerUtils.needsToDisplayIntermediumRest(
@@ -616,7 +619,7 @@ class TimerViewModel @AssistedInject constructor(
                 frequency = intermediumRestFrequency
             )
 
-            if (!needsToDisplayIntermediumRest && nextTimer.type == CustomTimerType.IntermediumRest) {
+            if (!needsToDisplayIntermediumRest && nextTimer.type == TimerType.IntermediumRest) {
                 return getTimeText(
                     context = context,
                     timers = timers,

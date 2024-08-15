@@ -7,10 +7,10 @@ import com.feduss.timerwear.uistate.uistate.TimerPickerInputUiState
 data class AddCustomWorkoutUiState(
     val titleUiState: GenericTextInputUiState,
     val repetitionsUiState: GenericTextInputUiState,
-    val intermediumRestUiState: TimerPickerInputUiState,
-    val intermediumRestFrequencyUiState: GenericTextInputUiState,
-    val customTimerUiStates: List<CustomTimerUiState>,
-    val addTimerButtonUiState: GenericButtonCardUiState,
+    val intermediumRestUiState: TimerPickerInputUiState? = null,
+    val intermediumRestFrequencyUiState: GenericTextInputUiState? = null,
+    val customTimerUiStates: List<CustomTimerUiState>? = null,
+    val addTimerButtonUiState: GenericButtonCardUiState? = null,
     val addWorkoutConfirmButtonUiState: GenericButtonCardUiState,
     val bottomValidationErrors: List<String>
 )

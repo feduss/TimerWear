@@ -3,7 +3,9 @@ package com.feduss.timerwear.utils
 import android.content.Context
 import com.feduss.timerwear.entity.CustomTimerModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
+import com.feduss.timerwear.utils.extension.getPrefName
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -11,9 +13,9 @@ class TimerUtils {
 
     companion object {
 
-        fun getCustomWorkoutModels(context: Context): List<CustomWorkoutModel>? {
+        fun getCustomWorkoutModels(context: Context, workoutType: WorkoutType): List<CustomWorkoutModel>? {
             val customWorkoutsRawModels =
-                PrefsUtils.getStringPref(context, PrefParam.CustomWorkoutList.value)
+                PrefsUtils.getStringPref(context, workoutType.getPrefName())
             val sType = object : TypeToken<List<CustomWorkoutModel>>() {}.type
             val customWorkoutModels: List<CustomWorkoutModel>? =
                 Gson().fromJson<List<CustomWorkoutModel>?>(customWorkoutsRawModels, sType)
@@ -58,9 +60,9 @@ class TimerUtils {
             timer: CustomTimerModel,
             repetition: Int,
             totalRepetitions: Int,
-            frequency: Int
+            frequency: Int?
         ): Boolean {
-            return if (timer.type == CustomTimerType.IntermediumRest) {
+            return if (timer.type == TimerType.IntermediumRest && frequency != null) {
                 // Skip last intermedium rest
                 if (repetition == totalRepetitions - 1) {
                     false

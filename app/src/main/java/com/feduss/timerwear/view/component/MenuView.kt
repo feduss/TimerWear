@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.feduss.timerwear.entity.enums.Section
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.uistate.MenuViewModel
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
@@ -47,14 +48,21 @@ fun MenuView(
         when(it) {
             is MenuViewModel.NavUiState.GoToCustomWorkout -> {
                 goToCustomWorkoutList(
-                    navController = navController
+                    navController = navController,
+                    workoutType = WorkoutType.CustomWorkout
                 )
             }
             is MenuViewModel.NavUiState.GoToEmom -> {
-                //TODO
+                goToCustomWorkoutList(
+                    navController = navController,
+                    workoutType = WorkoutType.Emom
+                )
             }
             is MenuViewModel.NavUiState.GoToTabata -> {
-                //TODO
+                goToCustomWorkoutList(
+                    navController = navController,
+                    workoutType = WorkoutType.Tabata
+                )
             }
 
             MenuViewModel.NavUiState.GoToSettings -> {
@@ -186,6 +194,6 @@ private fun RequestPermission() {
     }
 }
 
-fun goToCustomWorkoutList(navController: NavController) {
-    navController.navigate(Section.CustomWorkout.baseRoute)
+fun goToCustomWorkoutList(navController: NavController, workoutType: WorkoutType) {
+    navController.navigate(Section.CustomWorkout.withArgs(listOf(workoutType.toString())))
 }

@@ -3,7 +3,7 @@ package com.feduss.timerwear.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 
 class PrefsUtils {
 
@@ -44,7 +44,7 @@ class PrefsUtils {
             setStringPref(context, PrefParam.CurrentTimerName.value, null)
             setStringPref(context, PrefParam.CurrentRepetition.value, null)
             setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
-            setStringPref(context, PrefParam.TimerType.value, null)
+            setStringPref(context, PrefParam.WorkoutType.value, null)
             setStringPref(context, PrefParam.OngoingNotificationStartTime.value, null)
             setStringPref(context, PrefParam.IsTimerActive.value, "false")
         }
@@ -71,10 +71,10 @@ class PrefsUtils {
             PrefParam.IsTimerActive.value
         ) == "true"
 
-        fun getTimerType(context: Context) = TimerType.fromString(
+        fun getWorkoutType(context: Context) = WorkoutType.fromString(
             getStringPref(
                 context,
-                PrefParam.TimerType.value
+                PrefParam.WorkoutType.value
             )
         )
 

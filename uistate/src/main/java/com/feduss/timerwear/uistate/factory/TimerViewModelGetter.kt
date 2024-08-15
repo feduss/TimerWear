@@ -3,7 +3,7 @@ package com.feduss.timerwear.uistate.factory
 import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.hilt.ViewModelFactory
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import dagger.hilt.android.EntryPointAccessors
@@ -12,7 +12,7 @@ import dagger.hilt.android.EntryPointAccessors
 fun getTimerViewModel(
     activity: Activity,
     workoutId: Int,
-    timerType: TimerType,
+    workoutType: WorkoutType,
     currentTimerIndex: Int? = null,
     currentRepetition: Int? = null,
     currentTimerSecondsRemaining: Int? = null
@@ -23,7 +23,7 @@ fun getTimerViewModel(
             ViewModelFactory::class.java
         ).timerViewModelFactory(),
         workoutId = workoutId,
-        timerType = timerType,
+        workoutType = workoutType,
         currentTimerIndex = currentTimerIndex,
         currentRepetition = currentRepetition,
         currentTimerSecondsRemaining = currentTimerSecondsRemaining

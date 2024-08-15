@@ -30,6 +30,7 @@ fun GenericTextInputCard(
     placeholderId: Int,
     value: String,
     keyboardType: KeyboardType,
+    isReadOnly: Boolean = false,
     errorTextId: Int?,
     onValueChange: (String) -> Unit
 ) {
@@ -57,6 +58,7 @@ fun GenericTextInputCard(
                 )
                 .border(1.dp, if(errorTextId != null) errorColor else defaultColor, shape),
             value = value,
+            readOnly = isReadOnly,
             onValueChange = onValueChange,
             singleLine = true,
             keyboardOptions = KeyboardOptions(

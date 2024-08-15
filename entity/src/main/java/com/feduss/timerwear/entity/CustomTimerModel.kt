@@ -1,6 +1,6 @@
 package com.feduss.timerwear.entity
 
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
 import java.util.UUID
 
 data class CustomTimerModel(
@@ -8,5 +8,5 @@ data class CustomTimerModel(
     val uuid: UUID = UUID.randomUUID(),
     val name: String,
     val duration: TimerPickerModel,
-    val type: CustomTimerType
+    val type: TimerType
 )

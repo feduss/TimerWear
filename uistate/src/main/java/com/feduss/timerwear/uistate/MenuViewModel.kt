@@ -2,7 +2,7 @@ package com.feduss.timerwear.uistate
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.utils.PrefsUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +24,10 @@ class MenuViewModel @Inject constructor() : ViewModel() {
 
     fun loadActiveTimer(context: Context) {
         if (PrefsUtils.isTimerActive(context)) {
-            when(PrefsUtils.getTimerType(context)) {
-                TimerType.CustomWorkout -> _navUiState.value = NavUiState.GoToCustomWorkout(true)
-                TimerType.Emom -> _navUiState.value = NavUiState.GoToEmom(true)
-                TimerType.Tabata -> _navUiState.value = NavUiState.GoToTabata(true)
+            when(PrefsUtils.getWorkoutType(context)) {
+                WorkoutType.CustomWorkout -> _navUiState.value = NavUiState.GoToCustomWorkout(true)
+                WorkoutType.Emom -> _navUiState.value = NavUiState.GoToEmom(true)
+                WorkoutType.Tabata -> _navUiState.value = NavUiState.GoToTabata(true)
                 null -> _navUiState.value = null
             }
         }

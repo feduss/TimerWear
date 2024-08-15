@@ -15,7 +15,7 @@ import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.lazy.items
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.entity.enums.Section
-import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
 import com.feduss.timerwear.view.component.card.CustomWorkoutCardView
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
@@ -47,18 +47,21 @@ fun CustomWorkoutView(
         when (it) {
             is CustomWorkoutViewModel.NavUiState.AddCustomWorkoutClicked -> {
                 goToAddCustomWorkoutPage(
-                    navController = navController
+                    navController = navController,
+                    workoutType = it.workoutType
                 )
             }
             is CustomWorkoutViewModel.NavUiState.EditCustomWorkoutClicked ->
                 goToAddCustomWorkoutPage(
                     navController = navController,
-                    workoutId = it.id.toString()
+                    workoutId = it.workoutId.toString(),
+                    workoutType = it.workoutType
                 )
             is CustomWorkoutViewModel.NavUiState.ExistingCustomWorkoutClicked -> {
                 goToExistingWorkout(
                     navController = navController,
                     workoutId = it.workoutId.toString(),
+                    workoutType = it.workoutType,
                     currentTimerIndex = it.currentTimerIndex?.toString(),
                     currentRepetition = it.currentRepetition?.toString(),
                     currentTimerSecondsRemaining = it.currentTimerSecondsRemaining?.toString()
@@ -85,13 +88,13 @@ fun CustomWorkoutView(
         modifier = Modifier.fillMaxSize(),
         columnState = columnState
     ) {
-        item {
-            LeftIconTextHeader(
-                title = stringResource(id = viewModel.headerTextId)
-            )
-        }
-
         dataUiState?.let { state ->
+
+            item {
+                LeftIconTextHeader(
+                    title = stringResource(id = state.headerTitleId)
+                )
+            }
 
             state.customWorkouts?.let { customWorkoutState ->
                 items(
@@ -143,8 +146,12 @@ fun CustomWorkoutView(
 }
 
 fun goToExistingWorkout(
-    navController: NavController, workoutId: String, currentTimerIndex: String?,
-    currentRepetition: String?, currentTimerSecondsRemaining: String?
+    navController: NavController,
+    workoutId: String,
+    workoutType: WorkoutType,
+    currentTimerIndex: String?,
+    currentRepetition: String?,
+    currentTimerSecondsRemaining: String?
 ) {
 
     var optionalArgs: Map<String, String>? = null
@@ -157,14 +164,15 @@ fun goToExistingWorkout(
     }
 
     navController.navigate(Section.Timer.withArgs(
-        args = listOf(workoutId, TimerType.CustomWorkout.toString()),
+        args = listOf(workoutId, workoutType.toString()),
         optionalArgs = optionalArgs
     ))
 }
 
 private fun goToAddCustomWorkoutPage(
     navController: NavController,
-    workoutId: String? = null
+    workoutId: String? = null,
+    workoutType: WorkoutType
 ) {
 
     var optionalArgs: Map<String, String>? = null
@@ -173,6 +181,7 @@ private fun goToAddCustomWorkoutPage(
     }
     navController.navigate(
         Section.AddCustomWorkout.withArgs(
+            args = listOf(workoutType.toString()),
             optionalArgs = optionalArgs
         )
     )

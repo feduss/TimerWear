@@ -2,29 +2,62 @@ package com.feduss.timerwear.uistate.uistate.custom_timer
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.feduss.timerwear.entity.CustomWorkoutModel
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.R
+import com.feduss.timerwear.uistate.extension.getStringId
 import com.feduss.timerwear.uistate.uistate.GenericButtonCardUiState
 import com.feduss.timerwear.utils.PrefParam
 import com.feduss.timerwear.utils.PrefsUtils
+import com.feduss.timerwear.utils.extension.getPrefName
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
-@HiltViewModel
-class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
+class CustomWorkoutViewModel @AssistedInject constructor(
+    @Assisted("workoutType") val workoutType: WorkoutType
+) : ViewModel() {
 
+    //Factory
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("workoutType") workoutType: WorkoutType
+        ): CustomWorkoutViewModel
+    }
+
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        fun provideFactory(
+            assistedFactory: Factory,
+            workoutType: WorkoutType
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(
+                    workoutType
+                ) as T
+            }
+        }
+    }
 
     sealed class NavUiState {
-        data object AddCustomWorkoutClicked: NavUiState()
-        data class EditCustomWorkoutClicked(val id: Int): NavUiState()
+        data class AddCustomWorkoutClicked(
+            val workoutType: WorkoutType
+        ): NavUiState()
+        data class EditCustomWorkoutClicked(
+            val workoutId: Int,
+            val workoutType: WorkoutType
+        ): NavUiState()
         data class ExistingCustomWorkoutClicked(
             val workoutId: Int,
+            val workoutType: WorkoutType,
             val currentTimerIndex: Int? = null,
             val currentRepetition: Int? = null,
             val currentTimerSecondsRemaining: Int? = null
@@ -42,7 +75,6 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     private var customWorkoutModels: ArrayList<CustomWorkoutModel>? = null
 
     // Copies
-    val headerTextId = R.string.custom_workout_header_text
     val addButtonTextId = R.string.custom_workout_add_button_text
 
     // Assets
@@ -77,6 +109,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
             _navUiState.value = activeWorkoutId?.toInt()?.let {
                 NavUiState.ExistingCustomWorkoutClicked(
                     workoutId = it,
+                    workoutType = workoutType,
                     currentTimerIndex = activeTimerIndex?.toIntOrNull(),
                     currentRepetition = activeWorkoutRepetition?.toIntOrNull(),
                     currentTimerSecondsRemaining = activeTimerSecondsRemaining?.toIntOrNull()
@@ -89,8 +122,9 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
         this.customWorkoutModels = ArrayList(getCustomWorkoutModels(context) ?: listOf())
 
         _dataUiState.value = CustomWorkoutUiState(
+            headerTitleId = workoutType.getStringId(),
             customWorkouts = customWorkoutModels?.mapIndexed { index, customWorkout ->
-                val durationSecondsSum = customWorkout.timers.filter { it.type != CustomTimerType.IntermediumRest }.sumOf { it.duration.toSeconds() }
+                val durationSecondsSum = customWorkout.timers.filter { it.type != TimerType.IntermediumRest }.sumOf { it.duration.toSeconds() }
                 val durationMins = durationSecondsSum / 60
                 val durationSecs = durationSecondsSum % 60
                 CustomWorkoutCardUiState(
@@ -112,7 +146,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
 
     private fun getCustomWorkoutModels(context: Context): List<CustomWorkoutModel>? {
         val customWorkoutsRawModels =
-            PrefsUtils.getStringPref(context, PrefParam.CustomWorkoutList.value)
+            PrefsUtils.getStringPref(context, workoutType.getPrefName())
         val sType = object : TypeToken<List<CustomWorkoutModel>>() {}.type
         val customWorkoutModels: List<CustomWorkoutModel>? =
             Gson().fromJson<List<CustomWorkoutModel>?>(customWorkoutsRawModels, sType)
@@ -134,7 +168,7 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     }
 
     fun userHasClickedAddCustomWorkout() {
-        _navUiState.value = NavUiState.AddCustomWorkoutClicked
+        _navUiState.value = NavUiState.AddCustomWorkoutClicked(workoutType = workoutType)
     }
 
     fun onBalloonDismissed() {
@@ -150,7 +184,10 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
     }
 
     fun userHasClickedEditCustomWorkout(id: Int) {
-        _navUiState.value = NavUiState.EditCustomWorkoutClicked(id = id)
+        _navUiState.value = NavUiState.EditCustomWorkoutClicked(
+            workoutId = id,
+            workoutType = workoutType
+        )
     }
 
     fun userHasClickedDeleteCustomWorkout(context: Context, id: Int) {
@@ -173,7 +210,8 @@ class CustomWorkoutViewModel @Inject constructor() : ViewModel() {
 
     fun userHasClickedExistingWorkout(id: Int) {
         _navUiState.value = NavUiState.ExistingCustomWorkoutClicked(
-            workoutId = id
+            workoutId = id,
+            workoutType = workoutType
         )
     }
 }

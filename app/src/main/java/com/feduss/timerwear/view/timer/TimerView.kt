@@ -52,7 +52,7 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
 import com.feduss.timerwear.extension.infiniteMarquee
@@ -237,9 +237,9 @@ fun TimerView(
                             )
 
                             val soundType = when(timerViewUiState.timerType) {
-                                CustomTimerType.Work -> SoundType.Work
-                                CustomTimerType.Rest -> SoundType.Rest
-                                CustomTimerType.IntermediumRest -> SoundType.Rest
+                                TimerType.Work -> SoundType.Work
+                                TimerType.Rest -> SoundType.Rest
+                                TimerType.IntermediumRest -> SoundType.Rest
                             }
 
                             playSound(
@@ -510,7 +510,7 @@ private fun TimerAlertDialogView(
     viewModel: TimerViewModel,
     currentTimerIndex: Int,
     currentRepetition: Int,
-    currentTimerType: CustomTimerType,
+    currentTimerType: TimerType,
     onTimerSet: (String) -> Unit,
     userGoBack: () -> Unit
 ) {

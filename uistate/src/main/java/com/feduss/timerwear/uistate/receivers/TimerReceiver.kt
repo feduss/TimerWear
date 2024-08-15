@@ -8,9 +8,10 @@ import android.os.PowerManager
 import androidx.wear.ongoing.OngoingActivity
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.Consts
-import com.feduss.timerwear.entity.enums.CustomTimerType
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
+import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.NotificationUtils
@@ -39,7 +40,17 @@ class TimerReceiver : BroadcastReceiver() {
             pref = PrefParam.CurrentWorkoutId.value
         )?.toIntOrNull()
 
-        val currentWorkoutModel = TimerUtils.getCustomWorkoutModels(context = context)?.first {
+        val workoutTypeRaw = PrefsUtils.getStringPref(
+            context = context,
+            pref = PrefParam.WorkoutType.value
+        )
+
+        val workoutType = WorkoutType.fromString(workoutTypeRaw) ?: return
+
+        val currentWorkoutModel = TimerUtils.getCustomWorkoutModels(
+            context = context,
+            workoutType = workoutType
+        )?.first {
             it.id == currentWorkoutId
         }
 
@@ -117,7 +128,7 @@ class TimerReceiver : BroadcastReceiver() {
             totalRepetitions = totalRepetitions,
             frequency = currentWorkoutModel.intermediumRestFrequency
         )
-        if (!needsToShowIntermediumRest && newTimer.type == CustomTimerType.IntermediumRest) {
+        if (!needsToShowIntermediumRest && newTimer.type == TimerType.IntermediumRest) {
             handleNextTimer(
                 totalTimers = totalTimers,
                 totalRepetitions = totalRepetitions,
@@ -144,9 +155,9 @@ class TimerReceiver : BroadcastReceiver() {
         val name = newTimer.name
 
         val soundType = when (newTimer.type) {
-            CustomTimerType.Work -> SoundType.Work
-            CustomTimerType.Rest -> SoundType.Rest
-            CustomTimerType.IntermediumRest -> SoundType.Rest
+            TimerType.Work -> SoundType.Work
+            TimerType.Rest -> SoundType.Rest
+            TimerType.IntermediumRest -> SoundType.Rest
         }
 
         AlarmUtils.playSound(

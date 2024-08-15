@@ -24,17 +24,6 @@ class TimerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         // This method is called when Alarm expired in background.
 
-        val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
-        if (!powerManager.isInteractive) {
-            val wl = powerManager.newWakeLock(
-                PowerManager.ACQUIRE_CAUSES_WAKEUP  or
-                        PowerManager.ON_AFTER_RELEASE  or
-                        PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
-                "id:wakeupscreen"
-            )
-            wl.acquire(1000)
-        }
-
         val currentWorkoutId = PrefsUtils.getStringPref(
             context = context,
             pref = PrefParam.CurrentWorkoutId.value

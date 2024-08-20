@@ -198,7 +198,7 @@ class CustomWorkoutViewModel @AssistedInject constructor(
             customWorkoutModels?.removeAt(index)
 
             val json = Gson().toJson(customWorkoutModels)
-            PrefsUtils.setStringPref(context, PrefParam.CustomWorkoutList.value, json)
+            PrefsUtils.setStringPref(context, workoutType.getPrefName(), json)
             _dataUiState.update { state ->
                 state?.copy(
                     customWorkouts = state.customWorkouts?.filter { it.id != id }

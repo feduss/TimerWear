@@ -29,7 +29,7 @@
     <string name="add_custom_workout_timer_duration_error">La durata  non è valida</string>
     <string name="add_custom_workout_timer_type_error">Il tipo del timer non è valido</string>
     <string name="add_custom_workout_timers_error">Devi aggiungere almeno 1 timer</string>
-    <string name="add_custom_workout_generic_error">Correggi gli errori per continuare</string>
+    <string name="add_custom_workout_generic_error">Correggi gli errori o controlla che i dati siano validi</string>
     <string name="custom_workout_tooltip_text">Fai swipe per le azioni secondarie</string>
     <string name="custom_workout_card_swipe_primary_action_title">Modifica</string>
     <string name="custom_workout_card_swipe_secondary_action_undo_button">Annulla</string>

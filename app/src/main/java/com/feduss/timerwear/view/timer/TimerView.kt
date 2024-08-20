@@ -228,7 +228,7 @@ fun TimerView(
                     }
                 } else {
 
-                    LaunchedEffect(timerViewUiState.currentTimerId) {
+                    LaunchedEffect(timerViewUiState.uuid) {
 
                         if (!userHasSkippedTimer) {
                             vibrate(
@@ -684,6 +684,10 @@ private fun TimerViewMainContent(
                 },
                 onClick = {
                     //Pause/Play button
+                    vibrate(
+                        context = context,
+                        vibrationType = VibrationType.SingleLong
+                    )
                     viewModel.userChangedTimerState(
                         timerSecondsRemaining = newTimerSecondsRemaining.intValue,
                         isTimerActive = !timerViewUiState.isTimerActive,
@@ -709,6 +713,10 @@ private fun TimerViewMainContent(
                 },
                 onClick = {
                     //Skip button
+                    vibrate(
+                        context = context,
+                        vibrationType = VibrationType.SingleLong
+                    )
                     viewModel.userChangedTimerState(
                         timerSecondsRemaining = newTimerSecondsRemaining.intValue,
                         isTimerActive = false,

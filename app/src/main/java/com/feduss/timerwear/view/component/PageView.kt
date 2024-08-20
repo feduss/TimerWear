@@ -15,7 +15,7 @@ import com.google.android.horologist.compose.layout.rememberColumnState
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun PageView(
-    columnState: ScalingLazyColumnState = rememberColumnState(),
+    columnState: ScalingLazyColumnState,
     endCurvedText: String? = null,
     content: @Composable BoxScope.(ScalingLazyColumnState) -> Unit
 ) {

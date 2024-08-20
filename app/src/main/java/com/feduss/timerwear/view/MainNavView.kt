@@ -32,6 +32,9 @@ import com.feduss.timerwear.view.settings.SettingsView
 import com.feduss.timerwear.view.timer.TimerView
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.AppScaffold
+import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
+import com.google.android.horologist.compose.layout.rememberColumnState
+import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalHorologistApi::class)
@@ -50,7 +53,9 @@ fun MainNavView(
         mutableStateOf(null)
     }
 
-    AppScaffold {
+    AppScaffold(
+        timeText = {}
+    ) {
         SwipeDismissableNavHost(
             startDestination = startDestination,
             navController = navController,
@@ -58,7 +63,14 @@ fun MainNavView(
         ) {
 
             composable(route = startDestination) {
-                PageView {
+                PageView(
+                    columnState = rememberResponsiveColumnState(
+                        contentPadding = ScalingLazyColumnDefaults.padding(
+                            first = ScalingLazyColumnDefaults.ItemType.Text,
+                            last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                        )
+                    )
+                ) {
                     MenuView(
                         context = mainActivity,
                         columnState = it,
@@ -78,7 +90,14 @@ fun MainNavView(
                 if (workoutType == null) {
                     navController.popBackStack()
                 } else {
-                    PageView {
+                    PageView(
+                        columnState = rememberResponsiveColumnState(
+                            contentPadding = ScalingLazyColumnDefaults.padding(
+                                first = ScalingLazyColumnDefaults.ItemType.Text,
+                                last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                            )
+                        )
+                    ) {
                         CustomWorkoutView(
                             context = mainActivity,
                             viewModel = getCustomWorkoutView(
@@ -114,7 +133,14 @@ fun MainNavView(
                     navController.popBackStack()
                 } else {
 
-                    PageView {
+                    PageView(
+                        columnState = rememberResponsiveColumnState(
+                            contentPadding = ScalingLazyColumnDefaults.padding(
+                                first = ScalingLazyColumnDefaults.ItemType.Text,
+                                last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                            )
+                        )
+                    ) {
                         AddCustomWorkoutView(
                             viewModel = getAddCustomWorkoutViewModel(
                                 activity = mainActivity,
@@ -170,6 +196,7 @@ fun MainNavView(
                     navController.popBackStack()
                 } else {
                     PageView(
+                        columnState = rememberColumnState(),
                         endCurvedText = endCurvedText
                     ) {
                         TimerView(
@@ -201,7 +228,14 @@ fun MainNavView(
             }
 
             composable(route = Section.Settings.baseRoute) {
-                PageView {
+                PageView(
+                    columnState = rememberResponsiveColumnState(
+                        contentPadding = ScalingLazyColumnDefaults.padding(
+                            first = ScalingLazyColumnDefaults.ItemType.Text,
+                            last = ScalingLazyColumnDefaults.ItemType.Text
+                        )
+                    )
+                ) {
                     SettingsView(
                         columnState = it,
                         onEmailFeedbackTapped = {

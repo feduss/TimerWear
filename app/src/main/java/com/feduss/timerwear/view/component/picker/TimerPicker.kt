@@ -33,14 +33,11 @@ import androidx.wear.compose.material.PickerState
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.rememberPickerState
 import com.feduss.timerwear.entity.TimerPickerModel
-import com.feduss.timerwear.uistate.extension.Purple500
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
-import com.feduss.timerwear.uistate.extension.Purple700
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.composables.picker.toRotaryScrollAdapter
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
-import java.util.Timer
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable

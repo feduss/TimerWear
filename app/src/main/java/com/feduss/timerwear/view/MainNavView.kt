@@ -67,7 +67,7 @@ fun MainNavView(
                     columnState = rememberResponsiveColumnState(
                         contentPadding = ScalingLazyColumnDefaults.padding(
                             first = ScalingLazyColumnDefaults.ItemType.Text,
-                            last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                            last = ScalingLazyColumnDefaults.ItemType.Card
                         )
                     )
                 ) {
@@ -94,7 +94,7 @@ fun MainNavView(
                         columnState = rememberResponsiveColumnState(
                             contentPadding = ScalingLazyColumnDefaults.padding(
                                 first = ScalingLazyColumnDefaults.ItemType.Text,
-                                last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                                last = ScalingLazyColumnDefaults.ItemType.Card
                             )
                         )
                     ) {
@@ -137,7 +137,7 @@ fun MainNavView(
                         columnState = rememberResponsiveColumnState(
                             contentPadding = ScalingLazyColumnDefaults.padding(
                                 first = ScalingLazyColumnDefaults.ItemType.Text,
-                                last = ScalingLazyColumnDefaults.ItemType.SingleButton
+                                last = ScalingLazyColumnDefaults.ItemType.Card
                             )
                         )
                     ) {

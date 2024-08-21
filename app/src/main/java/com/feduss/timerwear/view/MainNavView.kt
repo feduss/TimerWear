@@ -40,7 +40,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MainNavView(
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    onKeepScreenOn: (Boolean) -> Unit
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
@@ -214,11 +215,7 @@ fun MainNavView(
                                 endCurvedText = hourTimerEnd
                             },
                             onKeepScreenOn = {
-                                if (it) {
-                                    keepScreenOn(mainActivity)
-                                } else {
-                                    restoreScreenTimeout(mainActivity)
-                                }
+                                onKeepScreenOn(it)
                             }
                         )
                     }
@@ -246,16 +243,6 @@ fun MainNavView(
             }
         }
     }
-}
-
-fun keepScreenOn(activity: MainActivity) {
-    val window = activity.window
-    window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-}
-
-fun restoreScreenTimeout(activity: MainActivity) {
-    val window = activity.window
-    window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }
 
 private fun openEmail(activity: MainActivity) {

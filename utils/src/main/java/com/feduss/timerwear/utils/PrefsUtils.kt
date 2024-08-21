@@ -71,6 +71,13 @@ class PrefsUtils {
             PrefParam.IsTimerActive.value
         ) == "true"
 
+        fun getKeepScreenOnPref(context: Context): Boolean {
+            return PrefsUtils.getStringPref(
+                context = context,
+                PrefParam.KeepScreenOn.value
+            ) == "true"
+        }
+
         fun getWorkoutType(context: Context) = WorkoutType.fromString(
             getStringPref(
                 context,

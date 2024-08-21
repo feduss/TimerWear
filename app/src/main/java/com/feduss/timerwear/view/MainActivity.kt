@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.IntentFilter
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -25,15 +26,11 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var notificationManager: NotificationManager
 
-    private lateinit var context: Context
-
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Handle the splash screen transition.
         installSplashScreen()
         super.onCreate(savedInstanceState)
-
-        context = this
 
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -41,13 +38,20 @@ class MainActivity : ComponentActivity() {
         registerReceiver(timerReceiver, filter)
 
         if(intent.getBooleanExtra(Consts.FromOngoingNotification.value, false)) {
-            NotificationUtils.restoreTimerSecondsFromOngoingNotification(context)
+            NotificationUtils.restoreTimerSecondsFromOngoingNotification(this)
         }
 
         setContent {
             MaterialTheme {
                 MainNavView(
-                    mainActivity = this
+                    mainActivity = this,
+                    onKeepScreenOn = {
+                        if (it) {
+                            keepScreenOn(this)
+                        } else {
+                            restoreScreenTimeout(this)
+                        }
+                    }
                 )
             }
         }
@@ -56,15 +60,16 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
 
-        val isTimerActive = PrefsUtils.isTimerActive(context)
+        val isTimerActive = PrefsUtils.isTimerActive(this)
 
         if (isTimerActive) {
+            restoreScreenTimeout(this)
             AlarmUtils.setBackgroundAlert(
-                context,
+                this,
                 TimerReceiver::class.java
             )
             NotificationUtils.setOngoingNotification(
-                context,
+                this,
                 iconId = R.drawable.ic_app
             )
         }
@@ -72,15 +77,33 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        val isTimerActive = PrefsUtils.isTimerActive(this)
+        val keepScreenOn = PrefsUtils.getKeepScreenOnPref(this)
+
+        if (isTimerActive && keepScreenOn) {
+            keepScreenOn(this)
+        }
+
         AlarmUtils.removeBackgroundAlert(
-            context,
+            this,
             TimerReceiver::class.java
         )
-        NotificationUtils.removeOngoingNotification(context)
+        NotificationUtils.removeOngoingNotification(this)
     }
 
     override fun onDestroy() {
         unregisterReceiver(timerReceiver)
         super.onDestroy()
+    }
+
+    private fun keepScreenOn(activity: MainActivity) {
+        val window = activity.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    private fun restoreScreenTimeout(activity: MainActivity) {
+        val window = activity.window
+        window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }

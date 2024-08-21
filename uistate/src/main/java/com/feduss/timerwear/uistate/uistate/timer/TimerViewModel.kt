@@ -216,7 +216,7 @@ class TimerViewModel @AssistedInject constructor(
                     ),
                     middleTimerStatusValueText = currentTimer.duration.toString(),
                     checkboxTextId = checkboxTextId,
-                    isCheckboxSelected = getKeepScreenOnPref(context),
+                    isCheckboxSelected = PrefsUtils.getKeepScreenOnPref(context),
                     isTimerActive = true,
                     maxTimerSeconds = currentTimer.duration.toSeconds(),
                     timerSecondsRemaining = currentTimerSecondsRemaining
@@ -573,13 +573,6 @@ class TimerViewModel @AssistedInject constructor(
             PrefParam.KeepScreenOn.value,
             keepScreenOn.toString()
         )
-    }
-
-    private fun getKeepScreenOnPref(context: Context): Boolean {
-        return PrefsUtils.getStringPref(
-            context = context,
-            PrefParam.KeepScreenOn.value
-        ) == "true"
     }
 
     //

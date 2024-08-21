@@ -13,11 +13,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
@@ -170,19 +170,22 @@ private fun RequestPermission() {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
 
+                val permissions = ArrayList<String>()
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    notificationPermissionRequest.launch(
-                        arrayOf(
-                            Manifest.permission.POST_NOTIFICATIONS
+                    permissions.addAll(
+                        listOf(
+                            Manifest.permission.POST_NOTIFICATIONS,
+                            Manifest.permission.USE_EXACT_ALARM
                         )
                     )
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        permissions.add(Manifest.permission.SCHEDULE_EXACT_ALARM)
                 }
 
-                notificationPermissionRequest.launch(
-                    arrayOf(
-                        Manifest.permission.VIBRATE,
-                    )
-                )
+                permissions.add(Manifest.permission.VIBRATE)
+
+                notificationPermissionRequest.launch(permissions.toTypedArray())
             }
         }
 

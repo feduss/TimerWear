@@ -36,7 +36,6 @@ import com.feduss.timerwear.entity.TimerPickerModel
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.composables.picker.toRotaryScrollAdapter
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
 
 @OptIn(ExperimentalHorologistApi::class)
@@ -153,10 +152,7 @@ private fun Picker(
             onSelected = {},
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(1f)
-                .rotaryWithSnap(
-                    state.toRotaryScrollAdapter()
-                ),
+                .weight(1f),
             separation = 4.dp
         ) {
             Text(

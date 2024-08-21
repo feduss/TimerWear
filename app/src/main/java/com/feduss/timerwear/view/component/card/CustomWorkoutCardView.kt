@@ -38,6 +38,7 @@ import androidx.wear.compose.material.SwipeToRevealPrimaryAction
 import androidx.wear.compose.material.SwipeToRevealSecondaryAction
 import androidx.wear.compose.material.SwipeToRevealUndoAction
 import androidx.wear.compose.material.Text
+import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.Teal200
 import com.skydoves.balloon.ArrowPositionRules
 import com.skydoves.balloon.BalloonAnimation
@@ -125,7 +126,11 @@ fun CustomWorkoutCardView(
             }
         },
         balloonContent = {
-            Text(text = stringResource(R.string.custom_workout_tooltip_text))
+            Text(
+                modifier = Modifier.infiniteMarquee,
+                text = stringResource(R.string.custom_workout_tooltip_text),
+                maxLines = 1
+            )
         }
     ) {
 

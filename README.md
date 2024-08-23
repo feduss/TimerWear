@@ -3,11 +3,9 @@ It supports vibration, sounds (work, rest, finish) an ongoing notification, opti
 
 Currently, is under internal test, but i'm planning to release it soon on play store. If you want to test it, let me know :D
 
-ps: i still have to translate it to english :P
 
-
-![Screenshot_20240820_234513](https://github.com/user-attachments/assets/87d1f4b1-e9a2-4184-a096-62611926c15e)
-![Screenshot_20240820_234725](https://github.com/user-attachments/assets/ee521178-55bf-4ac2-883f-1308df1450e2)
-![Screenshot_20240820_234805](https://github.com/user-attachments/assets/593c860f-9ad3-44cd-9eb8-72908ad425ca)
-![Screenshot_20240820_234811](https://github.com/user-attachments/assets/162eaf76-8116-4147-ba1d-2372df3a8d46)
-![Screenshot_20240820_234941](https://github.com/user-attachments/assets/bc95ad3a-184d-41d3-967f-6e652f823a2a)
+![Screenshot_20240821_211258](https://github.com/user-attachments/assets/8f011775-1b52-4b46-99c3-07f34301ceeb)
+![Screenshot_20240821_211322](https://github.com/user-attachments/assets/e33ca0f6-7c81-4ebf-b127-447b42a6e34a)
+![Screenshot_20240821_211359](https://github.com/user-attachments/assets/73881b0a-a651-4a91-b393-636610407ef8)
+![Screenshot_20240821_211405](https://github.com/user-attachments/assets/0f0b1547-5429-437b-8fb5-90c5fac74400)
+![Screenshot_20240821_211505](https://github.com/user-attachments/assets/8bd5333f-70f5-4551-8b11-0eaa5a2a15d4)

@@ -686,7 +686,7 @@ private fun TimerViewMainContent(
                     //Pause/Play button
                     vibrate(
                         context = context,
-                        vibrationType = VibrationType.SingleLong
+                        vibrationType = VibrationType.SingleVeryShort
                     )
                     viewModel.userChangedTimerState(
                         timerSecondsRemaining = newTimerSecondsRemaining.intValue,
@@ -715,7 +715,7 @@ private fun TimerViewMainContent(
                     //Skip button
                     vibrate(
                         context = context,
-                        vibrationType = VibrationType.SingleLong
+                        vibrationType = VibrationType.SingleVeryShort
                     )
                     viewModel.userChangedTimerState(
                         timerSecondsRemaining = newTimerSecondsRemaining.intValue,

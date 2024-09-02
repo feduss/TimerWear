@@ -105,18 +105,19 @@ class TimerViewModel @AssistedInject constructor(
     private val alertDialogSkipTitleId = R.string.timer_skip_timer
     private val alertDialogStopTitleId = R.string.timer_stop_timer_question
     private val typTitleId = R.string.timer_typ_title
-    private val checkboxTextId = R.string.timer_checkbox_text
 
     //Assets
     private val playIconId = R.drawable.ic_play
     private val playIconDescription = "ic_play"
     private val pauseIconId = R.drawable.ic_pause
     private val pauseIconDescription = "ic_pause"
+    private val runIconId = R.drawable.ic_run
+    private val runIconDescription = "ic_run"
     private val skipNextIcon = R.drawable.ic_skip_next
     private val skipNextIconDescription = "ic_skip_next"
     private val closeIconId = R.drawable.ic_close
     private val checkIconId = R.drawable.ic_check
-    private val typImageId = R.drawable.ic_win;
+    private val typImageId = R.drawable.ic_win
     private val typImageDescription = "ic_win"
 
     //Colors
@@ -205,7 +206,6 @@ class TimerViewModel @AssistedInject constructor(
                     customWorkoutModel = workout,
                     uuid = currentTimer.uuid,
                     currentTimerId = timerIndex,
-                    currentTimerName = currentTimer.name,
                     currentRepetition = repetition,
                     currentProgress = getCurrentProgress(
                         timers = workout.timers,
@@ -215,8 +215,6 @@ class TimerViewModel @AssistedInject constructor(
                         needsToShowIntermediumRest = needsToShowIntermediumRest
                     ),
                     middleTimerStatusValueText = currentTimer.duration.toString(),
-                    checkboxTextId = checkboxTextId,
-                    isCheckboxSelected = PrefsUtils.getKeepScreenOnPref(context),
                     isTimerActive = true,
                     maxTimerSeconds = currentTimer.duration.toSeconds(),
                     timerSecondsRemaining = currentTimerSecondsRemaining
@@ -230,14 +228,9 @@ class TimerViewModel @AssistedInject constructor(
                         isTimerActive = true,
                         timerType = currentTimer.type
                     ),
-                    timeText = getTimeText(
-                        context = context,
-                        timers = workout.timers,
-                        currentTimerIndex = timerIndex,
-                        currentRepetition = repetition,
-                        totalRepetitions = workout.repetition,
-                        intermediumRestFrequency = workout.intermediumRestFrequency
-                    )
+                    ambientIconId = runIconId,
+                    ambientIconDescription = runIconDescription,
+                    timeText = currentTimer.name
                 ),
                 alertDialogUiState = TimerAlertDialogUiState(
                     alertDialogSkipTitleId = alertDialogSkipTitleId,
@@ -338,7 +331,6 @@ class TimerViewModel @AssistedInject constructor(
                         timerViewUiState = state.timerViewUiState?.copy(
                             uuid = newTimer.uuid,
                             currentTimerId = newTimer.id,
-                            currentTimerName = newTimer.name,
                             currentRepetition = newCurrentRepetition,
                             isTimerActive = true,
                             maxTimerSeconds = newTimer.duration.toSeconds(),
@@ -358,14 +350,7 @@ class TimerViewModel @AssistedInject constructor(
                             ),
                             bottomLeftButtonId = pauseIconId,
                             bottomLeftButtonDescription = pauseIconDescription,
-                            timeText = getTimeText(
-                                context = context,
-                                timers = it.timers,
-                                currentTimerIndex = newCurrentTimerIndex,
-                                currentRepetition = newCurrentRepetition,
-                                totalRepetitions = totalRepetitions,
-                                intermediumRestFrequency = it.intermediumRestFrequency
-                            )
+                            timeText = newTimer.name
                         )
                     )
                 }
@@ -448,6 +433,8 @@ class TimerViewModel @AssistedInject constructor(
                     isTimerActive = isTimerActive,
                     bottomLeftButtonId = if (isTimerActive) pauseIconId else playIconId,
                     bottomLeftButtonDescription = if (isTimerActive) pauseIconDescription else playIconDescription,
+                    ambientIconId = if (isTimerActive) runIconId else pauseIconId,
+                    ambientIconDescription = if (isTimerActive) runIconDescription else pauseIconDescription,
                     circularSliderColor = getSliderColor(
                         isTimerActive = isTimerActive,
                         timerType = it.timerViewUiState.timerType
@@ -518,7 +505,7 @@ class TimerViewModel @AssistedInject constructor(
     // Prefs utils
 
     fun saveCurrentTimerData(
-        context: Context, currentTimerId: Int, currentTimerName: String?,
+        context: Context, currentTimerId: Int,
         currentRepetition: Int?, currentTimerSecondsRemaining: Int?
     ) {
 
@@ -530,6 +517,7 @@ class TimerViewModel @AssistedInject constructor(
                 newValue = currentTimerId.toString()
             )
 
+            val currentTimerName: String = customWorkoutModel?.timers?.get(currentTimerId)?.name ?: ""
             //Save the current timer title (used in notification)
             PrefsUtils.setStringPref(
                 context = context,
@@ -557,22 +545,6 @@ class TimerViewModel @AssistedInject constructor(
     fun cancelTimer(context: Context) {
         _dataUiState
         PrefsUtils.cancelTimerInPrefs(context)
-    }
-
-    fun saveKeepScreenOnPref(context: Context, keepScreenOn: Boolean) {
-        _dataUiState.update {
-            it?.copy(
-                timerViewUiState = it.timerViewUiState?.copy(
-                    isCheckboxSelected = keepScreenOn
-                )
-            )
-        }
-
-        PrefsUtils.setStringPref(
-            context = context,
-            PrefParam.KeepScreenOn.value,
-            keepScreenOn.toString()
-        )
     }
 
     //
@@ -652,6 +624,25 @@ class TimerViewModel @AssistedInject constructor(
                     middleTimerStatusValueText = "$minutesString:$secondsString"
                 )
             )
+        }
+    }
+
+    fun setNextTimerTimeText(context: Context) {
+        customWorkoutModel?.let { workout ->
+            _dataUiState.update {
+                it?.copy(
+                    timerViewUiState = it.timerViewUiState?.copy(
+                        timeText = getTimeText(
+                            context = context,
+                            timers = workout.timers,
+                            currentTimerIndex = it.timerViewUiState.currentTimerId,
+                            currentRepetition = it.timerViewUiState.currentRepetition,
+                            totalRepetitions = workout.repetition,
+                            intermediumRestFrequency = workout.intermediumRestFrequency
+                        )
+                    )
+                )
+            }
         }
     }
 }

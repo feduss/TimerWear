@@ -2,8 +2,9 @@ package com.feduss.timerwear.view
 
 import android.content.Intent
 import android.net.Uri
-import android.view.WindowManager
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import androidx.wear.remote.interactions.RemoteActivityHelper
@@ -31,6 +33,8 @@ import com.feduss.timerwear.view.custom_workout.CustomWorkoutView
 import com.feduss.timerwear.view.settings.SettingsView
 import com.feduss.timerwear.view.timer.TimerView
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.ambient.AmbientAware
+import com.google.android.horologist.compose.ambient.AmbientState
 import com.google.android.horologist.compose.layout.AppScaffold
 import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
 import com.google.android.horologist.compose.layout.rememberColumnState
@@ -40,8 +44,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MainNavView(
-    mainActivity: MainActivity,
-    onKeepScreenOn: (Boolean) -> Unit
+    mainActivity: MainActivity
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
@@ -54,191 +57,208 @@ fun MainNavView(
         mutableStateOf(null)
     }
 
-    AppScaffold(
-        timeText = {}
-    ) {
-        SwipeDismissableNavHost(
-            startDestination = startDestination,
-            navController = navController,
-            state = navHostState
+    val currentScreen by navController.currentBackStackEntryAsState()
+
+    val isAlwaysOnScreen = currentScreen?.destination?.route?.contains(Section.Timer.baseRoute) == true
+
+    val ambientState: MutableState<AmbientState> = remember {
+        mutableStateOf(AmbientState.Interactive)
+    }
+
+    AmbientAware(
+        isAlwaysOnScreen = isAlwaysOnScreen
+    ) { ambientStateUpdate ->
+
+        ambientState.value = ambientStateUpdate.ambientState
+
+        AppScaffold(
+            timeText = {}
         ) {
-
-            composable(route = startDestination) {
-                PageView(
-                    columnState = rememberResponsiveColumnState(
-                        contentPadding = ScalingLazyColumnDefaults.padding(
-                            first = ScalingLazyColumnDefaults.ItemType.Text,
-                            last = ScalingLazyColumnDefaults.ItemType.Card
-                        )
-                    )
-                ) {
-                    MenuView(
-                        context = mainActivity,
-                        columnState = it,
-                        navController = navController
-                    )
-                }
-            }
-
-            composable(
-                route = Section.CustomWorkout.parametricRoute
-            ) { navBackStackEntry ->
-                val workoutTypeRaw =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
-
-                val workoutType = WorkoutType.fromString(workoutTypeRaw)
-
-                if (workoutType == null) {
-                    navController.popBackStack()
-                } else {
+            SwipeDismissableNavHost(
+                startDestination = startDestination,
+                navController = navController,
+                state = navHostState
+            ) {
+                composable(route = startDestination) {
                     PageView(
                         columnState = rememberResponsiveColumnState(
                             contentPadding = ScalingLazyColumnDefaults.padding(
                                 first = ScalingLazyColumnDefaults.ItemType.Text,
                                 last = ScalingLazyColumnDefaults.ItemType.Card
                             )
-                        )
+                        ),
+                        ambientState = ambientState
                     ) {
-                        CustomWorkoutView(
-                            context = mainActivity,
-                            viewModel = getCustomWorkoutView(
-                                activity = mainActivity,
-                                workoutType = workoutType
-                            ),
-                            columnState = it,
-                            navController = navController,
-                            swipeToDismissBoxState = swipeToDismissBoxState
-                        )
-                    }
-                }
-            }
-
-            composable(
-                route = Section.AddCustomWorkout.parametricRoute,
-                arguments = listOf(
-                    navArgument(Params.WorkoutId.name) {
-                        nullable = true
-                        type = NavType.StringType
-                    },
-                )
-            ) { navBackStackEntry ->
-                val workoutTypeRaw =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
-
-                val workoutType = WorkoutType.fromString(workoutTypeRaw)
-
-                val workoutId =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
-
-                if (workoutType == null) {
-                    navController.popBackStack()
-                } else {
-
-                    PageView(
-                        columnState = rememberResponsiveColumnState(
-                            contentPadding = ScalingLazyColumnDefaults.padding(
-                                first = ScalingLazyColumnDefaults.ItemType.Text,
-                                last = ScalingLazyColumnDefaults.ItemType.Card
-                            )
-                        )
-                    ) {
-                        AddCustomWorkoutView(
-                            viewModel = getAddCustomWorkoutViewModel(
-                                activity = mainActivity,
-                                workoutType = workoutType,
-                                workoutId = workoutId?.toIntOrNull()
-                            ),
+                        MenuView(
                             context = mainActivity,
                             columnState = it,
                             navController = navController
                         )
                     }
                 }
-            }
 
-            composable(
-                route = Section.Timer.parametricRoute,
-                arguments = listOf(
-                    navArgument(Params.WorkoutId.name) { type = NavType.StringType },
-                    navArgument(Params.CurrentTimerIndex.name) {
-                        nullable = true
-                        type = NavType.StringType
-                    },
-                    navArgument(Params.CurrentRepetition.name) {
-                        nullable = true
-                        type = NavType.StringType
-                    },
-                    navArgument(Params.CurrentTimerSecondsRemaining.name) {
-                        nullable = true
-                        type = NavType.StringType
-                    },
-                )
-            ) { navBackStackEntry ->
-                val workoutId =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
+                composable(
+                    route = Section.CustomWorkout.parametricRoute
+                ) { navBackStackEntry ->
+                    val workoutTypeRaw =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
 
-                val workoutTypeRaw =
-                    navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+                    val workoutType = WorkoutType.fromString(workoutTypeRaw)
 
-                val workoutType = WorkoutType.fromString(workoutTypeRaw)
-
-                val currentTimerIndex =
-                    navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
-
-
-                val currentRepetition =
-                    navBackStackEntry.arguments?.getString(Params.CurrentRepetition.name)
-
-
-                val currentTimerSecondsRemaining =
-                    navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
-
-                if (workoutId == null || workoutType == null) {
-                    navController.popBackStack()
-                } else {
-                    PageView(
-                        columnState = rememberColumnState(),
-                        endCurvedText = endCurvedText
-                    ) {
-                        TimerView(
-                            context = mainActivity,
-                            navController = navController,
-                            viewModel = getTimerViewModel(
-                                activity = mainActivity,
-                                workoutId = workoutId.toInt(),
-                                workoutType = workoutType,
-                                currentTimerIndex = currentTimerIndex?.toIntOrNull(),
-                                currentRepetition = currentRepetition?.toIntOrNull(),
-                                currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
+                    if (workoutType == null) {
+                        navController.popBackStack()
+                    } else {
+                        PageView(
+                            columnState = rememberResponsiveColumnState(
+                                contentPadding = ScalingLazyColumnDefaults.padding(
+                                    first = ScalingLazyColumnDefaults.ItemType.Text,
+                                    last = ScalingLazyColumnDefaults.ItemType.Card
+                                )
                             ),
-                            onTimerSet = { hourTimerEnd: String ->
-                                endCurvedText = hourTimerEnd
-                            },
-                            onKeepScreenOn = {
-                                onKeepScreenOn(it)
-                            }
-                        )
+                            ambientState = ambientState
+                        ) {
+                            CustomWorkoutView(
+                                context = mainActivity,
+                                viewModel = getCustomWorkoutView(
+                                    activity = mainActivity,
+                                    workoutType = workoutType
+                                ),
+                                columnState = it,
+                                navController = navController,
+                                swipeToDismissBoxState = swipeToDismissBoxState
+                            )
+                        }
                     }
                 }
 
-
-            }
-
-            composable(route = Section.Settings.baseRoute) {
-                PageView(
-                    columnState = rememberResponsiveColumnState(
-                        contentPadding = ScalingLazyColumnDefaults.padding(
-                            first = ScalingLazyColumnDefaults.ItemType.Text,
-                            last = ScalingLazyColumnDefaults.ItemType.Text
-                        )
+                composable(
+                    route = Section.AddCustomWorkout.parametricRoute,
+                    arguments = listOf(
+                        navArgument(Params.WorkoutId.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
                     )
-                ) {
-                    SettingsView(
-                        columnState = it,
-                        onEmailFeedbackTapped = {
-                            openEmail(mainActivity)
+                ) { navBackStackEntry ->
+                    val workoutTypeRaw =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+
+                    val workoutType = WorkoutType.fromString(workoutTypeRaw)
+
+                    val workoutId =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
+
+                    if (workoutType == null) {
+                        navController.popBackStack()
+                    } else {
+
+                        PageView(
+                            columnState = rememberResponsiveColumnState(
+                                contentPadding = ScalingLazyColumnDefaults.padding(
+                                    first = ScalingLazyColumnDefaults.ItemType.Text,
+                                    last = ScalingLazyColumnDefaults.ItemType.Card
+                                )
+                            ),
+                            ambientState = ambientState
+                        ) {
+                            AddCustomWorkoutView(
+                                viewModel = getAddCustomWorkoutViewModel(
+                                    activity = mainActivity,
+                                    workoutType = workoutType,
+                                    workoutId = workoutId?.toIntOrNull()
+                                ),
+                                context = mainActivity,
+                                columnState = it,
+                                navController = navController
+                            )
                         }
+                    }
+                }
+
+                composable(
+                    route = Section.Timer.parametricRoute,
+                    arguments = listOf(
+                        navArgument(Params.WorkoutId.name) { type = NavType.StringType },
+                        navArgument(Params.CurrentTimerIndex.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
+                        navArgument(Params.CurrentRepetition.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
+                        navArgument(Params.CurrentTimerSecondsRemaining.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
                     )
+                ) { navBackStackEntry ->
+                    val workoutId =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
+
+                    val workoutTypeRaw =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+
+                    val workoutType = WorkoutType.fromString(workoutTypeRaw)
+
+                    val currentTimerIndex =
+                        navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
+
+
+                    val currentRepetition =
+                        navBackStackEntry.arguments?.getString(Params.CurrentRepetition.name)
+
+
+                    val currentTimerSecondsRemaining =
+                        navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
+
+                    if (workoutId == null || workoutType == null) {
+                        navController.popBackStack()
+                    } else {
+                        PageView(
+                            columnState = rememberColumnState(),
+                            ambientState = ambientState,
+                            endCurvedText = endCurvedText
+                        ) {
+                            TimerView(
+                                context = mainActivity,
+                                navController = navController,
+                                viewModel = getTimerViewModel(
+                                    activity = mainActivity,
+                                    workoutId = workoutId.toInt(),
+                                    workoutType = workoutType,
+                                    currentTimerIndex = currentTimerIndex?.toIntOrNull(),
+                                    currentRepetition = currentRepetition?.toIntOrNull(),
+                                    currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
+                                ),
+                                ambientState = ambientState,
+                                onTimerSet = { hourTimerEnd: String ->
+                                    endCurvedText = hourTimerEnd
+                                }
+                            )
+                        }
+                    }
+
+
+                }
+
+                composable(route = Section.Settings.baseRoute) {
+                    PageView(
+                        columnState = rememberResponsiveColumnState(
+                            contentPadding = ScalingLazyColumnDefaults.padding(
+                                first = ScalingLazyColumnDefaults.ItemType.Text,
+                                last = ScalingLazyColumnDefaults.ItemType.Text
+                            )
+                        ),
+                        ambientState = ambientState
+                    ) {
+                        SettingsView(
+                            columnState = it,
+                            onEmailFeedbackTapped = {
+                                openEmail(mainActivity)
+                            }
+                        )
+                    }
                 }
             }
         }

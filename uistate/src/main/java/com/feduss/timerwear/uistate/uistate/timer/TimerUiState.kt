@@ -26,7 +26,6 @@ data class TimerViewUiState(
     val customWorkoutModel: CustomWorkoutModel,
     val uuid: UUID,
     val currentTimerId: Int = 0,
-    val currentTimerName: String,
     val currentRepetition: Int = 0,
     val isTimerActive: Boolean,
     val maxTimerSeconds: Int,
@@ -36,14 +35,15 @@ data class TimerViewUiState(
     val circularSliderProgress: Double = 0.0,
     val currentProgress: String,
     val middleTimerStatusValueText: String,
-    val checkboxTextId: Int,
-    val isCheckboxSelected: Boolean,
     val bottomLeftButtonId: Int,
     val bottomLeftButtonDescription: String,
     val bottomLeftButtonColor: Color = Color.Black,
     val bottomRightButtonId: Int,
     val bottomRightButtonDescription: String,
     val bottomRightButtonColor: Color = Color.Black,
+    val ambientIconId: Int,
+    val ambientIconDescription: String,
+    val ambientTintColor: Color = Color.White,
     val timeText: String
 )
 

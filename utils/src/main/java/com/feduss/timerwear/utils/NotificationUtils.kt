@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.SystemClock
-import android.text.Html
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
@@ -17,7 +16,7 @@ class NotificationUtils {
 
     companion object {
 
-        fun setOngoingNotification(context: Context, iconId: Int) {
+        fun setOngoingNotification(context: Context, touchIntent: PendingIntent, iconId: Int) {
 
             val timerName = PrefsUtils.getStringPref(
                 context,
@@ -38,15 +37,6 @@ class NotificationUtils {
             )
 
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            val appIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-            appIntent?.putExtra(Consts.FromOngoingNotification.value, true)
-            val appPendingIntent = PendingIntent.getActivity(
-                context,
-                117,
-                appIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
 
             val channel = NotificationChannel(
                 Consts.MainChannelId.value,
@@ -82,7 +72,7 @@ class NotificationUtils {
                     notificationBuilder
                 )
                 .setStaticIcon(iconId)
-                .setTouchIntent(appPendingIntent)
+                .setTouchIntent(touchIntent)
                 .setStatus(status)
                     .setOngoingActivityId(Consts.OngoingActivityId.value.toInt())
                 .build()

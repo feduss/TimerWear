@@ -39,7 +39,6 @@
     <string name="timer_pre_countdown">Get ready</string>
     <string name="timer_post_countdown">Go!</string>
     <string name="timer_typ_title">End!</string>
-    <string name="timer_checkbox_text">Screen on</string>
     <string name="add_custom_workout_remove_timer_button_text">Remove</string>
     <string name="settings_title">Settings</string>
     <string name="settings_app_version">Version %1$s (%2$s) by Federico Saccà</string>

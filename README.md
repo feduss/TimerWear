@@ -1,7 +1,7 @@
 Timerwear is an android app that helps you to monitoring a workout exercices using emom, tabata or customs timers, on your wrist. 
 It supports vibration, sounds (work, rest, finish) an ongoing notification, optionally keeping on the screen during the timers.
 
-Currently, is under internal test, but i'm planning to release it soon on play store. If you want to test it, let me know :D
+Open test: https://play.google.com/store/apps/details?id=com.feduss.timerwear
 
 
 ![Screenshot_20240821_211258](https://github.com/user-attachments/assets/8f011775-1b52-4b46-99c3-07f34301ceeb)

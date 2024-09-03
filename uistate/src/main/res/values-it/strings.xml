@@ -3,7 +3,7 @@
     <string name="main_page_settings_button">Impostazioni</string>
     <string name="main_page_custom_workout_button">Allenamento personalizzato</string>
     <string name="main_page_emom_timer_button">Emom</string>
-    <string name="main_page_tabata_timer_button">Tabata</string>
+    <string name="main_page_hiit_timer_button">Hiit</string>
     <string name="custom_workout_add_button_text">Aggiungi</string>
     <string name="add_custom_workout_header_text">Nuovo allenamento</string>
     <string name="add_custom_workout_add_workout_button_text">Conferma</string>
@@ -50,8 +50,8 @@
     <string name="timer_intermedium_rest_title">Riposo lungo</string>
     <string name="timer_end_timetext_title">Fine</string>
     <string name="add_custom_workout_timer_name_work_emom_text_field">Allenamento</string>
-    <string name="add_custom_workout_timer_name_work_tabata_text_field">Allenamento</string>
-    <string name="add_custom_workout_timer_name_rest_tabata_text_field">Pausa</string>
+    <string name="add_custom_workout_timer_name_work_hiit_text_field">Allenamento</string>
+    <string name="add_custom_workout_timer_name_rest_hiit_text_field">Pausa</string>
     <string name="timer_type_work_text">Allenamento</string>
     <string name="timer_type_rest_text">Pausa</string>
     <string name="timer_type_intermedium_rest_text">Riposo lungo</string>

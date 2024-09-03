@@ -3,13 +3,13 @@ package com.feduss.timerwear.entity.enums
 enum class WorkoutType {
     CustomWorkout,
     Emom,
-    Tabata;
+    Hiit;
 
     override fun toString(): String {
         return when(this) {
             CustomWorkout -> "customWorkout"
             Emom -> "emom"
-            Tabata -> "tabata"
+            Hiit -> "hiit"
         }
     }
 
@@ -18,7 +18,7 @@ enum class WorkoutType {
             return when(raw) {
                 CustomWorkout.toString() -> CustomWorkout
                 Emom.toString() -> Emom
-                Tabata.toString() -> Tabata
+                Hiit.toString() -> Hiit
                 else -> null
             }
         }

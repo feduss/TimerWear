@@ -58,10 +58,10 @@ fun MenuView(
                     workoutType = WorkoutType.Emom
                 )
             }
-            is MenuViewModel.NavUiState.GoToTabata -> {
+            is MenuViewModel.NavUiState.GoToHiit -> {
                 goToCustomWorkoutList(
                     navController = navController,
-                    workoutType = WorkoutType.Tabata
+                    workoutType = WorkoutType.Hiit
                 )
             }
 
@@ -114,12 +114,12 @@ fun MenuView(
 
         item {
             GenericRoundedCard(
-                leftText = stringResource(R.string.main_page_tabata_timer_button),
-                leftIconId = R.drawable.ic_tabata,
-                leftIconContentDescription = "ic_tabata",
+                leftText = stringResource(R.string.main_page_hiit_timer_button),
+                leftIconId = R.drawable.ic_hiit,
+                leftIconContentDescription = "ic_hiit",
                 leftIconTintColor = Color.Red,
                 onCardClick = {
-                    viewModel.userClickedOnTabata()
+                    viewModel.userClickedOnHiit()
                 }
             )
         }

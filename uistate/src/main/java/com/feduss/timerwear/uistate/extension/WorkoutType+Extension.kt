@@ -7,6 +7,6 @@ fun WorkoutType.getStringId(): Int {
     return when(this) {
         WorkoutType.CustomWorkout -> R.string.main_page_custom_workout_button
         WorkoutType.Emom -> R.string.main_page_emom_timer_button
-        WorkoutType.Tabata -> R.string.main_page_tabata_timer_button
+        WorkoutType.Hiit -> R.string.main_page_hiit_timer_button
     }
 }

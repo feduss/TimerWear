@@ -3,7 +3,7 @@ package com.feduss.timerwear.utils
 sealed class PrefParam(val value: String) {
     data object CustomWorkoutList: PrefParam(value = "CustomWorkoutList")
     data object EmomList: PrefParam(value = "EmomList")
-    data object TabataList: PrefParam(value = "TabataList")
+    data object HiitList: PrefParam(value = "HiitList")
     data object BalloonDismissed: PrefParam(value = "BalloonDismissed")
     data object CurrentTimerIndex: PrefParam(value = "CurrentTimerIndex")
     data object CurrentWorkoutId: PrefParam(value = "CurrentWorkoutId")

@@ -3,7 +3,7 @@
     <string name="main_page_settings_button">Settings</string>
     <string name="main_page_custom_workout_button">Custom workout</string>
     <string name="main_page_emom_timer_button">Emom</string>
-    <string name="main_page_tabata_timer_button">Tabata</string>
+    <string name="main_page_hiit_timer_button">Hiit</string>
     <string name="custom_workout_add_button_text">Add</string>
     <string name="add_custom_workout_header_text">New workout</string>
     <string name="add_custom_workout_add_workout_button_text">Confirm</string>
@@ -50,8 +50,8 @@
     <string name="timer_intermedium_rest_title">Long rest</string>
     <string name="timer_end_timetext_title">End</string>
     <string name="add_custom_workout_timer_name_work_emom_text_field">Workout</string>
-    <string name="add_custom_workout_timer_name_work_tabata_text_field">Workout</string>
-    <string name="add_custom_workout_timer_name_rest_tabata_text_field">Pause</string>
+    <string name="add_custom_workout_timer_name_work_hiit_text_field">Workout</string>
+    <string name="add_custom_workout_timer_name_rest_hiit_text_field">Pause</string>
     <string name="timer_type_work_text">Workout</string>
     <string name="timer_type_rest_text">Pause</string>
     <string name="timer_type_intermedium_rest_text">Long rest</string>

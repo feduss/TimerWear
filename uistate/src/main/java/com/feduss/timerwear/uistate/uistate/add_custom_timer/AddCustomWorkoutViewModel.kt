@@ -96,8 +96,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
     private val timerNameTextFieldTitle = R.string.add_custom_workout_timer_name_text_field_title
     private val timerNameWorkTextFieldPlaceholder = R.string.add_custom_workout_timer_name_work_text_field_placeholder
     private val timerNameWorkEmomTextField = R.string.add_custom_workout_timer_name_work_emom_text_field
-    private val timerNameWorkTabataTextField = R.string.add_custom_workout_timer_name_work_tabata_text_field
-    private val timerNameRestTabataTextField = R.string.add_custom_workout_timer_name_rest_tabata_text_field
+    private val timerNameWorkHiitTextField = R.string.add_custom_workout_timer_name_work_hiit_text_field
+    private val timerNameRestHiitTextField = R.string.add_custom_workout_timer_name_rest_hiit_text_field
     private val timerNameRestTextFieldPlaceholder = R.string.add_custom_workout_timer_name_rest_text_field_placeholder
     private val timerDurationTextFieldTitle: Int = R.string.add_custom_workout_timer_duration_text_field_title
     private val timerDurationTextFieldPlaceholder = R.string.add_custom_workout_timer_duration_text_field_placeholder
@@ -133,8 +133,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
             WorkoutType.Emom -> {
                 setEmomUiState(context)
             }
-            WorkoutType.Tabata -> {
-                setTabataUiState(context)
+            WorkoutType.Hiit -> {
+                setHiitUiState(context)
             }
         }
     }
@@ -221,7 +221,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         )
     }
 
-    private fun setTabataUiState(context: Context) {
+    private fun setHiitUiState(context: Context) {
         var workoutTitle = ""
         var workoutRepetitions = ""
         var timers: List<CustomTimerUiState>
@@ -247,14 +247,14 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
                 getNewCustomTimerUiState(
                     context = context,
                     id = 0,
-                    name = context.getString(timerNameWorkTabataTextField),
+                    name = context.getString(timerNameWorkHiitTextField),
                     duration = TimerPickerModel(0, 30),
                     type = TimerType.Work
                 ),
                 getNewCustomTimerUiState(
                     context = context,
                     id = 1,
-                    name = context.getString(timerNameRestTabataTextField),
+                    name = context.getString(timerNameRestHiitTextField),
                     duration = TimerPickerModel(0, 30),
                     type = TimerType.Rest
                 )
@@ -647,7 +647,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         val isCustomWorkoutValid = when (workoutType) {
             WorkoutType.CustomWorkout -> isCustomWorkoutValid(state)
             WorkoutType.Emom -> isEmomValid(state)
-            WorkoutType.Tabata -> isTabataValid(state)
+            WorkoutType.Hiit -> isHiitValid(state)
         }
         return isCustomWorkoutValid
     }
@@ -693,7 +693,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         return isCustomWorkoutValid
     }
 
-    private fun isTabataValid(state: AddCustomWorkoutUiState): Boolean {
+    private fun isHiitValid(state: AddCustomWorkoutUiState): Boolean {
         val isWorkoutTitleValid = isWorkoutTitleValid(state.titleUiState.value)
         val areWorkoutRepetitionsValid = areWorkoutRepetitionsValid(state.repetitionsUiState.value)
 

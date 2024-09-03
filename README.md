@@ -1,4 +1,4 @@
-Timerwear is an android app that helps you to monitoring a workout exercices using emom, tabata or customs timers, on your wrist. 
+Timerwear is an android app that helps you to monitoring a workout exercices using emom, hiit or customs timers, on your wrist. 
 It supports vibration, sounds (work, rest, finish) an ongoing notification, optionally keeping on the screen during the timers.
 
 Open test: https://play.google.com/store/apps/details?id=com.feduss.timerwear

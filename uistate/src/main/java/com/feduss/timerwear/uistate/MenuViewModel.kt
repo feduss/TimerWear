@@ -15,7 +15,7 @@ class MenuViewModel @Inject constructor() : ViewModel() {
     sealed class NavUiState {
         data class GoToCustomWorkout(val isTimerActive: Boolean): NavUiState()
         data class GoToEmom(val isTimerActive: Boolean): NavUiState()
-        data class GoToTabata(val isTimerActive: Boolean): NavUiState()
+        data class GoToHiit(val isTimerActive: Boolean): NavUiState()
         data object GoToSettings : NavUiState()
     }
 
@@ -27,7 +27,7 @@ class MenuViewModel @Inject constructor() : ViewModel() {
             when(PrefsUtils.getWorkoutType(context)) {
                 WorkoutType.CustomWorkout -> _navUiState.value = NavUiState.GoToCustomWorkout(true)
                 WorkoutType.Emom -> _navUiState.value = NavUiState.GoToEmom(true)
-                WorkoutType.Tabata -> _navUiState.value = NavUiState.GoToTabata(true)
+                WorkoutType.Hiit -> _navUiState.value = NavUiState.GoToHiit(true)
                 null -> _navUiState.value = null
             }
         }
@@ -41,8 +41,8 @@ class MenuViewModel @Inject constructor() : ViewModel() {
         _navUiState.value = NavUiState.GoToEmom(false)
     }
 
-    fun userClickedOnTabata() {
-        _navUiState.value = NavUiState.GoToTabata(false)
+    fun userClickedOnHiit() {
+        _navUiState.value = NavUiState.GoToHiit(false)
     }
 
     fun userClickedOnSettings() {

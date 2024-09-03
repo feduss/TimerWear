@@ -338,7 +338,7 @@ fun AddCustomWorkoutView(
 
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    // Delete timer buttons isn't visible for emom and tabata
+                                    // Delete timer buttons isn't visible for emom and hiit
                                     val removeButtonTextId = it.removeButtonTextId
                                     if (removeButtonTextId != null) {
                                         Text(

@@ -84,5 +84,9 @@ class PrefsUtils {
                 pref = PrefParam.AlarmSetTime.value
             ) != null
         }
+
+        fun getSoundPreference(context: Context): Boolean {
+            return getStringPref(context, PrefParam.IsSoundEnabled.value) == "true"
+        }
     }
 }

@@ -99,6 +99,8 @@ class TimerViewModel @AssistedInject constructor(
 
     private var customWorkoutModel: CustomWorkoutModel? = null
 
+    var isSoundEnabled: Boolean = false
+
     //Copies
     private val preCountdownTextId = R.string.timer_pre_countdown
     private val postCountdownTextId = R.string.timer_post_countdown
@@ -128,6 +130,8 @@ class TimerViewModel @AssistedInject constructor(
 
     //State
     fun loadTimerCountdownUiState(context: Context) {
+
+        isSoundEnabled = PrefsUtils.getSoundPreference(context)
 
         if (_dataUiState.value != null) return
 

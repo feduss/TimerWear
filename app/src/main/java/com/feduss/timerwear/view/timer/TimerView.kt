@@ -163,6 +163,7 @@ fun TimerView(
         } else if(timerTYPViewUiState != null) {
             TimerTYPView(
                 context = context,
+                viewModel = viewModel,
                 timerTYPViewUiState = timerTYPViewUiState,
                 onTimerSet = onTimerSet
             )
@@ -294,10 +295,12 @@ private fun ActiveTimerView(
                         TimerType.IntermediumRest -> SoundType.Rest
                     }
 
-                    playSound(
-                        context = context,
-                        soundType = soundType
-                    )
+                    if (viewModel.isSoundEnabled) {
+                        playSound(
+                            context = context,
+                            soundType = soundType
+                        )
+                    }
                 }
             }
 
@@ -390,15 +393,22 @@ private fun ActiveTimerView(
 }
 
 @Composable
-fun TimerTYPView(context: Context, timerTYPViewUiState: TimerTYPViewUiState, onTimerSet: (String) -> Unit) {
+fun TimerTYPView(
+    context: Context,
+    viewModel: TimerViewModel,
+    timerTYPViewUiState: TimerTYPViewUiState,
+    onTimerSet: (String) -> Unit
+) {
 
     onTimerSet("")
 
     LaunchedEffect(Unit) {
-        playSound(
-            context = context,
-            soundType = SoundType.Finish
-        )
+        if (viewModel.isSoundEnabled) {
+            playSound(
+                context = context,
+                soundType = SoundType.Finish
+            )
+        }
     }
 
     Column(

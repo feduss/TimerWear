@@ -55,4 +55,5 @@
     <string name="timer_type_work_text">Workout</string>
     <string name="timer_type_rest_text">Pause</string>
     <string name="timer_type_intermedium_rest_text">Long rest</string>
+    <string name="add_custom_workout_sound_checkbox_text">Enable sound</string>
 </resources>

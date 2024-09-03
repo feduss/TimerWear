@@ -55,4 +55,5 @@
     <string name="timer_type_work_text">Allenamento</string>
     <string name="timer_type_rest_text">Pausa</string>
     <string name="timer_type_intermedium_rest_text">Riposo lungo</string>
+    <string name="add_custom_workout_sound_checkbox_text">Abilita suono</string>
 </resources>

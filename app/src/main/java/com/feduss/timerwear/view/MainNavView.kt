@@ -253,6 +253,7 @@ fun MainNavView(
                         ambientState = ambientState
                     ) {
                         SettingsView(
+                            context = mainActivity,
                             columnState = it,
                             onEmailFeedbackTapped = {
                                 openEmail(mainActivity)

@@ -612,7 +612,8 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         intermediumRest: TimerPickerModel?
     ): Boolean {
         if (repetitionsValue.isEmpty()) return false
-        return (repetitionsValue.toInt() == 1 && intermediumRest == null) || (repetitionsValue.toInt() > 1 && intermediumRest != null)
+        return (repetitionsValue.toInt() == 1 && (intermediumRest == null || intermediumRest.toSeconds() == 0)) ||
+               (repetitionsValue.toInt() > 1 && intermediumRest != null)
     }
 
     private fun isWorkoutIntermediumRestFrequencyValid(

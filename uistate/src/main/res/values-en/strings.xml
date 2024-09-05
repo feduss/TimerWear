@@ -56,4 +56,6 @@
     <string name="timer_type_rest_text">Pause</string>
     <string name="timer_type_intermedium_rest_text">Long rest</string>
     <string name="add_custom_workout_sound_checkbox_text">Enable sound</string>
+    <string name="ambient_warning_title">Ambient mode</string>
+    <string name="ambient_warning_subtitle">Always on display is recommended. Enabled it from the settings or proceed anyway.</string>
 </resources>

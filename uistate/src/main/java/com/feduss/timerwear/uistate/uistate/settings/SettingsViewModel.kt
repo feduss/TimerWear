@@ -1,9 +1,8 @@
-package com.feduss.timerwear.uistate.settings
+package com.feduss.timerwear.uistate.uistate.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.feduss.timerwear.uistate.R
-import com.feduss.timerwear.uistate.uistate.settings.SettingsUiState
 import com.feduss.timerwear.utils.PrefParam
 import com.feduss.timerwear.utils.PrefsUtils
 import dagger.hilt.android.lifecycle.HiltViewModel

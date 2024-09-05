@@ -10,6 +10,9 @@ sealed class Section(val baseRoute: String, val parametricRoute: String = "") {
     data object AddCustomWorkout: Section(
         "addCustomWorkout",
         "addCustomWorkout/{${Params.WorkoutType.name}}?${Params.WorkoutId.name}={${Params.WorkoutId.name}}")
+    data object AmbientWarning: Section(
+        "ambientWarning",
+        "ambientWarning/{${Params.WorkoutId.name}}/{${Params.WorkoutType.name}}?${Params.CurrentTimerIndex.name}={${Params.CurrentTimerIndex.name}}&${Params.CurrentRepetition.name}={${Params.CurrentRepetition.name}}&${Params.CurrentTimerSecondsRemaining.name}={${Params.CurrentTimerSecondsRemaining.name}}")
     data object Timer: Section(
         "timer",
         "timer/{${Params.WorkoutId.name}}/{${Params.WorkoutType.name}}?${Params.CurrentTimerIndex.name}={${Params.CurrentTimerIndex.name}}&${Params.CurrentRepetition.name}={${Params.CurrentRepetition.name}}&${Params.CurrentTimerSecondsRemaining.name}={${Params.CurrentTimerSecondsRemaining.name}}")

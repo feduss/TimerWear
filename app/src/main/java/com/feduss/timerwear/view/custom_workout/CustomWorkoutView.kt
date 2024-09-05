@@ -17,6 +17,8 @@ import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
+import com.feduss.timerwear.utils.AmbientUtils
+import com.feduss.timerwear.utils.NavUtils
 import com.feduss.timerwear.view.component.card.CustomWorkoutCardView
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
@@ -46,19 +48,20 @@ fun CustomWorkoutView(
     navUiState?.let {
         when (it) {
             is CustomWorkoutViewModel.NavUiState.AddCustomWorkoutClicked -> {
-                goToAddCustomWorkoutPage(
+                NavUtils.goToAddCustomWorkoutPage(
                     navController = navController,
                     workoutType = it.workoutType
                 )
             }
             is CustomWorkoutViewModel.NavUiState.EditCustomWorkoutClicked ->
-                goToAddCustomWorkoutPage(
+                NavUtils.goToAddCustomWorkoutPage(
                     navController = navController,
                     workoutId = it.workoutId.toString(),
                     workoutType = it.workoutType
                 )
             is CustomWorkoutViewModel.NavUiState.ExistingCustomWorkoutClicked -> {
-                goToExistingWorkout(
+                NavUtils.goToExistingWorkout(
+                    context = context,
                     navController = navController,
                     workoutId = it.workoutId.toString(),
                     workoutType = it.workoutType,
@@ -143,46 +146,4 @@ fun CustomWorkoutView(
             }
         }
     }
-}
-
-fun goToExistingWorkout(
-    navController: NavController,
-    workoutId: String,
-    workoutType: WorkoutType,
-    currentTimerIndex: String?,
-    currentRepetition: String?,
-    currentTimerSecondsRemaining: String?
-) {
-
-    var optionalArgs: Map<String, String>? = null
-    if (currentTimerIndex != null && currentRepetition != null && currentTimerSecondsRemaining != null) {
-        optionalArgs = mapOf(
-            Params.CurrentTimerIndex.name to currentTimerIndex,
-            Params.CurrentRepetition.name to currentRepetition,
-            Params.CurrentTimerSecondsRemaining.name to currentTimerSecondsRemaining
-        )
-    }
-
-    navController.navigate(Section.Timer.withArgs(
-        args = listOf(workoutId, workoutType.toString()),
-        optionalArgs = optionalArgs
-    ))
-}
-
-private fun goToAddCustomWorkoutPage(
-    navController: NavController,
-    workoutId: String? = null,
-    workoutType: WorkoutType
-) {
-
-    var optionalArgs: Map<String, String>? = null
-    if (workoutId != null) {
-        optionalArgs = mapOf(Params.WorkoutId.name to workoutId)
-    }
-    navController.navigate(
-        Section.AddCustomWorkout.withArgs(
-            args = listOf(workoutType.toString()),
-            optionalArgs = optionalArgs
-        )
-    )
 }

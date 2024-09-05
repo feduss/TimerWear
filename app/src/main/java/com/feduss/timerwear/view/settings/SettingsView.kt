@@ -31,7 +31,7 @@ import androidx.wear.compose.material.Text
 import com.feduss.timerwear.BuildConfig
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.PurpleCustom
-import com.feduss.timerwear.uistate.settings.SettingsViewModel
+import com.feduss.timerwear.uistate.uistate.settings.SettingsViewModel
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn

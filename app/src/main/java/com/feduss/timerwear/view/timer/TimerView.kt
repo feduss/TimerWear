@@ -343,7 +343,7 @@ private fun ActiveTimerView(
                 }
             }
 
-            OnLifecycleEvent { owner, event ->
+            OnLifecycleEvent { _, event ->
                 when (event) {
                     Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_DESTROY -> {
                         Log.e("TEST123 --> ", "Timer $timer canceled (goingBackground)")

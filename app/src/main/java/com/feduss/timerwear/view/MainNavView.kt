@@ -2,13 +2,16 @@ package com.feduss.timerwear.view
 
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -25,6 +28,8 @@ import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.factory.getCustomWorkoutView
 import com.feduss.timerwear.uistate.factory.getTimerViewModel
+import com.feduss.timerwear.utils.NavUtils
+import com.feduss.timerwear.view.ambient.AmbientWarning
 import com.feduss.timerwear.view.component.MenuView
 import com.feduss.timerwear.view.component.PageView
 import com.feduss.timerwear.view.custom_workout.AddCustomWorkoutView
@@ -177,6 +182,75 @@ fun MainNavView(
                 }
 
                 composable(
+                    route = Section.AmbientWarning.parametricRoute,
+                    arguments = listOf(
+                        navArgument(Params.WorkoutId.name) { type = NavType.StringType },
+                        navArgument(Params.CurrentTimerIndex.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
+                        navArgument(Params.CurrentRepetition.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
+                        navArgument(Params.CurrentTimerSecondsRemaining.name) {
+                            nullable = true
+                            type = NavType.StringType
+                        },
+                    )
+                ) { navBackStackEntry ->
+                    val workoutId =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutId.name)
+
+                    val workoutTypeRaw =
+                        navBackStackEntry.arguments?.getString(Params.WorkoutType.name)
+
+                    val workoutType = WorkoutType.fromString(workoutTypeRaw)
+
+                    val currentTimerIndex =
+                        navBackStackEntry.arguments?.getString(Params.CurrentTimerIndex.name)
+
+
+                    val currentRepetition =
+                        navBackStackEntry.arguments?.getString(Params.CurrentRepetition.name)
+
+
+                    val currentTimerSecondsRemaining =
+                        navBackStackEntry.arguments?.getString(Params.CurrentTimerSecondsRemaining.name)
+
+                    if (workoutId == null || workoutType == null) {
+                        navController.popBackStack()
+                    } else {
+                        PageView(
+                            columnState = rememberColumnState(),
+                            ambientState = ambientState
+                        ) {
+                            AmbientWarning(
+                                context = mainActivity,
+                                viewModel = hiltViewModel(),
+                                onGoToDisplaySettings = {
+                                    openDisplaySettings(mainActivity)
+                                },
+                                onGoToTimer = {
+                                    NavUtils.goToExistingWorkout(
+                                        context = mainActivity,
+                                        navController = navController,
+                                        workoutId = workoutId,
+                                        workoutType = workoutType,
+                                        currentTimerIndex = currentTimerIndex,
+                                        currentRepetition = currentRepetition,
+                                        currentTimerSecondsRemaining = currentTimerSecondsRemaining,
+                                        checkAmbientMode = false
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+
+                }
+
+                composable(
                     route = Section.Timer.parametricRoute,
                     arguments = listOf(
                         navArgument(Params.WorkoutId.name) { type = NavType.StringType },
@@ -241,8 +315,6 @@ fun MainNavView(
                             )
                         }
                     }
-
-
                 }
 
                 composable(route = Section.Settings.baseRoute) {
@@ -291,4 +363,9 @@ private fun openEmail(activity: MainActivity) {
                 .showOn(activity)
         }
     }
+}
+
+fun openDisplaySettings(mainActivity: MainActivity) {
+    val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
+    mainActivity.startActivity(intent)
 }

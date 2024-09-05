@@ -23,6 +23,7 @@ import com.feduss.timerwear.uistate.extension.PurpleCustom
 @Composable
 fun AlertDialog(
     titleId: Int,
+    subtitle: Int? = null,
     negativeButtonIconId: Int,
     negativeButtonIconDesc: String,
     negativeButtonClicked: () -> Unit,
@@ -85,5 +86,13 @@ fun AlertDialog(
                 onClick = positiveButtonClicked
             )
         }
-    )
+    ){
+        subtitle?.let {
+            Text(
+                text = stringResource(it),
+                textAlign = TextAlign.Center,
+                color = Color.White
+            )
+        }
+    }
 }

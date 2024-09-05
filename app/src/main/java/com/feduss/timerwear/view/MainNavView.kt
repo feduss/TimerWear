@@ -2,7 +2,6 @@ package com.feduss.timerwear.view
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -44,7 +43,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MainNavView(
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    onSetOnGoingNotification: () -> Unit,
+    onRemoveOngoingNotification: () -> Unit
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
@@ -234,7 +235,9 @@ fun MainNavView(
                                 ambientState = ambientState,
                                 onTimerSet = { hourTimerEnd: String ->
                                     endCurvedText = hourTimerEnd
-                                }
+                                },
+                                onSetOngoingNotification = onSetOnGoingNotification,
+                                onRemoveOngoingNotification = onRemoveOngoingNotification
                             )
                         }
                     }

@@ -11,9 +11,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.wear.ambient.AmbientLifecycleObserver
 import androidx.wear.compose.material.MaterialTheme
-import com.feduss.timerwear.entity.enums.Consts
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.receivers.TimerReceiver
 import com.feduss.timerwear.utils.AlarmUtils
@@ -26,57 +24,55 @@ class MainActivity : ComponentActivity() {
     private val timerReceiver = TimerReceiver()
     private lateinit var notificationManager: NotificationManager
 
-    private val ambientCallback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
-        override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
-            // ... Called when moving from interactive mode into ambient mode.
-
-        }
-
-        override fun onExitAmbient() {
-            // ... Called when leaving ambient mode, back into interactive mode.
-        }
-
-        override fun onUpdateAmbient() {
-            // ... Called by the system in order to allow the app to periodically
-            // update the display while in ambient mode. Typically the system will
-            // call this every 60 seconds.
-        }
-    }
-
-    private val ambientObserver = AmbientLifecycleObserver(this, ambientCallback)
-
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Handle the splash screen transition.
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        lifecycle.addObserver(ambientObserver)
-
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val filter = IntentFilter()
         registerReceiver(timerReceiver, filter)
 
-        if(intent.getBooleanExtra(Consts.FromOngoingNotification.value, false)) {
-            NotificationUtils.restoreTimerSecondsFromOngoingNotification(this)
-        }
-
+        removeOngoingNotification()
+        PrefsUtils.restoreActiveTimerDetails(this)
 
         setContent {
             MaterialTheme {
                 MainNavView(
-                    mainActivity = this
+                    mainActivity = this,
+                    onSetOnGoingNotification = {
+                        setOngoingNotification()
+                    },
+                    onRemoveOngoingNotification = {
+                        removeOngoingNotification()
+                    }
                 )
             }
         }
     }
 
+    // Lifecycle
+
     override fun onPause() {
         super.onPause()
+        setOngoingNotification()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        removeOngoingNotification()
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(timerReceiver)
+        super.onDestroy()
+    }
+
+    // Helpers
+    private fun setOngoingNotification() {
         val isTimerActive = PrefsUtils.isTimerActive(this)
-
         if (isTimerActive) {
             AlarmUtils.setBackgroundAlert(
                 this,
@@ -85,7 +81,6 @@ class MainActivity : ComponentActivity() {
 
             // Create a pending intent that point to your always-on activity
             val appIntent = Intent(this, MainActivity::class.java)
-            appIntent.putExtra(Consts.FromOngoingNotification.value, true)
             val touchIntent =
                 PendingIntent.getActivity(
                     this,
@@ -102,19 +97,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun removeOngoingNotification() {
 
-        lifecycle.removeObserver(ambientObserver)
         AlarmUtils.removeBackgroundAlert(
             this,
             TimerReceiver::class.java
         )
         NotificationUtils.removeOngoingNotification(this)
-    }
-
-    override fun onDestroy() {
-        unregisterReceiver(timerReceiver)
-        super.onDestroy()
     }
 }

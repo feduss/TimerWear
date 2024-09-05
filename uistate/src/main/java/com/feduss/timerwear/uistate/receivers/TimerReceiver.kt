@@ -103,10 +103,16 @@ class TimerReceiver : BroadcastReceiver() {
             )
             NotificationUtils.removeOngoingNotification(context)
 
-            AlarmUtils.playSound(
+            AlarmUtils.vibrate(
                 context = context,
-                soundId = SoundType.Finish.getRawMp3()
+                vibrationType = VibrationType.SingleLong
             )
+            if (PrefsUtils.getSoundPreference(context)) {
+                AlarmUtils.playSound(
+                    context = context,
+                    soundId = SoundType.Finish.getRawMp3()
+                )
+            }
             return
         }
 
@@ -149,10 +155,12 @@ class TimerReceiver : BroadcastReceiver() {
             TimerType.IntermediumRest -> SoundType.Rest
         }
 
-        AlarmUtils.playSound(
-            context = context,
-            soundId = soundType.getRawMp3()
-        )
+        if (PrefsUtils.getSoundPreference(context)) {
+            AlarmUtils.playSound(
+                context = context,
+                soundId = soundType.getRawMp3()
+            )
+        }
 
         val ongoingActivity = OngoingActivity.recoverOngoingActivity(
             context,
@@ -165,9 +173,11 @@ class TimerReceiver : BroadcastReceiver() {
             newValue = duration.toString()
         )
 
-        AlarmUtils.setBackgroundAlert(
+        val currentMillisecondsTimestamp = System.currentTimeMillis()
+        PrefsUtils.setStringPref(
             context,
-            TimerReceiver::class.java
+            PrefParam.OngoingNotificationStartTime.value,
+            currentMillisecondsTimestamp.toString()
         )
 
         ongoingActivity?.update(

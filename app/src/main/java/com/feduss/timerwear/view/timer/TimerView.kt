@@ -2,6 +2,7 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -51,6 +53,7 @@ import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
+import com.feduss.timerwear.lifecycle.OnLifecycleEvent
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
@@ -59,7 +62,6 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.utils.AlarmUtils
-import com.feduss.timerwear.utils.PrefsUtils
 import com.google.android.horologist.compose.ambient.AmbientState
 import kotlin.math.ceil
 
@@ -70,7 +72,9 @@ fun TimerView(
     navController: NavHostController,
     viewModel: TimerViewModel,
     onTimerSet: (String) -> Unit = {},
-    ambientState: MutableState<AmbientState>
+    ambientState: MutableState<AmbientState>,
+    onSetOngoingNotification: () -> Unit,
+    onRemoveOngoingNotification: () -> Unit
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
@@ -78,6 +82,14 @@ fun TimerView(
 
     val userHasSkippedTimer = remember {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(ambientState.value) {
+        if (ambientState.value is AmbientState.Interactive) {
+            onRemoveOngoingNotification()
+        } else {
+            onSetOngoingNotification()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -182,7 +194,21 @@ fun TimerView(
 }
 
 @Composable
-fun AmbientTimer(timerViewUiState: TimerViewUiState, onTimerSet: (String) -> Unit) {
+fun AmbientTimer(
+    timerViewUiState: TimerViewUiState,
+    ambientState: AmbientState.Ambient,
+    onTimerSet: (String) -> Unit
+) {
+
+    //TODO: handle ambient details
+    if (ambientState.ambientDetails?.burnInProtectionRequired == true) {
+
+    }
+
+    if (ambientState.ambientDetails?.deviceHasLowBitAmbient == true) {
+
+    }
+    //endtodo
 
     onTimerSet(timerViewUiState.timeText)
 
@@ -282,8 +308,7 @@ private fun ActiveTimerView(
         } else {
 
             LaunchedEffect(timerViewUiState.uuid) {
-
-                if (!userHasSkippedTimer.value) {
+                if (!userHasSkippedTimer.value && !timerViewUiState.resumedFromBackGround) {
                     vibrate(
                         context = context,
                         vibrationType = VibrationType.SingleLong
@@ -306,9 +331,11 @@ private fun ActiveTimerView(
 
             LaunchedEffect(
                 timerViewUiState.uuid,
-                timerViewUiState.isTimerActive
+                timerViewUiState.isTimerActive,
+                timerViewUiState.resumedFromBackGround
             ) {
                 if (timerViewUiState.isTimerActive) {
+
                     timer = (object : CountDownTimer(
                         timerViewUiState.timerSecondsRemaining * 1000L, 1000
                     ) {
@@ -354,14 +381,25 @@ private fun ActiveTimerView(
                                 currentTimerIndex = timerViewUiState.currentTimerId,
                                 currentRepetition = timerViewUiState.currentRepetition
                             )
+                            Log.e("TEST123 --> ", "Timer $timer expired")
                         }
 
                     })
                     timer?.start()
-                    //Log.e("TEST123: ", "LaunchedEffect: timer $timer created (started), timerSecondsRemaining: ${timerViewUiState.timerSecondsRemaining}")
+                    Log.e("TEST123 --> ", "Timer $timer created")
                 } else {
-                    //Log.e("TEST123: ", "LaunchedEffect: timer $timer destroyed (paused), timerSecondsRemaining: ${timerViewUiState.timerSecondsRemaining}")
+                    Log.e("TEST123 --> ", "Timer $timer canceled (isNotActive")
                     timer?.cancel()
+                }
+            }
+
+            OnLifecycleEvent { owner, event ->
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_DESTROY -> {
+                        Log.e("TEST123 --> ", "Timer $timer canceled (goingBackground)")
+                        timer?.cancel()
+                    }
+                    else -> { }
                 }
             }
 
@@ -382,9 +420,10 @@ private fun ActiveTimerView(
                     newTimerSecondsRemaining = newTimerSecondsRemaining,
                     onTimerSet = onTimerSet
                 )
-            } else {
+            } else if (ambientState is AmbientState.Ambient) {
                 AmbientTimer(
                     timerViewUiState,
+                    ambientState = ambientState,
                     onTimerSet
                 )
             }
@@ -799,24 +838,20 @@ private fun vibrate(
     context: Context,
     vibrationType: VibrationType
 ) {
-    if (!PrefsUtils.isAppInBackground(context)) {
-        AlarmUtils.vibrate(
-            context = context,
-            vibrationType = vibrationType
-        )
-    }
+    AlarmUtils.vibrate(
+        context = context,
+        vibrationType = vibrationType
+    )
 }
 
 private fun playSound(
     context: Context,
     soundType: SoundType
 ) {
-    if (!PrefsUtils.isAppInBackground(context)) {
-        AlarmUtils.playSound(
-            context = context,
-            soundId = soundType.getRawMp3()
-        )
-    }
+    AlarmUtils.playSound(
+        context = context,
+        soundId = soundType.getRawMp3()
+    )
 }
 
 private fun cancelCountdownTimers(timers: List<CountDownTimer?>, navigationController: NavController) {

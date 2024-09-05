@@ -44,6 +44,7 @@ data class TimerViewUiState(
     val ambientIconId: Int,
     val ambientIconDescription: String,
     val ambientTintColor: Color = Color.White,
+    val resumedFromBackGround: Boolean,
     val timeText: String
 )
 

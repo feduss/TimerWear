@@ -101,32 +101,6 @@ class NotificationUtils {
             notificationManager.cancel(Consts.MainNotificationId.value.toInt())
         }
 
-        fun restoreTimerSecondsFromOngoingNotification(context: Context) {
-            val ongoingNotificationStartTime = PrefsUtils.getStringPref(
-                context,
-                PrefParam.OngoingNotificationStartTime.value
-            )?.toLong() ?: 0L
 
-            val timerSecondsRemaining = PrefsUtils.getStringPref(
-                context,
-                PrefParam.CurrentTimerSecondsRemaining.value
-            )?.toLong() ?: 0L
-
-            val timerSecondsEndTime = (ongoingNotificationStartTime / 1000L) + timerSecondsRemaining
-            val currentMillisecondsTimestamp = System.currentTimeMillis()
-
-            var newTimerSecondsRemaining = timerSecondsEndTime - (currentMillisecondsTimestamp / 1000)
-
-            //Corner case?
-            if(newTimerSecondsRemaining < 0) {
-                newTimerSecondsRemaining = 0
-            }
-
-            PrefsUtils.setStringPref(
-                context,
-                PrefParam.CurrentTimerSecondsRemaining.value,
-                newTimerSecondsRemaining.toString()
-            )
-        }
     }
 }

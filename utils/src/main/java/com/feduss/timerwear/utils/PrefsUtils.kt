@@ -71,19 +71,40 @@ class PrefsUtils {
             PrefParam.IsTimerActive.value
         ) == "true"
 
+        fun restoreActiveTimerDetails(context: Context) {
+            val ongoingNotificationStartTime = getStringPref(
+                context,
+                PrefParam.OngoingNotificationStartTime.value
+            )?.toLong() ?: 0L
+
+            val timerSecondsRemaining = getStringPref(
+                context,
+                PrefParam.CurrentTimerSecondsRemaining.value
+            )?.toLong() ?: 0L
+
+            val currentMillisecondsTimestamp = System.currentTimeMillis()
+
+            //TODO: this is wrong lol
+            var newTimerSecondsRemaining = timerSecondsRemaining - (currentMillisecondsTimestamp - ongoingNotificationStartTime) / 1000
+
+            //Corner case?
+            if(newTimerSecondsRemaining < 0) {
+                newTimerSecondsRemaining = 0
+            }
+
+            setStringPref(
+                context,
+                PrefParam.CurrentTimerSecondsRemaining.value,
+                newTimerSecondsRemaining.toString()
+            )
+        }
+
         fun getWorkoutType(context: Context) = WorkoutType.fromString(
             getStringPref(
                 context,
                 PrefParam.WorkoutType.value
             )
         )
-
-        fun isAppInBackground(context: Context): Boolean {
-            return getStringPref(
-                context = context,
-                pref = PrefParam.AlarmSetTime.value
-            ) != null
-        }
 
         fun getSoundPreference(context: Context): Boolean {
             return getStringPref(context, PrefParam.IsSoundEnabled.value) == "true"

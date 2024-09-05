@@ -73,7 +73,7 @@ fun GenericTextInputCard(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = keyboardType,
-                    imeAction = ImeAction.None
+                    imeAction = ImeAction.Done
                 ),
                 textStyle = LocalTextStyle.current.copy(
                     color = Color.White,

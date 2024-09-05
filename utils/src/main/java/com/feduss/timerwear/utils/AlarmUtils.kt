@@ -20,7 +20,6 @@ class AlarmUtils {
     companion object {
 
         fun<T> setBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
-            //removeBackgroundAlert(context, timerReceiverClass)
 
             val timerSecondsRemaining = PrefsUtils.getStringPref(
                 context,
@@ -43,8 +42,11 @@ class AlarmUtils {
 
             val alarmTime = (timerSecondsRemaining * 1000L) + currentMillisecondsTimestamp
 
-            val alarmClockInfo = AlarmManager.AlarmClockInfo(alarmTime, null)
-            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                alarmTime,
+                pendingIntent
+            )
 
             PrefsUtils.setStringPref(
                 context,
@@ -107,17 +109,5 @@ class AlarmUtils {
                 mediaPlayer.release()
             }
         }
-
-        /*fun sound(context: Context) {
-            val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            val mp: MediaPlayer? = MediaPlayer.create(context, alarmSound)
-
-            if (mp != null) {
-                mp.start()
-                Handler(Looper.getMainLooper()).postDelayed({
-                    mp.release()
-                }, 5000)
-            }
-        }*/
     }
 }

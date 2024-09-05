@@ -179,8 +179,6 @@ private fun RequestPermission() {
                             Manifest.permission.USE_EXACT_ALARM
                         )
                     )
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        permissions.add(Manifest.permission.SCHEDULE_EXACT_ALARM)
                 }
 
                 permissions.add(Manifest.permission.VIBRATE)

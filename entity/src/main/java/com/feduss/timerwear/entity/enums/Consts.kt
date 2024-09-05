@@ -9,6 +9,5 @@ sealed class Consts(val value: String) {
     data object SubNotificationId: Consts("10")
     data object MainNotificationVisibleChannel: Consts("Notifica del timer attivo")
     data object SubNotificationVisibleChannel: Consts("Notifica del timer scaduto")
-    data object FromOngoingNotification: Consts("FromOngoingNotification")
     data object OngoingActivityId: Consts("13")
 }

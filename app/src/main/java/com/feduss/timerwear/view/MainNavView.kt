@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -48,9 +47,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MainNavView(
-    mainActivity: MainActivity,
-    onSetOnGoingNotification: () -> Unit,
-    onRemoveOngoingNotification: () -> Unit
+    mainActivity: MainActivity
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
@@ -306,12 +303,10 @@ fun MainNavView(
                                     currentRepetition = currentRepetition?.toIntOrNull(),
                                     currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
                                 ),
-                                ambientState = ambientState,
                                 onTimerSet = { hourTimerEnd: String ->
                                     endCurvedText = hourTimerEnd
                                 },
-                                onSetOngoingNotification = onSetOnGoingNotification,
-                                onRemoveOngoingNotification = onRemoveOngoingNotification
+                                ambientState = ambientState
                             )
                         }
                     }

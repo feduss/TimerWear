@@ -4,10 +4,8 @@ import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,12 +32,9 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.ButtonDefaults
@@ -48,22 +42,17 @@ import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.dialog.Alert
 import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
-import com.feduss.timerwear.lifecycle.OnLifecycleEvent
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
-import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
-import com.feduss.timerwear.uistate.uistate.timer.TimerTYPViewUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.view.ambient.AmbientTimer
-import com.feduss.timerwear.view.dialog.AlertDialog
 import com.google.android.horologist.compose.ambient.AmbientState
 import kotlin.math.ceil
 
@@ -74,9 +63,7 @@ fun TimerView(
     navController: NavHostController,
     viewModel: TimerViewModel,
     onTimerSet: (String) -> Unit = {},
-    ambientState: MutableState<AmbientState>,
-    onSetOngoingNotification: () -> Unit,
-    onRemoveOngoingNotification: () -> Unit
+    ambientState: MutableState<AmbientState>
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
@@ -84,14 +71,6 @@ fun TimerView(
 
     val userHasSkippedTimer = remember {
         mutableStateOf(false)
-    }
-
-    LaunchedEffect(ambientState.value) {
-        if (ambientState.value is AmbientState.Interactive) {
-            onRemoveOngoingNotification()
-        } else {
-            onSetOngoingNotification()
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -340,16 +319,6 @@ private fun ActiveTimerView(
                 } else {
                     Log.e("TEST123 --> ", "Timer $timer canceled (isNotActive")
                     timer?.cancel()
-                }
-            }
-
-            OnLifecycleEvent { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_DESTROY -> {
-                        Log.e("TEST123 --> ", "Timer $timer canceled (goingBackground)")
-                        timer?.cancel()
-                    }
-                    else -> { }
                 }
             }
 

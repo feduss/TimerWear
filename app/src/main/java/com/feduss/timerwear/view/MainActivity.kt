@@ -41,13 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 MainNavView(
-                    mainActivity = this,
-                    onSetOnGoingNotification = {
-                        setOngoingNotification()
-                    },
-                    onRemoveOngoingNotification = {
-                        removeOngoingNotification()
-                    }
+                    mainActivity = this
                 )
             }
         }

@@ -396,6 +396,7 @@ private fun TimerViewMainContent(
         progress = { timerViewUiState.circularSliderProgress.toFloat() },
         modifier = Modifier.fillMaxSize(),
         color = timerViewUiState.circularSliderColor,
+        trackColor = Color.Black,
         strokeWidth = 4.dp,
     )
     Column(

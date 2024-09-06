@@ -17,7 +17,7 @@ android {
         applicationId = "com.feduss.timerwear"
         minSdk = 26
         targetSdk = 34
-        versionCode = 17
+        versionCode = 19
         versionName = '1.0.5'
         vectorDrawables {
             useSupportLibrary = true
@@ -65,11 +65,11 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     //Compose wear
-    implementation 'androidx.wear.compose:compose-ui-tooling:1.4.0-beta03'
-    implementation 'androidx.wear.compose:compose-foundation:1.4.0-beta03'
-    implementation 'androidx.wear.compose:compose-material:1.4.0-beta03'
-    implementation 'androidx.wear.compose:compose-navigation:1.4.0-beta03'
-    implementation 'androidx.compose.material3:material3:1.2.1'
+    implementation 'androidx.wear.compose:compose-ui-tooling:1.4.0'
+    implementation 'androidx.wear.compose:compose-foundation:1.4.0'
+    implementation 'androidx.wear.compose:compose-material:1.4.0'
+    implementation 'androidx.wear.compose:compose-navigation:1.4.0'
+    implementation 'androidx.compose.material3:material3:1.3.0'
 
     //
     implementation 'androidx.wear:wear-remote-interactions:1.0.0'
@@ -77,17 +77,17 @@ dependencies {
     implementation project(':entity')
 
     // Testing
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.6.8"
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.8'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest:1.6.8'
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.7.0"
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.7.0'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest:1.7.0'
 
     // Optional - Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5'
 
     //Google pager + scaffold
     implementation 'com.google.android.horologist:horologist-compose-layout:0.6.18'
     implementation 'com.google.android.horologist:horologist-composables:0.6.18'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
 
     //Hilt
     implementation 'com.google.dagger:hilt-android:2.52'
@@ -101,7 +101,7 @@ dependencies {
     implementation 'com.valentinilk.shimmer:compose-shimmer:1.3.1'
 
     //APIs for SplashScreen, including compatibility helpers on devices prior Android 12
-    implementation 'androidx.core:core-splashscreen:1.2.0-alpha01'
+    implementation 'androidx.core:core-splashscreen:1.2.0-alpha02'
 
     //Reboot helper
     implementation 'com.jakewharton:process-phoenix:3.0.0'
@@ -110,7 +110,7 @@ dependencies {
     implementation 'com.github.skydoves:balloon-compose:1.6.6'
 
     //Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
 }

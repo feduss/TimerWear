@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.ButtonDefaults
@@ -46,6 +47,7 @@ import com.feduss.timerwear.entity.enums.AlertDialogType
 import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
+import com.feduss.timerwear.lifecycle.OnLifecycleEvent
 import com.feduss.timerwear.uistate.extension.PurpleCustom
 import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
@@ -63,7 +65,8 @@ fun TimerView(
     navController: NavHostController,
     viewModel: TimerViewModel,
     onTimerSet: (String) -> Unit = {},
-    ambientState: MutableState<AmbientState>
+    ambientState: MutableState<AmbientState>,
+    onKeepScreenOn: (Boolean) -> Unit
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
@@ -77,6 +80,27 @@ fun TimerView(
         viewModel.loadTimerCountdownUiState(
             context = context
         )
+    }
+
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                onKeepScreenOn(true)
+            }
+            Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP, Lifecycle.Event.ON_DESTROY -> {
+                onKeepScreenOn(false)
+            }
+            else -> { }
+        }
+    }
+
+    LaunchedEffect(ambientState.value) {
+        if (ambientState.value is AmbientState.Interactive) {
+            onKeepScreenOn(true)
+        } else if (ambientState.value is AmbientState.Ambient) {
+            onKeepScreenOn(false)
+        }
+
     }
 
     navUiState?.let {
@@ -162,13 +186,13 @@ fun TimerView(
             )
         } else if (timerViewUiState != null) {
             ActiveTimerView(
-                timerViewUiState,
-                alertDialogUiState,
-                viewModel,
+                timerViewUiState =timerViewUiState,
+                alertDialogUiState = alertDialogUiState,
+                viewModel = viewModel,
                 ambientState = ambientState.value,
-                onTimerSet,
-                userHasSkippedTimer,
-                context
+                onTimerSet = onTimerSet,
+                userHasSkippedTimer = userHasSkippedTimer,
+                context = context
             )
         }
     }
@@ -310,14 +334,14 @@ private fun ActiveTimerView(
                                 currentTimerIndex = timerViewUiState.currentTimerId,
                                 currentRepetition = timerViewUiState.currentRepetition
                             )
-                            Log.e("TEST123 --> ", "Timer $timer expired")
+                            //Log.e("TEST123 --> ", "Timer $timer expired")
                         }
 
                     })
                     timer?.start()
-                    Log.e("TEST123 --> ", "Timer $timer created")
+                    //Log.e("TEST123 --> ", "Timer $timer created")
                 } else {
-                    Log.e("TEST123 --> ", "Timer $timer canceled (isNotActive")
+                    //Log.e("TEST123 --> ", "Timer $timer canceled (isNotActive")
                     timer?.cancel()
                 }
             }

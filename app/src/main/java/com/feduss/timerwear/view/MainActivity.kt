@@ -8,6 +8,8 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -41,7 +43,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 MainNavView(
-                    mainActivity = this
+                    mainActivity = this,
+                    onKeepScreenOn = {
+                        if (it) {
+                            keepScreenOn(this)
+                        } else {
+                            restoreScreenTimeout(this)
+                        }
+                    }
                 )
             }
         }
@@ -98,5 +107,15 @@ class MainActivity : ComponentActivity() {
             TimerReceiver::class.java
         )
         NotificationUtils.removeOngoingNotification(this)
+    }
+
+    private fun keepScreenOn(activity: MainActivity) {
+        val window = activity.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    private fun restoreScreenTimeout(activity: MainActivity) {
+        val window = activity.window
+        window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }

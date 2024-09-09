@@ -47,7 +47,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MainNavView(
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    onKeepScreenOn: (Boolean) -> Unit
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
@@ -306,6 +307,7 @@ fun MainNavView(
                                 onTimerSet = { hourTimerEnd: String ->
                                     endCurvedText = hourTimerEnd
                                 },
+                                onKeepScreenOn = onKeepScreenOn,
                                 ambientState = ambientState
                             )
                         }

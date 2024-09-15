@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
+import com.feduss.timerwear.lifecycle.OnLifecycleEvent
 import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.uistate.MenuViewModel
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
@@ -164,12 +165,9 @@ private fun RequestPermission() {
         }
     }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
                 val permissions = ArrayList<String>()
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -185,12 +183,7 @@ private fun RequestPermission() {
 
                 notificationPermissionRequest.launch(permissions.toTypedArray())
             }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+            else -> { }
         }
     }
 }

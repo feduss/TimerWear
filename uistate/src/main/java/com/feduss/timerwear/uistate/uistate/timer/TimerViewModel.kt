@@ -73,7 +73,8 @@ class TimerViewModel @AssistedInject constructor(
         data object GoBackToCustomWorkoutList: NavUiState()
         data class GoToNextTimer(
             val currentTimerIndex: Int,
-            val currentRepetition: Int
+            val currentRepetition: Int,
+            val isAmbientMode: Boolean
         ): NavUiState()
         data class SkipToNextTimer(
             val currentTimerIndex: Int,
@@ -100,7 +101,8 @@ class TimerViewModel @AssistedInject constructor(
     private var customWorkoutModel: CustomWorkoutModel? = null
 
     var isSoundEnabled: Boolean = false
-    var resumedFromBackGround: Boolean = false
+    var ambientModeEnterMillsTimestamp: Long = 0L
+    var isTimerActivePreAmbient = false
 
     //Copies
     private val preCountdownTextId = R.string.timer_pre_countdown
@@ -282,10 +284,12 @@ class TimerViewModel @AssistedInject constructor(
     fun userGoToNextTimer(
         currentTimerIndex: Int,
         currentRepetition: Int,
+        isAmbientMode: Boolean
     ) {
         _navUiState.value = NavUiState.GoToNextTimer(
             currentTimerIndex = currentTimerIndex,
-            currentRepetition = currentRepetition
+            currentRepetition = currentRepetition,
+            isAmbientMode = isAmbientMode
         )
     }
 
@@ -375,7 +379,13 @@ class TimerViewModel @AssistedInject constructor(
             PrefsUtils.setNextTimerInPrefs(
                 context = context,
                 newCurrentTimerIndex = newCurrentTimerIndex,
-                newCurrentRepetition = newCurrentRepetition
+                newCurrentRepetition = newCurrentRepetition,
+                newCurrentTimerSecondsRemaining = newTimer.duration.toSeconds()
+            )
+
+            saveIsTimerActivePref(
+                context = context,
+                isTimerActive = true
             )
         }
     }
@@ -557,6 +567,10 @@ class TimerViewModel @AssistedInject constructor(
         PrefsUtils.cancelTimerInPrefs(context)
     }
 
+    fun isAmbientModeEnabled(context: Context): Boolean {
+        return PrefsUtils.getAmbientModeState(context)
+    }
+
     //
 
     private fun getTimeText(
@@ -654,5 +668,72 @@ class TimerViewModel @AssistedInject constructor(
                 )
             }
         }
+    }
+
+    fun userHasEnabledAmbientMode(context: Context) {
+        PrefsUtils.saveAmbientModeState(
+            context = context,
+            isEnabled = true
+        )
+        ambientModeEnterMillsTimestamp = System.currentTimeMillis()
+
+        val timerViewUiState = _dataUiState.value?.timerViewUiState
+
+        if (timerViewUiState == null) return
+
+        val currentTimer = timerViewUiState.customWorkoutModel.timers[timerViewUiState.currentTimerId]
+
+        _dataUiState.update {
+            isTimerActivePreAmbient = it?.timerViewUiState?.isTimerActive == true
+            return@update it?.copy(
+                timerViewUiState = it.timerViewUiState?.copy(
+                    middleTimerStatusValueText = currentTimer.name,
+                    isTimerActive = false
+                )
+            )
+        }
+    }
+
+    fun userHasDisabledAmbientMode(context: Context) {
+
+        PrefsUtils.saveAmbientModeState(
+            context = context,
+            isEnabled = false
+        )
+
+        val savedTimerSecondsRemaining = PrefsUtils.getStringPref(
+            context = context,
+            pref = PrefParam.CurrentTimerSecondsRemaining.value
+        )?.toIntOrNull()
+
+        if (savedTimerSecondsRemaining == null) return
+
+        val timerViewUiState = _dataUiState.value?.timerViewUiState
+
+        if (timerViewUiState == null) return
+
+
+        val currentMillisecondsTimestamp = System.currentTimeMillis()
+        val timeElapsed = (currentMillisecondsTimestamp - ambientModeEnterMillsTimestamp) / 1000
+        var newTimerSecondsRemaining = savedTimerSecondsRemaining - timeElapsed.toInt()
+
+        val timerSecondsRemaining = if (isTimerActivePreAmbient) {
+            newTimerSecondsRemaining
+        } else {
+            timerViewUiState.timerSecondsRemaining
+        }
+
+        ambientModeEnterMillsTimestamp = 0L
+
+        _dataUiState.update {
+            return@update it?.copy(
+                timerViewUiState = it.timerViewUiState?.copy(
+                    isTimerActive = isTimerActivePreAmbient,
+                    timerSecondsRemaining = timerSecondsRemaining
+                )
+            )
+        }
+
+        updateMiddleLabelValue(timerSecondsRemaining)
     }
 }

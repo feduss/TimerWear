@@ -29,7 +29,7 @@ fun CustomTimeText(
     val textColor = if (ambientState.value is AmbientState.Interactive) {
         Color.PurpleCustom
     } else {
-        Color.White
+        return
     }
 
     val modifier = Modifier.scrollAway(columnState)

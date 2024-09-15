@@ -37,9 +37,10 @@ class NavUtils {
                 args = listOf(workoutId, workoutType.toString()),
                 optionalArgs = optionalArgs
             )) {
-                if (section == Section.Timer) {
-                    popUpTo(navController.currentBackStackEntry?.destination?.route ?: return@navigate) {
-                        inclusive =  true
+                val currentRoute = navController.currentBackStackEntry?.destination?.route
+                if (section == Section.Timer && currentRoute?.contains(Section.AmbientWarning.baseRoute) == true) {
+                    popUpTo(navController.previousBackStackEntry?.destination?.route ?: return@navigate) {
+                        inclusive =  false
                     }
                 }
             }

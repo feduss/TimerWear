@@ -74,7 +74,7 @@ class NotificationUtils {
                 .setStaticIcon(iconId)
                 .setTouchIntent(touchIntent)
                 .setStatus(status)
-                    .setOngoingActivityId(Consts.OngoingActivityId.value.toInt())
+                .setOngoingActivityId(Consts.OngoingActivityId.value.toInt())
                 .build()
 
             ongoingActivity.apply(context.applicationContext)

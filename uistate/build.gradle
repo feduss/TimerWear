@@ -20,7 +20,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -31,9 +31,6 @@ android {
     buildFeatures {
         compose true
         buildConfig true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion '1.5.12'
     }
 }
 
@@ -55,8 +52,6 @@ dependencies {
 
     //Gson
     implementation 'com.google.code.gson:gson:2.11.0'
-
-    implementation 'androidx.wear:wear-ongoing:1.0.0'
 }
 
 // Allow references to generated code

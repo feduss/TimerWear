@@ -49,7 +49,12 @@ class PrefsUtils {
             setStringPref(context, PrefParam.IsTimerActive.value, "false")
         }
 
-        fun setNextTimerInPrefs(context: Context, newCurrentTimerIndex: Int, newCurrentRepetition: Int) {
+        fun setNextTimerInPrefs(
+            context: Context,
+            newCurrentTimerIndex: Int,
+            newCurrentRepetition: Int,
+            newCurrentTimerSecondsRemaining: Int
+        ) {
 
             setStringPref(
                 context,
@@ -63,7 +68,11 @@ class PrefsUtils {
                 newCurrentRepetition.toString()
             )
 
-            setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
+            setStringPref(
+                context,
+                PrefParam.CurrentTimerSecondsRemaining.value,
+                newCurrentTimerSecondsRemaining.toString()
+            )
         }
 
         fun isTimerActive(context: Context) = getStringPref(
@@ -71,20 +80,34 @@ class PrefsUtils {
             PrefParam.IsTimerActive.value
         ) == "true"
 
+        fun saveAmbientModeState(context: Context, isEnabled: Boolean) {
+            setStringPref(
+                context,
+                PrefParam.IsAmbientModeEnabled.value,
+                isEnabled.toString()
+            )
+        }
+
+        fun getAmbientModeState(context: Context): Boolean {
+            return getStringPref(
+                context,
+                PrefParam.IsAmbientModeEnabled.value
+            ) == "true"
+        }
+
         fun restoreActiveTimerDetails(context: Context) {
             val ongoingNotificationStartTime = getStringPref(
                 context,
                 PrefParam.OngoingNotificationStartTime.value
-            )?.toLong() ?: 0L
+            )?.toLongOrNull() ?: 0L
 
             val timerSecondsRemaining = getStringPref(
                 context,
                 PrefParam.CurrentTimerSecondsRemaining.value
-            )?.toLong() ?: 0L
+            )?.toLongOrNull() ?: 0L
 
             val currentMillisecondsTimestamp = System.currentTimeMillis()
 
-            //TODO: this is wrong lol
             var newTimerSecondsRemaining = timerSecondsRemaining - (currentMillisecondsTimestamp - ongoingNotificationStartTime) / 1000
 
             //Corner case?

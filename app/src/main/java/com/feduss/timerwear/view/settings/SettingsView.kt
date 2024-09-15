@@ -62,6 +62,7 @@ fun SettingsView(
                 onEmailFeedbackTapped()
             }
         }
+        viewModel.firedNavState()
     }
 
     dataUiState?.let { state ->

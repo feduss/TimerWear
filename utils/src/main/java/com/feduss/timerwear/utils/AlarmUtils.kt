@@ -20,7 +20,7 @@ class AlarmUtils {
     companion object {
 
         fun<T> setBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
-
+            Log.e("TEST123 --> ", "BackgroundAlert set")
             val timerSecondsRemaining = PrefsUtils.getStringPref(
                 context,
                 PrefParam.CurrentTimerSecondsRemaining.value
@@ -56,6 +56,7 @@ class AlarmUtils {
         }
 
         fun<T> removeBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
+            Log.e("TEST123 --> ", "BackgroundAlert removed")
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val broadcastReceiverIntent = Intent(context, timerReceiverClass)
 

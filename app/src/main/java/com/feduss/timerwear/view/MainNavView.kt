@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainNavView(
     mainActivity: MainActivity,
+    onEnterBackgroundState: (Boolean) -> Unit,
     onKeepScreenOn: (Boolean) -> Unit
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
@@ -307,6 +308,7 @@ fun MainNavView(
                                 onTimerSet = { hourTimerEnd: String ->
                                     endCurvedText = hourTimerEnd
                                 },
+                                onEnterBackgroundState = onEnterBackgroundState,
                                 onKeepScreenOn = onKeepScreenOn,
                                 ambientState = ambientState
                             )

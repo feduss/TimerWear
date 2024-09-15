@@ -48,19 +48,19 @@ fun AmbientTimer(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = timerViewUiState.currentProgress,
+            text = timerViewUiState.middleTimerStatusValueText,
             color = Color.White,
             textAlign = TextAlign.Center,
-            fontSize = TextUnit(10f, TextUnitType.Sp)
+            fontSize = TextUnit(20.0f, TextUnitType.Sp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = timerViewUiState.middleTimerStatusValueText,
+            text = timerViewUiState.currentProgress,
             color = Color.White,
             textAlign = TextAlign.Center,
-            fontSize = TextUnit(20.0f, TextUnitType.Sp)
+            fontSize = TextUnit(16.0f, TextUnitType.Sp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))

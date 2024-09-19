@@ -28,7 +28,12 @@
             android:value="true" />
 
         <receiver
-            android:name=".receivers.TimerReceiver"
+            android:name=".receivers.ActiveTimerReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+
+        <receiver
+            android:name=".receivers.CountdownTimerReceiver"
             android:enabled="true"
             android:exported="false"/>
 

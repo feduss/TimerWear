@@ -36,8 +36,6 @@
     <string name="custom_workout_deleted_text">Workout removed successfully!</string>
     <string name="timer_skip_timer">Do you really wanna skip this timer?</string>
     <string name="timer_stop_timer_question">Do you wanna cancel the timer?</string>
-    <string name="timer_pre_countdown">Get ready</string>
-    <string name="timer_post_countdown">Go!</string>
     <string name="timer_typ_title">End!</string>
     <string name="add_custom_workout_remove_timer_button_text">Remove</string>
     <string name="settings_title">Settings</string>
@@ -58,4 +56,5 @@
     <string name="add_custom_workout_sound_checkbox_text">Enable sound</string>
     <string name="ambient_warning_title">Ambient mode</string>
     <string name="ambient_warning_subtitle">Always on display is recommended. Enabled it from the settings or proceed anyway.</string>
+    <string name="ambient_countdown_text">Countdown</string>
 </resources>

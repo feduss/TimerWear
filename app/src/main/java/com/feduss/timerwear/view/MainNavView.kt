@@ -21,6 +21,7 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import androidx.wear.remote.interactions.RemoteActivityHelper
 import androidx.wear.widget.ConfirmationOverlay
+import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.entity.enums.Params
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.entity.enums.Section
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainNavView(
     mainActivity: MainActivity,
-    onEnterBackgroundState: (Boolean) -> Unit,
+    onEnterBackgroundState: (BackgroundAlarmType, Boolean) -> Unit,
     onKeepScreenOn: (Boolean) -> Unit
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()

@@ -75,6 +75,11 @@ class PrefsUtils {
             )
         }
 
+        fun isCountdownTimerActive(context: Context) = getStringPref(
+            context,
+            PrefParam.IsCountdownTimerActive.value
+        ) == "true"
+
         fun isTimerActive(context: Context) = getStringPref(
             context,
             PrefParam.IsTimerActive.value

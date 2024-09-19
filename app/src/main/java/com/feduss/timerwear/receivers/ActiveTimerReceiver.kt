@@ -1,13 +1,9 @@
 package com.feduss.timerwear.receivers
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.wear.ongoing.OngoingActivity
-import com.feduss.timerwear.entity.CustomTimerModel
 import com.feduss.timerwear.entity.CustomWorkoutModel
-import com.feduss.timerwear.entity.enums.Consts
+import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.VibrationType
@@ -20,7 +16,7 @@ import com.feduss.timerwear.utils.PrefsUtils
 import com.feduss.timerwear.utils.TimerUtils
 import com.feduss.timerwear.view.MainActivity
 
-class TimerReceiver : BroadcastReceiver() {
+class ActiveTimerReceiver : BaseBroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -112,7 +108,8 @@ class TimerReceiver : BroadcastReceiver() {
             )
             AlarmUtils.removeBackgroundAlert(
                 context = context,
-                TimerReceiver::class.java
+                timerReceiverClass =  ActiveTimerReceiver::class.java,
+                backgroundAlarmType = BackgroundAlarmType.ActiveTimer
             )
             NotificationUtils.removeOngoingNotification(context)
 
@@ -162,58 +159,10 @@ class TimerReceiver : BroadcastReceiver() {
             vibrateAndPlaySound(context, newTimer)
 
             scheduleNextBackgroundAlert(context)
-            updateOngoingNotification(context, duration, name)
-        }
-    }
-
-    private fun scheduleNextBackgroundAlert(context: Context) {
-        AlarmUtils.setBackgroundAlert(
-            context,
-            TimerReceiver::class.java
-        )
-    }
-
-    private fun updateOngoingNotification(context: Context, duration: Int, name: String) {
-        val ongoingActivity = OngoingActivity.recoverOngoingActivity(
-            context,
-            Consts.OngoingActivityId.value.toInt()
-        )
-
-        val currentMillisecondsTimestamp = System.currentTimeMillis()
-        PrefsUtils.setStringPref(
-            context,
-            PrefParam.OngoingNotificationStartTime.value,
-            toString()
-        )
-
-        ongoingActivity?.update(
-            context,
-            NotificationUtils.getOngoingStatus(
-                currentMillisecondsTimestamp.toLong(),
-                name
-            )
-        )
-    }
-
-    private fun vibrateAndPlaySound(
-        context: Context,
-        newTimer: CustomTimerModel
-    ) {
-        AlarmUtils.vibrate(
-            context = context,
-            vibrationType = VibrationType.SingleLong
-        )
-
-        val soundType = when (newTimer.type) {
-            TimerType.Work -> SoundType.Work
-            TimerType.Rest -> SoundType.Rest
-            TimerType.IntermediumRest -> SoundType.Rest
-        }
-
-        if (PrefsUtils.getSoundPreference(context)) {
-            AlarmUtils.playSound(
+            NotificationUtils.updateOngoingNotification(
                 context = context,
-                soundId = soundType.getRawMp3()
+                name = name,
+                timerSecondsRemaining = duration.toLong()
             )
         }
     }

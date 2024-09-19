@@ -15,11 +15,11 @@ data class TimerUiState(
 
 data class TimerCountdownUiState(
     val workoutName: String,
-    val preCountdownTextId: Int,
-    val preCountdownDuration: Int,
     val countdown: Int,
-    val postCountdownTextId: Int,
-    val postCountdownSeconds: Int
+    val ambientCountDownTextId: Int,
+    val ambientCountDownIconId: Int,
+    val ambientCountDownIconDescription: String,
+    val isTimerActive: Boolean
 )
 
 data class TimerViewUiState(

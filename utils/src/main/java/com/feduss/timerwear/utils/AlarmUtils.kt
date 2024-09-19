@@ -6,26 +6,38 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.*
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.entity.enums.Consts
-import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
 
 class AlarmUtils {
 
     companion object {
 
-        fun<T> setBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
-            Log.e("TEST123 --> ", "BackgroundAlert set")
-            val timerSecondsRemaining = PrefsUtils.getStringPref(
-                context,
-                PrefParam.CurrentTimerSecondsRemaining.value
-            )?.toLong() ?: 0L
+        fun<T> setBackgroundAlert(
+            context: Context,
+            timerReceiverClass: Class<T>,
+            backgroundAlarmType: BackgroundAlarmType
+        ) {
+            //Log.e("TEST123 --> ", "BackgroundAlert set")
+
+            val timerSecondsRemaining: Long = when(backgroundAlarmType) {
+                BackgroundAlarmType.CountdownTimer -> {
+                    Consts.CountdownTimerSeconds.value.toLong()
+                }
+                BackgroundAlarmType.ActiveTimer -> {
+                    PrefsUtils.getStringPref(
+                        context,
+                        PrefParam.CurrentTimerSecondsRemaining.value
+                    )?.toLong() ?: 0L
+                }
+            }
+
             val currentMillisecondsTimestamp = System.currentTimeMillis()
+
+            val alarmTime = (timerSecondsRemaining * 1000L) + currentMillisecondsTimestamp
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -35,12 +47,11 @@ class AlarmUtils {
             //Intent called when the timer ended
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
-                Consts.AlarmEnd.value.toInt(),
+                backgroundAlarmType.getRequestCode(),
                 broadcastReceiverIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val alarmTime = (timerSecondsRemaining * 1000L) + currentMillisecondsTimestamp
 
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
@@ -48,28 +59,34 @@ class AlarmUtils {
                 pendingIntent
             )
 
-            PrefsUtils.setStringPref(
-                context,
-                PrefParam.AlarmSetTime.value,
-                (alarmTime / 1000).toString()
-            )
+            if (backgroundAlarmType == BackgroundAlarmType.ActiveTimer) {
+                PrefsUtils.setStringPref(
+                    context,
+                    PrefParam.TimerActiveAlarmSetTime.value,
+                    (alarmTime / 1000).toString()
+                )
+            }
         }
 
-        fun<T> removeBackgroundAlert(context: Context, timerReceiverClass: Class<T>) {
-            Log.e("TEST123 --> ", "BackgroundAlert removed")
+        fun<T> removeBackgroundAlert(
+            context: Context,
+            timerReceiverClass: Class<T>,
+            backgroundAlarmType: BackgroundAlarmType
+        ) {
+            //Log.e("TEST123 --> ", "BackgroundAlert removed")
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val broadcastReceiverIntent = Intent(context, timerReceiverClass)
 
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
-                Consts.AlarmEnd.value.toInt(),
+                backgroundAlarmType.getRequestCode(),
                 broadcastReceiverIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
             alarmManager.cancel(pendingIntent)
             PrefsUtils.setStringPref(
                 context,
-                PrefParam.AlarmSetTime.value,
+                PrefParam.TimerActiveAlarmSetTime.value,
                 null
             )
         }

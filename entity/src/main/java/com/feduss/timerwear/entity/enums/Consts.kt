@@ -1,7 +1,9 @@
 package com.feduss.timerwear.entity.enums
 
 sealed class Consts(val value: String) {
-    data object AlarmEnd: Consts("321")
+    data object CountdownTimerAlarmEndRequestCode: Consts("321")
+    data object CountdownTimerSeconds: Consts("7")
+    data object ActiveTimerAlarmEndRequestCode: Consts("717")
     data object MainChannelId: Consts("TomatoMainChannelId")
     data object SubChannelId: Consts("TomatoSubChannelId")
     data object NotificationChannelId: Consts("TomatoNotificationChannelId")

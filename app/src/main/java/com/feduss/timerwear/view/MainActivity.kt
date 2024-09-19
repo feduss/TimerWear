@@ -13,8 +13,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material.MaterialTheme
+import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.uistate.R
-import com.feduss.timerwear.receivers.TimerReceiver
+import com.feduss.timerwear.receivers.ActiveTimerReceiver
+import com.feduss.timerwear.receivers.CountdownTimerReceiver
 import com.feduss.timerwear.utils.AlarmUtils
 import com.feduss.timerwear.utils.NotificationUtils
 import com.feduss.timerwear.utils.PrefsUtils
@@ -22,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val timerReceiver = TimerReceiver()
+    private val activeTimerReceiver = ActiveTimerReceiver()
     private lateinit var notificationManager: NotificationManager
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -34,20 +36,19 @@ class MainActivity : ComponentActivity() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val filter = IntentFilter()
-        registerReceiver(timerReceiver, filter)
+        registerReceiver(activeTimerReceiver, filter)
 
-        removeOngoingNotification()
         PrefsUtils.restoreActiveTimerDetails(this)
 
         setContent {
             MaterialTheme {
                 MainNavView(
                     mainActivity = this,
-                    onEnterBackgroundState = {
-                        if (it) {
-                            setOngoingNotification()
+                    onEnterBackgroundState = { backgroundAlarmType, isActive ->
+                        if (isActive) {
+                            setOngoingNotification(backgroundAlarmType)
                         } else {
-                            removeOngoingNotification()
+                            removeOngoingNotification(backgroundAlarmType)
                         }
                     },
                     onKeepScreenOn = {
@@ -73,17 +74,24 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        unregisterReceiver(timerReceiver)
+        unregisterReceiver(activeTimerReceiver)
         super.onDestroy()
     }
 
     // Helpers
-    private fun setOngoingNotification() {
+    private fun setOngoingNotification(backgroundAlarmType: BackgroundAlarmType) {
+        val isCountdownTimerActive = PrefsUtils.isCountdownTimerActive(this)
         val isTimerActive = PrefsUtils.isTimerActive(this)
-        if (isTimerActive) {
+        if (isCountdownTimerActive || isTimerActive) {
+            val timerReceiverClass = when(backgroundAlarmType) {
+                BackgroundAlarmType.CountdownTimer -> CountdownTimerReceiver::class.java
+                BackgroundAlarmType.ActiveTimer -> ActiveTimerReceiver::class.java
+            }
+
             AlarmUtils.setBackgroundAlert(
-                this,
-                TimerReceiver::class.java
+                context = this,
+                timerReceiverClass = timerReceiverClass,
+                backgroundAlarmType = backgroundAlarmType
             )
 
             // Create a pending intent that point to your always-on activity
@@ -104,11 +112,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun removeOngoingNotification() {
+    private fun removeOngoingNotification(backgroundAlarmType: BackgroundAlarmType) {
+
+        val timerReceiverClass = when(backgroundAlarmType) {
+            BackgroundAlarmType.CountdownTimer -> CountdownTimerReceiver::class.java
+            BackgroundAlarmType.ActiveTimer -> ActiveTimerReceiver::class.java
+        }
 
         AlarmUtils.removeBackgroundAlert(
-            this,
-            TimerReceiver::class.java
+            context = this,
+            timerReceiverClass = timerReceiverClass,
+            backgroundAlarmType = backgroundAlarmType
         )
         NotificationUtils.removeOngoingNotification(this)
     }

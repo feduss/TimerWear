@@ -45,7 +45,7 @@ class PrefsUtils {
             setStringPref(context, PrefParam.CurrentRepetition.value, null)
             setStringPref(context, PrefParam.CurrentTimerSecondsRemaining.value, null)
             setStringPref(context, PrefParam.WorkoutType.value, null)
-            setStringPref(context, PrefParam.OngoingNotificationStartTime.value, null)
+            setStringPref(context, PrefParam.TimerActiveAlarmSetTime.value, null)
             setStringPref(context, PrefParam.IsTimerActive.value, "false")
         }
 
@@ -101,23 +101,23 @@ class PrefsUtils {
         }
 
         fun restoreActiveTimerDetails(context: Context) {
-            val ongoingNotificationStartTime = getStringPref(
+            val timerActiveAlarmSetTime = getStringPref(
                 context,
-                PrefParam.OngoingNotificationStartTime.value
+                PrefParam.TimerActiveAlarmSetTime.value
             )?.toLongOrNull() ?: 0L
 
             val timerSecondsRemaining = getStringPref(
                 context,
                 PrefParam.CurrentTimerSecondsRemaining.value
-            )?.toLongOrNull() ?: 0L
+            )?.toDoubleOrNull() ?: 0.0
 
             val currentMillisecondsTimestamp = System.currentTimeMillis()
 
-            var newTimerSecondsRemaining = timerSecondsRemaining - (currentMillisecondsTimestamp - ongoingNotificationStartTime) / 1000
+            var newTimerSecondsRemaining = timerSecondsRemaining - ((currentMillisecondsTimestamp - timerActiveAlarmSetTime) / 1000.0)
 
             //Corner case?
             if(newTimerSecondsRemaining < 0) {
-                newTimerSecondsRemaining = 0
+                newTimerSecondsRemaining = .0
             }
 
             setStringPref(

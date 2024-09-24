@@ -17,10 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -49,9 +51,8 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerAlertDialogUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.view.ambient.AmbientTimer
-import com.feduss.timerwear.view.ambient.ObserveTimerAmbientMode
+import com.feduss.timerwear.view.ambient.ObserveTimerBackgroundMode
 import com.google.android.horologist.compose.ambient.AmbientState
-import kotlin.math.ceil
 
 @Composable
 fun ActiveTimerView(
@@ -64,13 +65,13 @@ fun ActiveTimerView(
     onKeepScreenOn: (Boolean) -> Unit,
     onVibrate: (VibrationType) -> Unit,
     onPlaySound: (SoundType) -> Unit,
-    onTimerFinished: () -> Unit,
+    onActiveTimerFinished: (Boolean) -> Unit,
     onSetAmbientMode: () -> Unit,
     userHasSkippedTimer: MutableState<Boolean>,
     context: Context
 ) {
     val newTimerSecondsRemaining = remember {
-        mutableIntStateOf(timerViewUiState.timerSecondsRemaining)
+        mutableDoubleStateOf(timerViewUiState.timerSecondsRemaining)
     }
 
     var timer: CountDownTimer? by remember {
@@ -86,7 +87,7 @@ fun ActiveTimerView(
         //Log.e("TEST123: ", "timer $timer resumed = $isAlertDialogVisible, stopped = ${!isAlertDialogVisible}, timerSecondsRemaining: ${newTimerSecondsRemaining.intValue}")
 
         viewModel.userChangedTimerState(
-            timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+            timerSecondsRemaining = newTimerSecondsRemaining.doubleValue,
             isTimerActive = isAlertDialogVisible,
             completion = {
                 viewModel.userChangeAlertDialogState(
@@ -123,7 +124,7 @@ fun ActiveTimerView(
 
             LaunchedEffect(timerViewUiState.uuid) {
                 if (!userHasSkippedTimer.value && !timerViewUiState.resumedFromBackGround) {
-                    onVibrate(VibrationType.SingleLong)
+                    onVibrate(VibrationType.SingleShort)
 
                     val soundType = when (timerViewUiState.timerType) {
                         TimerType.Work -> SoundType.Work
@@ -148,16 +149,18 @@ fun ActiveTimerView(
                 }
 
                 if (timerViewUiState.isTimerActive) {
-
-                    timer = (object : CountDownTimer(
-                        timerViewUiState.timerSecondsRemaining * 1000L, 1000
-                    ) {
+                    val countDownDurationMillis = (timerViewUiState.timerSecondsRemaining * 1000).toLong()
+                    var counter = 0L
+                    var prevMillisUntilFinished = 0L
+                    timer = (object : CountDownTimer(countDownDurationMillis, 10) {
                         override fun onTick(millisUntilFinished: Long) {
-                            val currentTimerSecondsRemaining =
-                                ceil((millisUntilFinished).toDouble() / 1000).toInt()
+                            var currentTimerSecondsRemaining = millisUntilFinished.toDouble() / 1000
+                            if (currentTimerSecondsRemaining == timerViewUiState.timerSecondsRemaining) {
+                                currentTimerSecondsRemaining -= 0.1
+                            }
 
-                            val progress = (1f - (1f - currentTimerSecondsRemaining.toFloat()
-                                .div(timerViewUiState.maxTimerSeconds))).toDouble()
+                            val progress = (1f - (1f - currentTimerSecondsRemaining
+                                .div(timerViewUiState.maxTimerSeconds)))
                             viewModel.updateCircularProgressBarProgress(progress = progress)
                             viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = currentTimerSecondsRemaining)
 
@@ -167,21 +170,30 @@ fun ActiveTimerView(
                                 currentRepetition = timerViewUiState.currentRepetition,
                                 currentTimerSecondsRemaining = currentTimerSecondsRemaining
                             )
-                            newTimerSecondsRemaining.intValue = currentTimerSecondsRemaining
+                            newTimerSecondsRemaining.doubleValue = currentTimerSecondsRemaining
 
-                            if (currentTimerSecondsRemaining < 6) {
+                            if (currentTimerSecondsRemaining < 5) {
 
                                 viewModel.setNextTimerTimeText(
                                     context = context
                                 )
 
-                                onVibrate(VibrationType.SingleShort)
+                                if (counter > 1000) {
+                                    counter = 0
+                                    onVibrate(VibrationType.SingleShort)
+                                } else if (prevMillisUntilFinished == 0L) {
+                                    prevMillisUntilFinished = millisUntilFinished
+                                    onVibrate(VibrationType.SingleShort)
+                                } else {
+                                    counter += (prevMillisUntilFinished - millisUntilFinished)
+                                    prevMillisUntilFinished = millisUntilFinished
+                                }
                             }
                         }
 
                         override fun onFinish() {
                             userHasSkippedTimer.value = false
-                            onTimerFinished()
+                            onActiveTimerFinished(false)
                             //Log.e("TEST123 --> ", "Timer $timer expired")
                         }
                     })
@@ -193,11 +205,10 @@ fun ActiveTimerView(
                 }
             }
 
-            ObserveTimerAmbientMode(
+            ObserveTimerBackgroundMode(
                 ambientState = ambientState,
                 viewModel = viewModel,
                 context = context,
-                backgroundAlarmType = BackgroundAlarmType.ActiveTimer,
                 onKeepScreenOn = onKeepScreenOn,
                 onEnterBackgroundState = onEnterBackgroundState,
                 onSetAmbientMode = onSetAmbientMode,
@@ -239,7 +250,7 @@ private fun TimerViewMainContent(
     timerViewUiState: TimerViewUiState,
     viewModel: TimerViewModel,
     context: Context,
-    newTimerSecondsRemaining: MutableIntState,
+    newTimerSecondsRemaining: MutableDoubleState,
     onTimerSet: (String) -> Unit,
     onVibrate: (VibrationType) -> Unit
 ) {
@@ -274,7 +285,8 @@ private fun TimerViewMainContent(
             text = timerViewUiState.middleTimerStatusValueText,
             color = Color.PurpleCustom,
             textAlign = TextAlign.Center,
-            fontSize = TextUnit(20.0f, TextUnitType.Sp)
+            fontSize = TextUnit(20.0f, TextUnitType.Sp),
+            fontFamily = FontFamily(Typeface(android.graphics.Typeface.MONOSPACE))
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -307,7 +319,7 @@ private fun TimerViewMainContent(
                     //Pause/Play button
                     onVibrate(VibrationType.SingleVeryShort)
                     viewModel.userChangedTimerState(
-                        timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                        timerSecondsRemaining = newTimerSecondsRemaining.doubleValue,
                         isTimerActive = !timerViewUiState.isTimerActive,
                         completion = {}
                     )
@@ -333,7 +345,7 @@ private fun TimerViewMainContent(
                     //Skip button
                     onVibrate(VibrationType.SingleVeryShort)
                     viewModel.userChangedTimerState(
-                        timerSecondsRemaining = newTimerSecondsRemaining.intValue,
+                        timerSecondsRemaining = newTimerSecondsRemaining.doubleValue,
                         isTimerActive = false,
                         completion = {
                             viewModel.userChangeAlertDialogState(

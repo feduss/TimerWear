@@ -30,15 +30,7 @@ class NotificationUtils {
             val timerSecondsRemaining = PrefsUtils.getStringPref(
                 context,
                 PrefParam.CurrentTimerSecondsRemaining.value
-            )?.toLong() ?: 0L
-
-            //Save in prefs when the notification is set
-            val currentMillisecondsTimestamp = System.currentTimeMillis()
-            PrefsUtils.setStringPref(
-                context,
-                PrefParam.OngoingNotificationStartTime.value,
-                currentMillisecondsTimestamp.toString()
-            )
+            )?.toDoubleOrNull() ?: 0.0
 
             if (
                 !updateOngoingNotification(
@@ -99,7 +91,11 @@ class NotificationUtils {
             }
         }
 
-        fun updateOngoingNotification(context: Context, name: String, timerSecondsRemaining: Long): Boolean {
+        fun updateOngoingNotification(
+            context: Context,
+            name: String,
+            timerSecondsRemaining: Double
+        ): Boolean {
             var ongoingActivity = OngoingActivity.recoverOngoingActivity(
                 context,
                 Consts.OngoingActivityId.value.toInt()
@@ -110,7 +106,7 @@ class NotificationUtils {
                 ongoingActivity.update(
                     context,
                     NotificationUtils.getOngoingStatus(
-                        timerSecondsRemaining.toLong(),
+                        timerSecondsRemaining,
                         name
                     )
                 )
@@ -120,8 +116,8 @@ class NotificationUtils {
             }
         }
 
-        fun getOngoingStatus(timerSecondsRemaining: Long, timerName: String): Status {
-            val runStartTime = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timerSecondsRemaining)
+        fun getOngoingStatus(timerSecondsRemaining: Double, timerName: String): Status {
+            val runStartTime = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(timerSecondsRemaining.toLong())
             val status = Status.Builder()
                 .addTemplate("#timerSeconds# (#timerName#)")
                 .addPart("timerSeconds", Status.StopwatchPart(runStartTime))

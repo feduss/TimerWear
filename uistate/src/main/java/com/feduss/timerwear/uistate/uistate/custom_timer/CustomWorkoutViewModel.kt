@@ -60,7 +60,7 @@ class CustomWorkoutViewModel @AssistedInject constructor(
             val workoutType: WorkoutType,
             val currentTimerIndex: Int? = null,
             val currentRepetition: Int? = null,
-            val currentTimerSecondsRemaining: Int? = null
+            val currentTimerSecondsRemaining: Double? = null
         ): NavUiState()
         data object BalloonDismissed: NavUiState()
         data class CustomWorkoutDeleted(val textId: Int): NavUiState()
@@ -112,7 +112,7 @@ class CustomWorkoutViewModel @AssistedInject constructor(
                     workoutType = workoutType,
                     currentTimerIndex = activeTimerIndex?.toIntOrNull(),
                     currentRepetition = activeWorkoutRepetition?.toIntOrNull(),
-                    currentTimerSecondsRemaining = activeTimerSecondsRemaining?.toIntOrNull()
+                    currentTimerSecondsRemaining = activeTimerSecondsRemaining?.toDoubleOrNull()
                 )
             }
         }

@@ -38,7 +38,7 @@ dependencies {
     implementation 'androidx.wear.compose:compose-foundation:1.4.0'
 
     implementation 'androidx.wear:wear-ongoing:1.0.0'
-    implementation 'androidx.navigation:navigation-runtime-ktx:2.8.0'
+    implementation 'androidx.navigation:navigation-runtime-ktx:2.8.1'
 
     //Testing
     testImplementation 'junit:junit:4.13.2'

@@ -24,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val countdownTimerReceiver = CountdownTimerReceiver()
     private val activeTimerReceiver = ActiveTimerReceiver()
     private lateinit var notificationManager: NotificationManager
 
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val filter = IntentFilter()
+        registerReceiver(countdownTimerReceiver, filter)
         registerReceiver(activeTimerReceiver, filter)
 
         PrefsUtils.restoreActiveTimerDetails(this)
@@ -74,6 +76,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        unregisterReceiver(countdownTimerReceiver)
         unregisterReceiver(activeTimerReceiver)
         super.onDestroy()
     }

@@ -23,21 +23,14 @@ class AlarmUtils {
         ) {
             //Log.e("TEST123 --> ", "BackgroundAlert set")
 
-            val timerSecondsRemaining: Long = when(backgroundAlarmType) {
-                BackgroundAlarmType.CountdownTimer -> {
-                    Consts.CountdownTimerSeconds.value.toLong()
-                }
-                BackgroundAlarmType.ActiveTimer -> {
-                    PrefsUtils.getStringPref(
-                        context,
-                        PrefParam.CurrentTimerSecondsRemaining.value
-                    )?.toLong() ?: 0L
-                }
-            }
+            val timerSecondsRemaining = PrefsUtils.getStringPref(
+                context,
+                PrefParam.CurrentTimerSecondsRemaining.value
+            )?.toDoubleOrNull() ?: 0.0
 
             val currentMillisecondsTimestamp = System.currentTimeMillis()
 
-            val alarmTime = (timerSecondsRemaining * 1000L) + currentMillisecondsTimestamp
+            val alarmTime: Long = (timerSecondsRemaining * 1000).toLong() + currentMillisecondsTimestamp
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -59,13 +52,11 @@ class AlarmUtils {
                 pendingIntent
             )
 
-            if (backgroundAlarmType == BackgroundAlarmType.ActiveTimer) {
-                PrefsUtils.setStringPref(
-                    context,
-                    PrefParam.TimerActiveAlarmSetTime.value,
-                    (alarmTime / 1000).toString()
-                )
-            }
+            PrefsUtils.setStringPref(
+                context,
+                PrefParam.TimerActiveAlarmSetTime.value,
+                currentMillisecondsTimestamp.toString()
+            )
         }
 
         fun<T> removeBackgroundAlert(

@@ -304,7 +304,7 @@ fun MainNavView(
                                     workoutType = workoutType,
                                     currentTimerIndex = currentTimerIndex?.toIntOrNull(),
                                     currentRepetition = currentRepetition?.toIntOrNull(),
-                                    currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toIntOrNull()
+                                    currentTimerSecondsRemaining = currentTimerSecondsRemaining?.toDoubleOrNull()
                                 ),
                                 onTimerSet = { hourTimerEnd: String ->
                                     endCurvedText = hourTimerEnd

@@ -15,7 +15,7 @@ data class TimerUiState(
 
 data class TimerCountdownUiState(
     val workoutName: String,
-    val countdown: Int,
+    val countdown: Double,
     val ambientCountDownTextId: Int,
     val ambientCountDownIconId: Int,
     val ambientCountDownIconDescription: String,
@@ -28,8 +28,8 @@ data class TimerViewUiState(
     val currentTimerId: Int = 0,
     val currentRepetition: Int = 0,
     val isTimerActive: Boolean,
-    val maxTimerSeconds: Int,
-    val timerSecondsRemaining: Int,
+    val maxTimerSeconds: Double,
+    val timerSecondsRemaining: Double,
     val timerType: TimerType,
     val circularSliderColor: Color,
     val circularSliderProgress: Double = 0.0,

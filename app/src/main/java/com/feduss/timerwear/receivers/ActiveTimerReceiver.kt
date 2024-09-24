@@ -2,6 +2,7 @@ package com.feduss.timerwear.receivers
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.feduss.timerwear.entity.CustomWorkoutModel
 import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.entity.enums.SoundType
@@ -61,6 +62,8 @@ class ActiveTimerReceiver : BaseBroadcastReceiver() {
             return
         }
 
+        Log.e("TEST123 --> ", "currentExpiredTimer: ${currentWorkoutModel.timers[currentTimerIndex].name}, repetition: $currentRepetition")
+
         handleNextTimer(
             totalTimers,
             totalRepetitions,
@@ -94,24 +97,22 @@ class ActiveTimerReceiver : BaseBroadcastReceiver() {
 
         val isAmbientModeEnabled = PrefsUtils.getAmbientModeState(context)
 
-        if (isAmbientModeEnabled) {
-            val appIntent = Intent(context, MainActivity::class.java)
-            appIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(appIntent)
-        }
+
         //end of timer
-        else if (newCurrentTimerIndex == -1 && newCurrentRepetition == -1) {
-            PrefsUtils.setStringPref(
-                context,
-                PrefParam.IsTimerActive.value,
-                "false"
-            )
+        if (newCurrentTimerIndex == -1 && newCurrentRepetition == -1) {
             AlarmUtils.removeBackgroundAlert(
                 context = context,
                 timerReceiverClass =  ActiveTimerReceiver::class.java,
                 backgroundAlarmType = BackgroundAlarmType.ActiveTimer
             )
             NotificationUtils.removeOngoingNotification(context)
+
+            PrefsUtils.setNextTimerInPrefs(
+                context = context,
+                newCurrentTimerIndex = -1,
+                newCurrentRepetition = -1,
+                newCurrentTimerSecondsRemaining = -1
+            )
 
             AlarmUtils.vibrate(
                 context = context,
@@ -122,6 +123,12 @@ class ActiveTimerReceiver : BaseBroadcastReceiver() {
                     context = context,
                     soundId = SoundType.Finish.getRawMp3()
                 )
+            }
+
+            if (isAmbientModeEnabled) {
+                val appIntent = Intent(context, MainActivity::class.java)
+                appIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(appIntent)
             }
         }
         //next timer
@@ -157,13 +164,18 @@ class ActiveTimerReceiver : BaseBroadcastReceiver() {
             )
 
             vibrateAndPlaySound(context, newTimer)
-
             scheduleNextBackgroundAlert(context)
             NotificationUtils.updateOngoingNotification(
                 context = context,
                 name = name,
-                timerSecondsRemaining = duration.toLong()
+                timerSecondsRemaining = duration.toDouble()
             )
+
+            if (isAmbientModeEnabled) {
+                val appIntent = Intent(context, MainActivity::class.java)
+                appIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(appIntent)
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.feduss.timerwear.view.timer
 
 import android.content.Context
-import android.os.CountDownTimer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -9,18 +8,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import com.feduss.timerwear.entity.enums.BackgroundAlarmType
 import com.feduss.timerwear.entity.enums.SoundType
 import com.feduss.timerwear.entity.enums.VibrationType
-import com.feduss.timerwear.lifecycle.OnLifecycleEvent
 import com.feduss.timerwear.uistate.extension.getRawMp3
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewUiState
 import com.feduss.timerwear.utils.AlarmUtils
-import com.feduss.timerwear.utils.AmbientUtils
 import com.google.android.horologist.compose.ambient.AmbientState
 
 
@@ -56,16 +51,6 @@ fun TimerView(
                 viewModel.loadTimerUiState(
                     context = context
                 )
-
-                if (it.isAmbientMode) {
-                    setAmbientMode(
-                        viewModel,
-                        context,
-                        backgroundAlarmType = BackgroundAlarmType.ActiveTimer,
-                        onKeepScreenOn,
-                        onEnterBackgroundState
-                    )
-                }
             }
             is TimerViewModel.NavUiState.GoBackToCustomWorkoutList -> {
                 goBackToWorkoutList(
@@ -82,16 +67,6 @@ fun TimerView(
                     currentTimerIndex = it.currentTimerIndex,
                     currentRepetition = it.currentRepetition
                 )
-
-                if (it.isAmbientMode) {
-                    setAmbientMode(
-                        viewModel,
-                        context,
-                        backgroundAlarmType = BackgroundAlarmType.ActiveTimer,
-                        onKeepScreenOn,
-                        onEnterBackgroundState
-                    )
-                }
             }
 
             is TimerViewModel.NavUiState.SkipToNextTimer -> {
@@ -134,61 +109,6 @@ fun TimerView(
         val timerViewUiState = state.timerViewUiState
         val timerTYPViewUiState = state.timerTYPViewUiState
 
-        OnLifecycleEvent { _, event ->
-
-            val backgroundAlarmType = if (timerCountdownUiState != null) {
-                BackgroundAlarmType.CountdownTimer
-            } else if (timerViewUiState != null) {
-                BackgroundAlarmType.ActiveTimer
-            } else {
-                null
-            }
-
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    onKeepScreenOn(!AmbientUtils.isAmbientDisplayOn(context))
-
-                    //When the user resume the app without ambient mode, remove background alert and ongoing notification
-                    if (ambientState.value is AmbientState.Interactive) {
-                        backgroundAlarmType?.let { onEnterBackgroundState(it, false) }
-                    }
-                    //When the app is in ambient mode and the background alert expired
-                    //and the activity is still valid
-                    else {
-                        timerCountdownUiState?.let {
-                            viewModel.countdownFinished(
-                                context = context,
-                                isAmbientMode = true
-                            )
-                        }
-
-                        timerViewUiState?.let {
-                            onTimerFinished(
-                                context = context,
-                                viewModel = viewModel,
-                                timerViewUiState = it,
-                                isAmbientMode = true
-                            )
-                        }
-                    }
-                }
-                Lifecycle.Event.ON_PAUSE -> {
-                    onKeepScreenOn(false)
-
-                    // When the user put the app in background without ambient mode
-                    // enable a background alert and an ongoing notification
-                    if (ambientState.value is AmbientState.Interactive) {
-                        backgroundAlarmType?.let { onEnterBackgroundState(it, true) }
-                    }
-                }
-                Lifecycle.Event.ON_STOP,
-                Lifecycle.Event.ON_DESTROY -> {
-                    onKeepScreenOn(false)
-                }
-                else -> { }
-            }
-        }
-
         if (timerCountdownUiState != null) {
             TimerCountdownView(
                 timerCountdownUiState = timerCountdownUiState,
@@ -207,11 +127,11 @@ fun TimerView(
                 },
                 onSetAmbientMode = {
                     setAmbientMode(
-                        viewModel,
-                        context,
+                        viewModel = viewModel,
+                        context = context,
                         backgroundAlarmType = BackgroundAlarmType.CountdownTimer,
-                        onKeepScreenOn,
-                        onEnterBackgroundState
+                        onKeepScreenOn = onKeepScreenOn,
+                        onEnterBackgroundState = onEnterBackgroundState,
                     )
                 }
             )
@@ -243,11 +163,12 @@ fun TimerView(
                         soundType = it
                     )
                 },
-                onTimerFinished = {
+                onActiveTimerFinished = { isAmbientMode ->
                     onTimerFinished(
                         context = context,
                         viewModel = viewModel,
-                        timerViewUiState = timerViewUiState
+                        timerViewUiState = timerViewUiState,
+                        isAmbientMode = isAmbientMode
                     )
                 },
                 onSetAmbientMode = {
@@ -273,9 +194,10 @@ private fun setAmbientMode(
     onKeepScreenOn: (Boolean) -> Unit,
     onEnterBackgroundState: (BackgroundAlarmType, Boolean) -> Unit
 ) {
-    viewModel.userHasEnabledAmbientMode(
+    viewModel.onEnterBackgroundMode(
         context = context,
-        backgroundAlarmType = backgroundAlarmType
+        backgroundAlarmType = backgroundAlarmType,
+        isAmbientMode = true
     )
     onKeepScreenOn(false)
 
@@ -295,11 +217,10 @@ private fun onTimerFinished(
         vibrationType = VibrationType.SingleShort
     )
     viewModel.updateCircularProgressBarProgress(progress = 0.0)
-    viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = 0)
+    viewModel.updateMiddleLabelValue(currentTimerSecondsRemaining = 0.0)
     viewModel.userGoToNextTimer(
         currentTimerIndex = timerViewUiState.currentTimerId,
-        currentRepetition = timerViewUiState.currentRepetition,
-        isAmbientMode = isAmbientMode
+        currentRepetition = timerViewUiState.currentRepetition
     )
 }
 

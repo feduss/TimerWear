@@ -15,7 +15,7 @@ fun getTimerViewModel(
     workoutType: WorkoutType,
     currentTimerIndex: Int? = null,
     currentRepetition: Int? = null,
-    currentTimerSecondsRemaining: Int? = null
+    currentTimerSecondsRemaining: Double? = null
 ): TimerViewModel = viewModel(
     factory = TimerViewModel.provideFactory(
         assistedFactory = EntryPointAccessors.fromActivity(

@@ -37,9 +37,8 @@ import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
 import com.feduss.timerwear.utils.PrefParam
 import com.feduss.timerwear.utils.PrefsUtils
-import com.feduss.timerwear.view.ambient.ObserveTimerAmbientMode
+import com.feduss.timerwear.view.ambient.ObserveTimerBackgroundMode
 import com.google.android.horologist.compose.ambient.AmbientState
-import kotlin.math.ceil
 
 @Composable
 fun TimerCountdownView(
@@ -65,27 +64,42 @@ fun TimerCountdownView(
         timerCountdownUiState.isTimerActive
     ) {
         if (timerCountdownUiState.isTimerActive) {
-            countDownTimer = object : CountDownTimer(
-                timerCountdownUiState.countdown * 1000L, 1000
-            ) {
+            val countDownDurationMillis = (timerCountdownUiState.countdown * 1000).toLong()
+            var counter = 0L
+            var prevMillisUntilFinished = 0L
+            countDownTimer = object : CountDownTimer(countDownDurationMillis, 100) {
                 override fun onTick(millisUntilFinished: Long) {
-                    val currentTimerSecondsRemaining = ceil((millisUntilFinished).toDouble() / 1000).toInt()
+                    var currentTimerSecondsRemaining = millisUntilFinished.toDouble() / 1000
+                    if (currentTimerSecondsRemaining == timerCountdownUiState.countdown) {
+                        currentTimerSecondsRemaining -= 0.1
+                    }
 
                     viewModel.saveCountdownData(
                         context = context,
                         currentTimerSecondsRemaining = currentTimerSecondsRemaining
                     )
+
                     viewModel.updateCountdown(currentTimerSecondsRemaining)
 
-                    onVibrate(VibrationType.SingleShort)
+                    if (currentTimerSecondsRemaining < 1.1) {
+                        //onVibrate(VibrationType.SingleShort)
+                        viewModel.countdownFinished(
+                            context = context
+                        )
+                    } else if (counter > 1000) {
+                        counter = 0
+                        onVibrate(VibrationType.SingleShort)
+                    } else if (prevMillisUntilFinished == 0L) {
+                        prevMillisUntilFinished = millisUntilFinished
+                        onVibrate(VibrationType.SingleShort)
+                    } else {
+                        counter += (prevMillisUntilFinished - millisUntilFinished)
+                        prevMillisUntilFinished = millisUntilFinished
+                    }
                 }
 
                 override fun onFinish() {
-                    onVibrate(VibrationType.SingleLong)
-                    viewModel.countdownFinished(
-                        context = context,
-                        isAmbientMode = false
-                    )
+
                 }
             }
             countDownTimer?.start()
@@ -95,11 +109,10 @@ fun TimerCountdownView(
 
     }
 
-    ObserveTimerAmbientMode(
+    ObserveTimerBackgroundMode(
         ambientState = ambientState,
         viewModel = viewModel,
         context = context,
-        backgroundAlarmType = BackgroundAlarmType.CountdownTimer,
         onKeepScreenOn = onKeepScreenOn,
         onEnterBackgroundState = onEnterBackgroundState,
         onSetAmbientMode = onSetAmbientMode,
@@ -139,7 +152,7 @@ fun TimerCountdownView(
 
             if (ambientState is AmbientState.Interactive) {
                 Text(
-                    text = timerCountdownUiState.countdown.toString(),
+                    text = timerCountdownUiState.countdown.toInt().toString(),
                     textAlign = TextAlign.Center,
                     color = Color.White,
                     fontSize = TextUnit(40f, TextUnitType.Sp),

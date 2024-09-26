@@ -17,7 +17,7 @@ android {
         applicationId = "com.feduss.timerwear"
         minSdk = 26
         targetSdk = 34
-        versionCode = 28
+        versionCode = 29
         versionName = '1.0.8'
         vectorDrawables {
             useSupportLibrary = true
@@ -85,8 +85,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6'
 
     //Google pager + scaffold
-    implementation 'com.google.android.horologist:horologist-compose-layout:0.6.19'
-    implementation 'com.google.android.horologist:horologist-composables:0.6.19'
+    implementation 'com.google.android.horologist:horologist-compose-layout:0.6.20'
+    implementation 'com.google.android.horologist:horologist-composables:0.6.20'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
 
     //Hilt

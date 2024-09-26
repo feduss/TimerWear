@@ -36,7 +36,6 @@ import com.feduss.timerwear.entity.TimerPickerModel
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable

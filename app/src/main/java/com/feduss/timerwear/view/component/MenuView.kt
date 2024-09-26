@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,21 +15,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.lifecycle.OnLifecycleEvent
-import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.uistate.MenuViewModel
+import com.feduss.timerwear.uistate.R
+import com.feduss.timerwear.uistate.extension.Purple200
+import com.feduss.timerwear.uistate.extension.Teal200
+import com.feduss.timerwear.view.component.card.GenericRoundedCard
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import com.feduss.timerwear.uistate.R
-import com.feduss.timerwear.uistate.extension.Purple200
-import com.feduss.timerwear.uistate.extension.Teal200
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable

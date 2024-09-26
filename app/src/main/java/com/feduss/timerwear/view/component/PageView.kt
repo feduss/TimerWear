@@ -25,12 +25,11 @@ fun PageView(
     ScreenScaffold(
         timeText = {
             CustomTimeText(
-                columnState = columnState,
                 ambientState = ambientState,
                 endCurvedText = endCurvedText
             )
         },
-        scrollState = columnState.state,
+        scrollState = columnState,
         positionIndicator = { PositionIndicator(scalingLazyListState = columnState.state) },
         modifier = Modifier
             .fillMaxSize()

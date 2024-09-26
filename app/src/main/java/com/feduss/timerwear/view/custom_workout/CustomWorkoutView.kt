@@ -13,11 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.lazy.items
-import com.feduss.timerwear.entity.enums.Params
-import com.feduss.timerwear.entity.enums.Section
-import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.uistate.custom_timer.CustomWorkoutViewModel
-import com.feduss.timerwear.utils.AmbientUtils
 import com.feduss.timerwear.utils.NavUtils
 import com.feduss.timerwear.view.component.card.CustomWorkoutCardView
 import com.feduss.timerwear.view.component.card.GenericRoundedCard

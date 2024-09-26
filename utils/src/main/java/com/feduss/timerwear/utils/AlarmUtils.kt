@@ -9,7 +9,6 @@ import android.media.MediaPlayer
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import com.feduss.timerwear.entity.enums.BackgroundAlarmType
-import com.feduss.timerwear.entity.enums.Consts
 import com.feduss.timerwear.entity.enums.VibrationType
 
 class AlarmUtils {

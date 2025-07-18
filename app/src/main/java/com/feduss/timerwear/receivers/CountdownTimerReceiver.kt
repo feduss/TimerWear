@@ -27,7 +27,7 @@ class CountdownTimerReceiver: BaseBroadcastReceiver() {
 
         val timer = currentWorkoutModel?.timers?.first()
 
-        Log.e("TEST123 --> ", "currentExpireTimer: countdown")
+        //Log.e("TEST123 --> ", "currentExpireTimer: countdown")
 
         timer?.let {
             PrefsUtils.setNextTimerInPrefs(

@@ -19,24 +19,10 @@ class PrefsUtils {
         }
 
         fun setStringPref(context: Context, pref: String, newValue: String?) {
-
-            val removed: Boolean
-
-
             if (newValue == null) {
-                removed = true
                 getSharedPreferences(context).edit { remove(pref).commit() }
             } else {
-                removed = false
                 getSharedPreferences(context).edit { putString(pref, newValue).commit() }
-            }
-
-            if (pref == PrefParam.CurrentTimerSecondsRemaining.value) {
-                if (removed) {
-                    Log.e("123: ", "current seconds remaining removed")
-                } else {
-                    Log.e("123: ", "current seconds remaining saved: $newValue")
-                }
             }
         }
 

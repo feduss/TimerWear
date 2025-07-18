@@ -62,7 +62,7 @@ class ActiveTimerReceiver : BaseBroadcastReceiver() {
             return
         }
 
-        Log.e("TEST123 --> ", "currentExpiredTimer: ${currentWorkoutModel.timers[currentTimerIndex].name}, repetition: $currentRepetition")
+        //Log.e("TEST123 --> ", "currentExpiredTimer: ${currentWorkoutModel.timers[currentTimerIndex].name}, repetition: $currentRepetition")
 
         handleNextTimer(
             totalTimers,

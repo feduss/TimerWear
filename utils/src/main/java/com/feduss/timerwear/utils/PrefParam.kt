@@ -15,5 +15,6 @@ sealed class PrefParam(val value: String) {
     data object WorkoutType: PrefParam(value = "WorkoutType")
     data object TimerActiveAlarmSetTime: PrefParam(value = "TimerActiveAlarmSetTime")
     data object IsSoundEnabled: PrefParam(value = "IsSoundEnabled")
+    data object TimerWarningSeconds: PrefParam(value = "TimerWarningSeconds")
     data object IsAmbientModeEnabled: PrefParam(value = "IsAmbientModeEnabled")
 }

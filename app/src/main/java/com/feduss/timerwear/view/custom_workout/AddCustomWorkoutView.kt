@@ -92,7 +92,9 @@ fun AddCustomWorkoutView(
             TimerPicker(
                 titleId = it.titleId,
                 initialMinutesValue = it.initialMinutesValue,
+                maxMinutesOptions = it.maxMinutesOptions,
                 initialSecondsValue = it.initialSecondsValue,
+                maxSecondsOptions = it.maxSecondsOptions,
                 onValuesConfirmed = it.onValueChanged
             )
         } ?:

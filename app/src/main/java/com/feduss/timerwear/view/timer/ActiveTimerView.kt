@@ -70,6 +70,7 @@ fun ActiveTimerView(
     userHasSkippedTimer: MutableState<Boolean>,
     context: Context
 ) {
+
     val newTimerSecondsRemaining = remember {
         mutableDoubleStateOf(timerViewUiState.timerSecondsRemaining)
     }
@@ -122,22 +123,6 @@ fun ActiveTimerView(
             }
         } else {
 
-            LaunchedEffect(timerViewUiState.uuid) {
-                if (!userHasSkippedTimer.value && !timerViewUiState.resumedFromBackGround) {
-                    onVibrate(VibrationType.SingleShort)
-
-                    val soundType = when (timerViewUiState.timerType) {
-                        TimerType.Work -> SoundType.Work
-                        TimerType.Rest -> SoundType.Rest
-                        TimerType.IntermediumRest -> SoundType.Rest
-                    }
-
-                    if (viewModel.isSoundEnabled) {
-                        onPlaySound(soundType)
-                    }
-                }
-            }
-
             LaunchedEffect(
                 timerViewUiState.uuid,
                 timerViewUiState.isTimerActive,
@@ -159,6 +144,10 @@ fun ActiveTimerView(
                                 currentTimerSecondsRemaining -= 0.1
                             }
 
+                            if (currentTimerSecondsRemaining < 1.0) {
+                                val a = 0
+                            }
+
                             val progress = (1f - (1f - currentTimerSecondsRemaining
                                 .div(timerViewUiState.maxTimerSeconds)))
                             viewModel.updateCircularProgressBarProgress(progress = progress)
@@ -172,7 +161,7 @@ fun ActiveTimerView(
                             )
                             newTimerSecondsRemaining.doubleValue = currentTimerSecondsRemaining
 
-                            if (currentTimerSecondsRemaining < 5) {
+                            if (currentTimerSecondsRemaining < viewModel.timerWarningSeconds) {
 
                                 viewModel.setNextTimerTimeText(
                                     context = context
@@ -184,6 +173,15 @@ fun ActiveTimerView(
                                 } else if (prevMillisUntilFinished == 0L) {
                                     prevMillisUntilFinished = millisUntilFinished
                                     onVibrate(VibrationType.SingleShort)
+
+                                    if (viewModel.isSoundEnabled) {
+                                        val soundType = when (timerViewUiState.timerType) {
+                                            TimerType.Work -> SoundType.Work
+                                            TimerType.Rest -> SoundType.Rest
+                                            TimerType.IntermediumRest -> SoundType.Rest
+                                        }
+                                        onPlaySound(soundType)
+                                    }
                                 } else {
                                     counter += (prevMillisUntilFinished - millisUntilFinished)
                                     prevMillisUntilFinished = millisUntilFinished
@@ -254,7 +252,6 @@ private fun TimerViewMainContent(
     onTimerSet: (String) -> Unit,
     onVibrate: (VibrationType) -> Unit
 ) {
-
     onTimerSet(timerViewUiState.timeText)
 
     CircularProgressIndicator(

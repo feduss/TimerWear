@@ -148,17 +148,9 @@ private fun RequestPermission() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
-            permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false) -> {
-
-            }
-
-            permissions.getOrDefault(Manifest.permission.VIBRATE, false) -> {
-
-            }
-
-            else -> {
-
-            }
+            permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false) -> {}
+            permissions.getOrDefault(Manifest.permission.VIBRATE, false) -> {}
+            else -> {}
         }
     }
 

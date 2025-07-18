@@ -29,13 +29,14 @@ fun AmbientTimer(
 ) {
 
     //TODO: handle ambient details
-    if (ambientState.ambientDetails?.burnInProtectionRequired == true) {
+
+    /*if (ambientState.ambientDetails?.burnInProtectionRequired == true) {
 
     }
 
     if (ambientState.ambientDetails?.deviceHasLowBitAmbient == true) {
 
-    }
+    }*/
     //endtodo
 
     onTimerSet(timerViewUiState.timeText)

@@ -44,6 +44,7 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
 import com.google.android.horologist.compose.layout.rememberColumnState
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
@@ -65,17 +66,17 @@ fun MainNavView(
 
     val currentScreen by navController.currentBackStackEntryAsState()
 
-    val isAlwaysOnScreen = currentScreen?.destination?.route?.contains(Section.Timer.baseRoute) == true
+    //val isAlwaysOnScreen = currentScreen?.destination?.route?.contains(Section.Timer.baseRoute) == true
 
     val ambientState: MutableState<AmbientState> = remember {
         mutableStateOf(AmbientState.Interactive)
     }
 
     AmbientAware(
-        isAlwaysOnScreen = isAlwaysOnScreen
+        //isAlwaysOnScreen = isAlwaysOnScreen
     ) { ambientStateUpdate ->
 
-        ambientState.value = ambientStateUpdate.ambientState
+        ambientState.value = ambientStateUpdate//.ambientState
 
         AppScaffold(
             timeText = {}
@@ -329,6 +330,7 @@ fun MainNavView(
                     ) {
                         SettingsView(
                             context = mainActivity,
+                            navController = navController,
                             columnState = it,
                             onEmailFeedbackTapped = {
                                 openEmail(mainActivity)
@@ -344,7 +346,7 @@ fun MainNavView(
 private fun openEmail(activity: MainActivity) {
     val uriText = "mailto:feduss96@gmail.co," +
             "?subject=" + "TimerWear: feedback"
-    val uri = Uri.parse(uriText)
+    val uri = uriText.toUri()
     val sendIntent = Intent(Intent.ACTION_VIEW)
     sendIntent.addCategory(Intent.CATEGORY_BROWSABLE)
     sendIntent.data = uri

@@ -33,6 +33,7 @@ import androidx.wear.compose.material.PickerState
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.rememberPickerState
 import com.feduss.timerwear.entity.TimerPickerModel
+import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.R
 import com.feduss.timerwear.uistate.extension.Purple200
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -41,21 +42,30 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 @Composable
 fun TimerPicker(
     titleId: Int,
-    initialMinutesValue: Int = 0,
-    initialSecondsValue: Int = 0,
+    initialMinutesValue: Int?,
+    maxMinutesOptions: Int?,
+    initialSecondsValue: Int ,
+    maxSecondsOptions: Int,
     onValuesConfirmed: (TimerPickerModel) -> Unit
 ) {
 
-    val minutesPickerState = rememberPickerState(
-        initialNumberOfOptions = 60,
-        initiallySelectedOption = initialMinutesValue
-    )
+    var minutesPickerState: PickerState? = null
+    var minutesPickerContentDescription: String? = null
+
+    if (initialMinutesValue != null && maxMinutesOptions != null) {
+        minutesPickerState = rememberPickerState(
+            initialNumberOfOptions = maxMinutesOptions,
+            initiallySelectedOption = initialMinutesValue
+        )
+
+        minutesPickerContentDescription = remember { derivedStateOf { "${minutesPickerState.selectedOption + 1}" }.toString() }
+    }
+
     val secondsPickerState = rememberPickerState(
-        initialNumberOfOptions = 60,
+        initialNumberOfOptions = maxSecondsOptions,
         initiallySelectedOption = initialSecondsValue
     )
 
-    val minutesPickerContentDescription by remember { derivedStateOf { "${minutesPickerState.selectedOption + 1}" } }
     val secondsPickerContentDescription by remember { derivedStateOf { "${secondsPickerState.selectedOption + 1}" } }
     val color = Color.Purple200
     Column(
@@ -66,8 +76,10 @@ fun TimerPicker(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
+            modifier = Modifier.infiniteMarquee.padding(horizontal = 24.dp),
             text = stringResource(id = titleId),
-            color = Color.Purple200
+            color = Color.Purple200,
+            maxLines = 1
         )
         
         Spacer(modifier = Modifier.height(4.dp))
@@ -79,12 +91,14 @@ fun TimerPicker(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
         ) {
-            Picker(
-                state = minutesPickerState,
-                contentDescription =  minutesPickerContentDescription,
-                titleId = R.string.timer_picker_minutes_title,
-                color = color
-            )
+            if (minutesPickerState != null && minutesPickerContentDescription != null) {
+                Picker(
+                    state = minutesPickerState,
+                    contentDescription = minutesPickerContentDescription,
+                    titleId = R.string.timer_picker_minutes_title,
+                    color = color
+                )
+            }
 
             Picker(
                 state = secondsPickerState,
@@ -113,7 +127,7 @@ fun TimerPicker(
             onClick = {
                 onValuesConfirmed(
                     TimerPickerModel(
-                        minutes = minutesPickerState.selectedOption,
+                        minutes = minutesPickerState?.selectedOption ?: 0,
                         seconds = secondsPickerState.selectedOption
                     )
                 )

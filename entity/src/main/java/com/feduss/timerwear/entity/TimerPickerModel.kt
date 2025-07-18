@@ -9,4 +9,8 @@ class TimerPickerModel(val minutes: Int, val seconds: Int) {
     fun toSeconds(): Int {
         return (minutes * 60) + seconds
     }
+
+    fun toSecondsString(): String {
+        return "${toSeconds()}s"
+    }
 }

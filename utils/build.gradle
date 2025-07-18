@@ -31,14 +31,14 @@ dependencies {
     implementation project(path: ':entity')
 
     //Kotlin core
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.16.0'
 
     //Androidx for legacy support
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.wear.compose:compose-foundation:1.4.0'
+    implementation 'androidx.wear.compose:compose-foundation:1.4.1'
 
     implementation 'androidx.wear:wear-ongoing:1.0.0'
-    implementation 'androidx.navigation:navigation-runtime-ktx:2.8.1'
+    implementation 'androidx.navigation:navigation-runtime-ktx:2.9.2'
 
     //Testing
     testImplementation 'junit:junit:4.13.2'
@@ -49,5 +49,5 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.2.1'
 
     //Gson
-    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.google.code.gson:gson:2.13.1'
 }

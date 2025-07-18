@@ -103,6 +103,7 @@ class TimerViewModel @AssistedInject constructor(
     private var customWorkoutModel: CustomWorkoutModel? = null
 
     var isSoundEnabled: Boolean = false
+    var timerWarningSeconds: Int = 5
     var backgroundModeEnterMillsTimestamp: Long = 0L
     var backgroundModeEnterTimerUUID: UUID? = null
     var isTimerActivePreBackground = false
@@ -139,6 +140,7 @@ class TimerViewModel @AssistedInject constructor(
     fun loadTimerCountdownUiState(context: Context) {
 
         isSoundEnabled = PrefsUtils.getSoundPreference(context)
+        timerWarningSeconds = PrefsUtils.getTimerWarningSeconds(context)
 
         if (_dataUiState.value != null) return
 
@@ -626,7 +628,7 @@ class TimerViewModel @AssistedInject constructor(
         PrefsUtils.setStringPref(
             context = context,
             pref = PrefParam.CurrentTimerSecondsRemaining.value,
-            newValue = currentTimerSecondsRemaining?.toString()
+            newValue = currentTimerSecondsRemaining.toString()
         )
     }
 

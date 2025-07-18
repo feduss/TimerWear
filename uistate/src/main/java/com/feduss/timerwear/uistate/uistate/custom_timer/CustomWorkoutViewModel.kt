@@ -89,31 +89,40 @@ class CustomWorkoutViewModel @AssistedInject constructor(
             val activeWorkoutId = PrefsUtils.getStringPref(
                 context = context,
                 pref = PrefParam.CurrentWorkoutId.value
-            )
+            )?.toIntOrNull()
 
             val activeTimerIndex = PrefsUtils.getStringPref(
                 context = context,
                 pref = PrefParam.CurrentTimerIndex.value
-            )
+            )?.toIntOrNull()
 
             val activeWorkoutRepetition = PrefsUtils.getStringPref(
                 context = context,
                 pref = PrefParam.CurrentRepetition.value
-            )
+            )?.toIntOrNull()
 
             val activeTimerSecondsRemaining = PrefsUtils.getStringPref(
                 context = context,
                 pref = PrefParam.CurrentTimerSecondsRemaining.value
-            )
+            )?.toDoubleOrNull()
 
-            _navUiState.value = activeWorkoutId?.toInt()?.let {
-                NavUiState.ExistingCustomWorkoutClicked(
-                    workoutId = it,
+            // Check if existing workout is valid before resuming it
+            // else wipe it, it's probably corrupted someway
+            if (
+                activeWorkoutId != null && activeWorkoutId > -1 &&
+                activeTimerIndex != null && activeTimerIndex > -1 &&
+                activeWorkoutRepetition != null && activeWorkoutRepetition > -1 &&
+                activeTimerSecondsRemaining != null && activeTimerSecondsRemaining >= 0.0
+            ) {
+                _navUiState.value = NavUiState.ExistingCustomWorkoutClicked(
+                    workoutId = activeWorkoutId,
                     workoutType = workoutType,
-                    currentTimerIndex = activeTimerIndex?.toIntOrNull(),
-                    currentRepetition = activeWorkoutRepetition?.toIntOrNull(),
-                    currentTimerSecondsRemaining = activeTimerSecondsRemaining?.toDoubleOrNull()
+                    currentTimerIndex = activeTimerIndex,
+                    currentRepetition = activeWorkoutRepetition,
+                    currentTimerSecondsRemaining = activeTimerSecondsRemaining
                 )
+            } else {
+                PrefsUtils.cancelTimerInPrefs(context)
             }
         }
     }

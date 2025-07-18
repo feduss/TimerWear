@@ -2,8 +2,10 @@ package com.feduss.timerwear.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.feduss.timerwear.entity.enums.WorkoutType
+import androidx.core.content.edit
 
 class PrefsUtils {
 
@@ -16,25 +18,25 @@ class PrefsUtils {
             return getSharedPreferences(context).getString(pref, null)
         }
 
-        fun getStringSetPref(context: Context, pref: String): MutableSet<String>? {
-            return getSharedPreferences(context).getStringSet(pref, null)
-        }
-
         fun setStringPref(context: Context, pref: String, newValue: String?) {
 
+            val removed: Boolean
+
+
             if (newValue == null) {
-                getSharedPreferences(context).edit().remove(pref).apply()
+                removed = true
+                getSharedPreferences(context).edit { remove(pref).commit() }
             } else {
-                getSharedPreferences(context).edit().putString(pref, newValue).apply()
+                removed = false
+                getSharedPreferences(context).edit { putString(pref, newValue).commit() }
             }
-        }
 
-        fun setStringSetPref(context: Context, pref: String, newValue: Set<String>?) {
-
-            if (newValue == null) {
-                getSharedPreferences(context).edit().remove(pref).apply()
-            } else {
-                getSharedPreferences(context).edit().putStringSet(pref, newValue).apply()
+            if (pref == PrefParam.CurrentTimerSecondsRemaining.value) {
+                if (removed) {
+                    Log.e("123: ", "current seconds remaining removed")
+                } else {
+                    Log.e("123: ", "current seconds remaining saved: $newValue")
+                }
             }
         }
 
@@ -113,7 +115,15 @@ class PrefsUtils {
 
             val currentMillisecondsTimestamp = System.currentTimeMillis()
 
-            var newTimerSecondsRemaining = timerSecondsRemaining - ((currentMillisecondsTimestamp - timerActiveAlarmSetTime) / 1000.0)
+            var newTimerSecondsRemaining: Double
+
+            // if the app was correctly put to background, timerActiveAlarmSetTime should be > 0
+            // otherwise, if the app is killed, for example, this value should be 0
+            newTimerSecondsRemaining = if (timerActiveAlarmSetTime > 0) {
+                timerSecondsRemaining - ((currentMillisecondsTimestamp - timerActiveAlarmSetTime) / 1000.0)
+            } else {
+                timerSecondsRemaining
+            }
 
             //Corner case?
             if(newTimerSecondsRemaining < 0) {
@@ -136,6 +146,10 @@ class PrefsUtils {
 
         fun getSoundPreference(context: Context): Boolean {
             return getStringPref(context, PrefParam.IsSoundEnabled.value) == "true"
+        }
+
+        fun getTimerWarningSeconds(context: Context): Int {
+            return getStringPref(context, PrefParam.TimerWarningSeconds.value)?.toIntOrNull() ?: 5
         }
     }
 }

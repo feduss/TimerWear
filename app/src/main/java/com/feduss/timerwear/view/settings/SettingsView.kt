@@ -1,6 +1,7 @@
 package com.feduss.timerwear.view.settings
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,12 +29,18 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
+import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import com.feduss.timerwear.BuildConfig
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.PurpleCustom
+import com.feduss.timerwear.uistate.uistate.picker.TimerPickerUiState
 import com.feduss.timerwear.uistate.uistate.settings.SettingsViewModel
+import com.feduss.timerwear.view.component.card.GenericOtherInputCard
 import com.feduss.timerwear.view.component.header.LeftIconTextHeader
+import com.feduss.timerwear.view.component.picker.TimerPicker
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -43,12 +50,16 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 fun SettingsView(
     context: Context,
     viewModel: SettingsViewModel = hiltViewModel(),
+    navController: NavController,
     columnState: ScalingLazyColumnState,
     onEmailFeedbackTapped: () -> Unit
 ) {
 
     val dataUiState by viewModel.dataUiState.collectAsState()
     val navUiState by viewModel.navUiState.collectAsState()
+    val timerPickerState by viewModel.timerPickerUiState.collectAsState()
+
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
 
     val versionName = BuildConfig.VERSION_NAME
     val versionCode = BuildConfig.VERSION_CODE
@@ -68,84 +79,141 @@ fun SettingsView(
 
     dataUiState?.let { state ->
 
-        ScalingLazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp),
-            columnState = columnState
+        BackHandler {
+            handleBackButton(timerPickerState, viewModel, navController)
+        }
+
+        SwipeToDismissBox(
+            state = swipeToDismissBoxState,
+            onDismissed = {
+                handleBackButton(timerPickerState, viewModel, navController)
+            }
         ) {
-            item {
-                LeftIconTextHeader(
-                    title = stringResource(state.headerTextId)
+            timerPickerState?.let {
+                TimerPicker(
+                    titleId = it.titleId,
+                    initialMinutesValue = it.initialMinutesValue,
+                    maxMinutesOptions = it.maxMinutesOptions,
+                    initialSecondsValue = it.initialSecondsValue,
+                    maxSecondsOptions = it.maxSecondsOptions,
+                    onValuesConfirmed = it.onValueChanged
                 )
-            }
+            } ?: ScalingLazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
+                columnState = columnState
+            ) {
+                item {
+                    LeftIconTextHeader(
+                        title = stringResource(state.headerTextId)
+                    )
+                }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
-                ) {
-                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                        Checkbox(
-                            checked = state.isSoundEnabled,
-                            onCheckedChange = {
-                                viewModel.saveSoundPreference(
-                                    context = context,
-                                    isSoundEnabled = it
-                                )
-                            }
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            4.dp,
+                            Alignment.CenterHorizontally
+                        )
+                    ) {
+                        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                            Checkbox(
+                                checked = state.isSoundEnabled,
+                                onCheckedChange = {
+                                    viewModel.saveSoundPreference(
+                                        context = context,
+                                        isSoundEnabled = it
+                                    )
+                                }
+                            )
+                        }
+                        Text(
+                            modifier = Modifier.infiniteMarquee,
+                            text = stringResource(id = state.soundCheckboxTextId),
+                            color = Color.White,
+                            textAlign = TextAlign.Left,
+                            fontSize = TextUnit(12f, TextUnitType.Sp)
                         )
                     }
-                    Text(
-                        modifier = Modifier.infiniteMarquee,
-                        text = stringResource(id = state.soundCheckboxTextId),
-                        color = Color.White,
-                        textAlign = TextAlign.Left,
-                        fontSize = TextUnit(12f, TextUnitType.Sp)
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                val timerWarningSecondsUiState = state.timerWarningSecondsUiState
+
+                item {
+                    GenericOtherInputCard(
+                        titleId = timerWarningSecondsUiState.titleId,
+                        placeholderId = timerWarningSecondsUiState.placeholderId,
+                        value = timerWarningSecondsUiState.value?.toSecondsString() ?: "",
+                        errorTextId = null,
+                        onCardClicked = {
+                            viewModel.userHasOpenedTimerWarningSecondsPicker(
+                                context = context,
+                                titleId = timerWarningSecondsUiState.titleId,
+                                newModel = timerWarningSecondsUiState.value
+                            )
+                        }
                     )
                 }
-            }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-            item {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                item {
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(state.feedbackTextId),
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            modifier = Modifier.clickable {
+                                viewModel.userHasTappedEmail()
+                            },
+                            text = state.feedbackEmail,
+                            textAlign = TextAlign.Center,
+                            textDecoration = TextDecoration.Underline,
+                            color = Color.PurpleCustom
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+
+                item {
                     Text(
-                        text = stringResource(state.feedbackTextId),
+                        text = stringResource(state.appVersionTextId, versionName, versionCode),
                         textAlign = TextAlign.Center
                     )
-                    Text(
-                        modifier = Modifier.clickable {
-                            viewModel.userHasTappedEmail()
-                        },
-                        text = state.feedbackEmail,
-                        textAlign = TextAlign.Center,
-                        textDecoration = TextDecoration.Underline,
-                        color = Color.PurpleCustom
-                    )
                 }
             }
-
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-
-            item {
-                Text(
-                    text = stringResource(state.appVersionTextId, versionName, versionCode),
-                    textAlign = TextAlign.Center
-                )
-            }
         }
+    }
+}
+
+private fun handleBackButton(
+    timerPickerState: TimerPickerUiState?,
+    viewModel: SettingsViewModel,
+    navController: NavController
+) {
+    if (timerPickerState != null) {
+        viewModel.userHasDismissedTimerPicker()
+    } else {
+        navController.popBackStack()
     }
 }

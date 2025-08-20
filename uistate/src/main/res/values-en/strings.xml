@@ -58,4 +58,5 @@
     <string name="ambient_warning_subtitle">Always on display is recommended. Enabled it from the settings or proceed anyway.</string>
     <string name="ambient_countdown_text">Countdown</string>
     <string name="settings_timer_warning_seconds_textfield_title">Expiring timer warning</string>
+    <string name="setup_schedule_alarm_warning">Grant alarms and reminders permission to enable buttons.</string>
 </resources>

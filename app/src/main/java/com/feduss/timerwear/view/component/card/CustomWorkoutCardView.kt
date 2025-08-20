@@ -24,20 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
-import androidx.wear.compose.foundation.RevealActionType
-import androidx.wear.compose.foundation.RevealState
-import androidx.wear.compose.foundation.RevealValue
 import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.edgeSwipeToDismiss
-import androidx.wear.compose.foundation.rememberRevealState
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.RevealActionType
+import androidx.wear.compose.material.RevealState
+import androidx.wear.compose.material.RevealValue
 import androidx.wear.compose.material.SwipeToRevealCard
 import androidx.wear.compose.material.SwipeToRevealDefaults
 import androidx.wear.compose.material.SwipeToRevealPrimaryAction
 import androidx.wear.compose.material.SwipeToRevealSecondaryAction
 import androidx.wear.compose.material.SwipeToRevealUndoAction
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.rememberRevealState
 import com.feduss.timerwear.extension.infiniteMarquee
 import com.feduss.timerwear.uistate.extension.Teal200
 import com.skydoves.balloon.ArrowPositionRules
@@ -116,7 +116,7 @@ fun CustomWorkoutCardView(
                 balloonJob = coroutineScope.launch {
                     repeat(2) {
                         delay(2000)
-                        revealState.animateTo(RevealValue.Revealing)
+                        revealState.animateTo(RevealValue.RightRevealing)
                         delay(2000)
                         revealState.animateTo(RevealValue.Covered)
                         revealState.lastActionType = RevealActionType.None
@@ -143,7 +143,7 @@ fun CustomWorkoutCardView(
                     customActions = listOf(
                         CustomAccessibilityAction("Edit this custom workout") {
                             coroutineScope.launch {
-                                revealState.animateTo(RevealValue.Revealed)
+                                revealState.animateTo(RevealValue.RightRevealed)
                             }
                             state.onEditWorkoutButtonClicked()
                             true
@@ -180,7 +180,7 @@ fun CustomWorkoutCardView(
                     },
                     onClick = {
                         coroutineScope.launch {
-                            revealState.animateTo(RevealValue.Revealed)
+                            revealState.animateTo(RevealValue.RightRevealed)
                         }
                         state.onEditWorkoutButtonClicked()
 
@@ -192,7 +192,7 @@ fun CustomWorkoutCardView(
                     revealState = revealState,
                     onClick = {
                         coroutineScope.launch {
-                            revealState.animateTo(RevealValue.Revealed)
+                            revealState.animateTo(RevealValue.RightRevealed)
                             delay(3000)
                             if (!undoDone.value) {
                                 state.onDeleteWorkoutButtonClicked()
@@ -268,7 +268,7 @@ fun CustomWorkoutCardView(
     }
 }
 
-@OptIn(ExperimentalWearFoundationApi::class)
+@OptIn(ExperimentalWearFoundationApi::class, ExperimentalWearMaterialApi::class)
 private fun resetRevealState(
     coroutineScope: CoroutineScope,
     revealState: RevealState,

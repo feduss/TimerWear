@@ -145,7 +145,6 @@ fun ActiveTimerView(
                             }
 
                             if (currentTimerSecondsRemaining < 1.0) {
-                                val a = 0
                             }
 
                             val progress = (1f - (1f - currentTimerSecondsRemaining

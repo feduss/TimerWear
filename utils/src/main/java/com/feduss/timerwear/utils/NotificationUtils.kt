@@ -105,7 +105,7 @@ class NotificationUtils {
 
                 ongoingActivity.update(
                     context,
-                    NotificationUtils.getOngoingStatus(
+                    getOngoingStatus(
                         timerSecondsRemaining,
                         name
                     )

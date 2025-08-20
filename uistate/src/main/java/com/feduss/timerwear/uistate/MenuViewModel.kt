@@ -23,6 +23,8 @@ class MenuViewModel @Inject constructor() : ViewModel() {
     private var _navUiState = MutableStateFlow<NavUiState?>(null)
     val navUiState = _navUiState.asStateFlow()
 
+    val scheduleAlarmWarningId = R.string.setup_schedule_alarm_warning
+
     fun loadActiveTimer(context: Context) {
         if (PrefsUtils.isTimerActive(context)) {
 

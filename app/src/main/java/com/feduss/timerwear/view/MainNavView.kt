@@ -16,7 +16,6 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
-import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import androidx.wear.remote.interactions.RemoteActivityHelper
@@ -64,17 +63,13 @@ fun MainNavView(
         mutableStateOf(null)
     }
 
-    val currentScreen by navController.currentBackStackEntryAsState()
-
     //val isAlwaysOnScreen = currentScreen?.destination?.route?.contains(Section.Timer.baseRoute) == true
 
     val ambientState: MutableState<AmbientState> = remember {
         mutableStateOf(AmbientState.Interactive)
     }
 
-    AmbientAware(
-        //isAlwaysOnScreen = isAlwaysOnScreen
-    ) { ambientStateUpdate ->
+    AmbientAware { ambientStateUpdate ->
 
         ambientState.value = ambientStateUpdate//.ambientState
 
@@ -99,7 +94,8 @@ fun MainNavView(
                         MenuView(
                             context = mainActivity,
                             columnState = it,
-                            navController = navController
+                            navController = navController,
+                            openAlarmSettings =  { openScheduleExactAlarmPermissionSetting(mainActivity) },
                         )
                     }
                 }
@@ -370,4 +366,15 @@ private fun openEmail(activity: MainActivity) {
 fun openDisplaySettings(mainActivity: MainActivity) {
     val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
     mainActivity.startActivity(intent)
+}
+
+fun openScheduleExactAlarmPermissionSetting(activity: MainActivity) {
+
+
+    val intent = Intent(
+        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+        Uri.fromParts("package", activity.packageName, null)
+    )
+    activity.startActivity(intent)
+
 }

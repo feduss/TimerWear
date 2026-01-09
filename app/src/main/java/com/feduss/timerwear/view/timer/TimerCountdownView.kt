@@ -2,6 +2,7 @@ package com.feduss.timerwear.view.timer
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,8 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.Text
 import com.feduss.timerwear.entity.enums.BackgroundAlarmType
+import com.feduss.timerwear.entity.enums.SoundType
+import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.entity.enums.VibrationType
 import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
 import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
@@ -39,6 +42,7 @@ import com.feduss.timerwear.utils.PrefParam
 import com.feduss.timerwear.utils.PrefsUtils
 import com.feduss.timerwear.view.ambient.ObserveTimerBackgroundMode
 import com.google.android.horologist.compose.ambient.AmbientState
+import kotlin.math.absoluteValue
 
 @Composable
 fun TimerCountdownView(
@@ -51,6 +55,7 @@ fun TimerCountdownView(
     onEnterBackgroundState: (BackgroundAlarmType, Boolean) -> Unit,
     onKeepScreenOn: (Boolean) -> Unit,
     onVibrate: (VibrationType) -> Unit,
+    onPlaySound: (SoundType) -> Unit,
     onSetAmbientMode: () -> Unit
 ) {
 
@@ -65,7 +70,7 @@ fun TimerCountdownView(
     ) {
         if (timerCountdownUiState.isTimerActive) {
             val countDownDurationMillis = (timerCountdownUiState.countdown * 1000).toLong()
-            var counter = 0L
+            var elapsedSeconds = 0f
             var prevMillisUntilFinished = 0L
             countDownTimer = object : CountDownTimer(countDownDurationMillis, 100) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -82,24 +87,33 @@ fun TimerCountdownView(
                     viewModel.updateCountdown(currentTimerSecondsRemaining)
 
                     if (currentTimerSecondsRemaining < 1.1) {
-                        //onVibrate(VibrationType.SingleShort)
                         viewModel.countdownFinished(
                             context = context
                         )
-                    } else if (counter > 1000) {
-                        counter = 0
+                    //elapsedSeconds is not ensure that the vibration is played every second
+                    } else if (elapsedSeconds > 1.0) {
+                        elapsedSeconds = 0f
+                        //Log.e("TEST123: ", "elapsedSeconds reset to 0")
                         onVibrate(VibrationType.SingleShort)
-                    } else if (prevMillisUntilFinished == 0L) {
+                    } else if (prevMillisUntilFinished != 0L) {
+                        elapsedSeconds += (prevMillisUntilFinished - millisUntilFinished).div(1000f)
+                        //Log.e("TEST123: ", "prevMillisUntilFinished: $prevMillisUntilFinished, millisUntilFinished: $millisUntilFinished, elapsedSeconds: $elapsedSeconds")
                         prevMillisUntilFinished = millisUntilFinished
-                        onVibrate(VibrationType.SingleShort)
                     } else {
-                        counter += (prevMillisUntilFinished - millisUntilFinished)
                         prevMillisUntilFinished = millisUntilFinished
+                        onVibrate(VibrationType.SingleShort)
                     }
                 }
 
                 override fun onFinish() {
-
+                    if (viewModel.isSoundEnabled) {
+                        val soundType = when (timerCountdownUiState.firstTimerType) {
+                            TimerType.Work -> SoundType.Work
+                            TimerType.Rest -> SoundType.Rest
+                            TimerType.IntermediumRest -> SoundType.Rest
+                        }
+                        onPlaySound(soundType)
+                    }
                 }
             }
             countDownTimer?.start()

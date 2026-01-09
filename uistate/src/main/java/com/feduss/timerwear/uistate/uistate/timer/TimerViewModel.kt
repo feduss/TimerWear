@@ -103,6 +103,7 @@ class TimerViewModel @AssistedInject constructor(
     private var customWorkoutModel: CustomWorkoutModel? = null
 
     var isSoundEnabled: Boolean = false
+    var endOfWorkout: Boolean = false
     var timerWarningSeconds: Int = 5
     var backgroundModeEnterMillsTimestamp: Long = 0L
     var backgroundModeEnterTimerUUID: UUID? = null
@@ -178,7 +179,8 @@ class TimerViewModel @AssistedInject constructor(
                     ambientCountDownTextId = ambientCountdownTextId,
                     ambientCountDownIconId = countdownIconId,
                     ambientCountDownIconDescription = countdownIconDescription,
-                    isTimerActive = true
+                    isTimerActive = true,
+                    firstTimerType = customWorkoutModel?.timers?.first()?.type ?: TimerType.Work
                 ),
                 timerTYPViewUiState = null
             )
@@ -399,6 +401,7 @@ class TimerViewModel @AssistedInject constructor(
 
             if (newCurrentTimerIndex == -1 && newCurrentRepetition == -1) {
                 _navUiState.value = NavUiState.GoToEndOfWorkout
+                endOfWorkout = true
                 return
             }
 

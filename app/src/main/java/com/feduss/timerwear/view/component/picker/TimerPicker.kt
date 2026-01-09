@@ -76,7 +76,7 @@ fun TimerPicker(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            modifier = Modifier.infiniteMarquee.padding(horizontal = 24.dp),
+            modifier = Modifier.infiniteMarquee().padding(horizontal = 24.dp),
             text = stringResource(id = titleId),
             color = Color.Purple200,
             maxLines = 1

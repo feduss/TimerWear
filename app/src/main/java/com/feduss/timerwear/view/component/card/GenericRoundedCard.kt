@@ -105,7 +105,7 @@ fun GenericRoundedCard(
                     Text(
                         maxLines = 1,
                         modifier = Modifier
-                            .infiniteMarquee,
+                            .infiniteMarquee(),
                         text = leftText,
                         textAlign = TextAlign.Left,
                         color = if (isEnabled) leftTextColor else disabledContentColor
@@ -115,7 +115,7 @@ fun GenericRoundedCard(
                         Text(
                             maxLines = 1,
                             modifier = Modifier
-                                .infiniteMarquee,
+                                .infiniteMarquee(),
                             text = bottomText,
                             textAlign = TextAlign.Left,
                             color = if (isEnabled) bottomTextColor else disabledContentColor

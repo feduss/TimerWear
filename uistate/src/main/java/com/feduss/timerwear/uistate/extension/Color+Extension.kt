@@ -50,5 +50,5 @@ fun Color.Companion.fromHex(hex: String?): Color? {
     if (hex.isNullOrEmpty()) {
         return null
     }
-    return Color(android.graphics.Color.parseColor("#$hex"))
+    return Color("#$hex".toColorInt())
 }

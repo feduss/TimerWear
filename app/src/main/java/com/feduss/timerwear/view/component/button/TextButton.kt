@@ -21,7 +21,7 @@ fun TextButton(
     contentColor: Color = contentColorFor(backgroundColor)
 ) {
     Button(
-        modifier = modifier.fillMaxWidth(0.8f).infiniteMarquee,
+        modifier = modifier.fillMaxWidth(0.8f).infiniteMarquee(),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor,
             contentColor = contentColor

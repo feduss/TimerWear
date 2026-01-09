@@ -46,7 +46,7 @@ fun GenericTextInputCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            modifier = Modifier.infiniteMarquee,
+            modifier = Modifier.infiniteMarquee(),
             text = stringResource(id = titleId),
             textAlign = TextAlign.Start
         )
@@ -86,7 +86,7 @@ fun GenericTextInputCard(
                         val placeholder = stringResource(id = placeholderId)
                         if (placeholder.isNotEmpty() && value.isEmpty()) {
                             Text(
-                                modifier = Modifier.infiniteMarquee,
+                                modifier = Modifier.infiniteMarquee(),
                                 text = placeholder,
                                 textAlign = TextAlign.Center,
                                 color = Color.Gray,
@@ -102,7 +102,7 @@ fun GenericTextInputCard(
 
         if (errorTextId != null) {
             Text(
-                modifier = Modifier.infiniteMarquee,
+                modifier = Modifier.infiniteMarquee(),
                 text = stringResource(id = errorTextId),
                 textAlign = TextAlign.Start,
                 color = errorColor

@@ -125,6 +125,12 @@ fun TimerView(
                         vibrationType = it
                     )
                 },
+                onPlaySound = {
+                    playSound(
+                        context = context,
+                        soundType = it
+                    )
+                },
                 onSetAmbientMode = {
                     setAmbientMode(
                         viewModel = viewModel,

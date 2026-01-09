@@ -49,7 +49,7 @@ fun LeftIconTextHeader(
             maxLines = 1,
             modifier = Modifier
                 .weight(1f, false)
-                .infiniteMarquee,
+                .infiniteMarquee(),
             text = title
         )
     }

@@ -19,7 +19,8 @@ data class TimerCountdownUiState(
     val ambientCountDownTextId: Int,
     val ambientCountDownIconId: Int,
     val ambientCountDownIconDescription: String,
-    val isTimerActive: Boolean
+    val isTimerActive: Boolean,
+    val firstTimerType: TimerType
 )
 
 data class TimerViewUiState(

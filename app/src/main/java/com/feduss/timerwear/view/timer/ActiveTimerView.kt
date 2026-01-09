@@ -135,16 +135,13 @@ fun ActiveTimerView(
 
                 if (timerViewUiState.isTimerActive) {
                     val countDownDurationMillis = (timerViewUiState.timerSecondsRemaining * 1000).toLong()
-                    var counter = 0L
+                    var elapsedSeconds = 0f
                     var prevMillisUntilFinished = 0L
                     timer = (object : CountDownTimer(countDownDurationMillis, 10) {
                         override fun onTick(millisUntilFinished: Long) {
                             var currentTimerSecondsRemaining = millisUntilFinished.toDouble() / 1000
                             if (currentTimerSecondsRemaining == timerViewUiState.timerSecondsRemaining) {
                                 currentTimerSecondsRemaining -= 0.1
-                            }
-
-                            if (currentTimerSecondsRemaining < 1.0) {
                             }
 
                             val progress = (1f - (1f - currentTimerSecondsRemaining
@@ -166,38 +163,40 @@ fun ActiveTimerView(
                                     context = context
                                 )
 
-                                if (counter > 1000) {
-                                    counter = 0
+                                //elapsedSeconds is not ensure that the vibration is played every second
+                                if (elapsedSeconds > 1.0) {
+                                    elapsedSeconds = 0f
                                     onVibrate(VibrationType.SingleShort)
-                                } else if (prevMillisUntilFinished == 0L) {
+                                } else if (prevMillisUntilFinished != 0L) {
+                                    elapsedSeconds += (prevMillisUntilFinished - millisUntilFinished).div(1000f)
                                     prevMillisUntilFinished = millisUntilFinished
-                                    onVibrate(VibrationType.SingleShort)
-
-                                    if (viewModel.isSoundEnabled) {
-                                        val soundType = when (timerViewUiState.timerType) {
-                                            TimerType.Work -> SoundType.Work
-                                            TimerType.Rest -> SoundType.Rest
-                                            TimerType.IntermediumRest -> SoundType.Rest
-                                        }
-                                        onPlaySound(soundType)
-                                    }
                                 } else {
-                                    counter += (prevMillisUntilFinished - millisUntilFinished)
                                     prevMillisUntilFinished = millisUntilFinished
+                                    onVibrate(VibrationType.SingleShort)
                                 }
                             }
                         }
 
                         override fun onFinish() {
+                            if (!viewModel.endOfWorkout) {
+                                onVibrate(VibrationType.DoubleShort)
+                                if (viewModel.isSoundEnabled) {
+                                    val soundType = when (timerViewUiState.timerType) {
+                                        TimerType.Work -> SoundType.Work
+                                        TimerType.Rest -> SoundType.Rest
+                                        TimerType.IntermediumRest -> SoundType.Rest
+                                    }
+                                    onPlaySound(soundType)
+                                }
+                            } else {
+                                onVibrate(VibrationType.SingleLong)
+                            }
                             userHasSkippedTimer.value = false
                             onActiveTimerFinished(false)
-                            //Log.e("TEST123 --> ", "Timer $timer expired")
                         }
                     })
                     timer?.start()
-                    //Log.e("TEST123 --> ", "Timer $timer created")
                 } else {
-                    //Log.e("TEST123 --> ", "Timer $timer canceled (isNotActive")
                     timer?.cancel()
                 }
             }

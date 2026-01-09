@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -193,7 +193,7 @@ fun AddCustomWorkoutView(
 
                 item {
                     Text(
-                        modifier = Modifier.infiniteMarquee,
+                        modifier = Modifier.infiniteMarquee(),
                         text = stringResource(id = viewModel.timerSectionTitleId),
                         textAlign = TextAlign.Center
                     )

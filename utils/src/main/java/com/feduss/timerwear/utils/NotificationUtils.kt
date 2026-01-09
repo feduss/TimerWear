@@ -1,10 +1,15 @@
 package com.feduss.timerwear.utils
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.SystemClock
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
@@ -91,17 +96,28 @@ class NotificationUtils {
             }
         }
 
+        @SuppressLint("MissingPermission")
         fun updateOngoingNotification(
             context: Context,
             name: String,
             timerSecondsRemaining: Double
         ): Boolean {
-            var ongoingActivity = OngoingActivity.recoverOngoingActivity(
+            val ongoingActivity = OngoingActivity.recoverOngoingActivity(
                 context,
                 Consts.OngoingActivityId.value.toInt()
             )
 
-            if (ongoingActivity != null) {
+            val postNotificationPermissionGranted =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                } else {
+                    true
+                }
+
+            if (postNotificationPermissionGranted && ongoingActivity != null) {
 
                 ongoingActivity.update(
                     context,

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.feduss.timerwear.utils'
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
         minSdk 26
@@ -35,10 +35,10 @@ dependencies {
 
     //Androidx for legacy support
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.wear.compose:compose-foundation:1.4.1'
+    implementation 'androidx.wear.compose:compose-foundation:1.5.6'
 
-    implementation 'androidx.wear:wear-ongoing:1.0.0'
-    implementation 'androidx.navigation:navigation-runtime-ktx:2.9.3'
+    implementation 'androidx.wear:wear-ongoing:1.1.0'
+    implementation 'androidx.navigation:navigation-runtime-ktx:2.9.6'
 
     //Testing
     testImplementation 'junit:junit:4.13.2'
@@ -49,5 +49,5 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.2.1'
 
     //Gson
-    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'com.google.code.gson:gson:2.13.2'
 }

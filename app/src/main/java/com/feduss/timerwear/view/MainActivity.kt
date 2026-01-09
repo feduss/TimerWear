@@ -67,14 +67,6 @@ class MainActivity : ComponentActivity() {
 
     // Lifecycle
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onDestroy() {
         unregisterReceiver(countdownTimerReceiver)
         unregisterReceiver(activeTimerReceiver)

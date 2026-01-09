@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.*
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import com.feduss.timerwear.entity.enums.BackgroundAlarmType
@@ -90,7 +91,7 @@ class AlarmUtils {
         fun vibrate(context: Context, vibrationType: VibrationType) {
             val vibrationPattern = vibrationType.toPattern()
             val vibrator: Vibrator = getVibrator(context)
-            //Log.e("TEST123: ", "has vibration? ${vibrator.hasVibrator()}")
+            Log.e("TEST123: ", "vibrate")
             if (vibrator.hasVibrator()) {
                 vibrator.vibrate(
                     VibrationEffect.createWaveform(
@@ -121,6 +122,8 @@ class AlarmUtils {
             mediaPlayer.setOnCompletionListener {
                 mediaPlayer.release()
             }
+
+            Log.e("TEST123: ", "play sound")
         }
     }
 }

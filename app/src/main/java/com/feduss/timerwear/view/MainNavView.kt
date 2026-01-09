@@ -2,14 +2,16 @@ package com.feduss.timerwear.view
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -40,7 +42,6 @@ import com.google.android.horologist.compose.ambient.AmbientAware
 import com.google.android.horologist.compose.ambient.AmbientState
 import com.google.android.horologist.compose.layout.AppScaffold
 import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
-import com.google.android.horologist.compose.layout.rememberColumnState
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
@@ -95,7 +96,9 @@ fun MainNavView(
                             context = mainActivity,
                             columnState = it,
                             navController = navController,
-                            openAlarmSettings =  { openScheduleExactAlarmPermissionSetting(mainActivity) },
+                            openAlarmSettings =  {
+                                openScheduleExactAlarmPermissionSetting(mainActivity)
+                            },
                         )
                     }
                 }
@@ -219,7 +222,7 @@ fun MainNavView(
                         navController.popBackStack()
                     } else {
                         PageView(
-                            columnState = rememberColumnState(),
+                            columnState = rememberResponsiveColumnState(),
                             ambientState = ambientState
                         ) {
                             AmbientWarning(
@@ -288,7 +291,7 @@ fun MainNavView(
                         navController.popBackStack()
                     } else {
                         PageView(
-                            columnState = rememberColumnState(),
+                            columnState = rememberResponsiveColumnState(),
                             ambientState = ambientState,
                             endCurvedText = endCurvedText
                         ) {
@@ -355,7 +358,7 @@ private fun openEmail(activity: MainActivity) {
             ConfirmationOverlay()
                 .setType(ConfirmationOverlay.OPEN_ON_PHONE_ANIMATION)
                 .showOn(activity)
-        } catch (throwable: Throwable) {
+        } catch (_: Throwable) {
             ConfirmationOverlay()
                 .setType(ConfirmationOverlay.FAILURE_ANIMATION)
                 .showOn(activity)
@@ -368,13 +371,13 @@ fun openDisplaySettings(mainActivity: MainActivity) {
     mainActivity.startActivity(intent)
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 fun openScheduleExactAlarmPermissionSetting(activity: MainActivity) {
-
-
     val intent = Intent(
         Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
         Uri.fromParts("package", activity.packageName, null)
     )
     activity.startActivity(intent)
+
 
 }

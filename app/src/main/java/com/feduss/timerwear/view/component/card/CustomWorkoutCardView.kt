@@ -127,7 +127,7 @@ fun CustomWorkoutCardView(
         },
         balloonContent = {
             Text(
-                modifier = Modifier.infiniteMarquee,
+                modifier = Modifier.infiniteMarquee(),
                 text = stringResource(R.string.custom_workout_tooltip_text),
                 maxLines = 1
             )

@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.SwipeToDismissBox
@@ -134,7 +134,7 @@ fun SettingsView(
                             )
                         }
                         Text(
-                            modifier = Modifier.infiniteMarquee,
+                            modifier = Modifier.infiniteMarquee(),
                             text = stringResource(id = state.soundCheckboxTextId),
                             color = Color.White,
                             textAlign = TextAlign.Left,

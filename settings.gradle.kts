@@ -20,7 +20,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "TimerWear"
-include(":app")
+include(":wear")
 include(":business")
 include(":data")
 include(":entity")

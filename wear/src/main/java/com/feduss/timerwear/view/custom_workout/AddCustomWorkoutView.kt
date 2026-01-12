@@ -217,7 +217,7 @@ fun AddCustomWorkoutView(
                             isExpanded = it.isExpanded,
                             hasValidationError = !it.isExpanded && !it.isValid,
                             onCardClick = {
-                                viewModel.userHasClickedOnTimer(id = it.id)
+                                viewModel.userHasClickedOnTimer(uuid = it.uuid)
                             },
                             expandedContent = {
                                 Column(
@@ -234,7 +234,7 @@ fun AddCustomWorkoutView(
                                         onValueChange = { newTitle ->
                                             viewModel.userHasEditedTimerTitle(
                                                 context = context,
-                                                id = it.id,
+                                                uuid = it.uuid,
                                                 newTitle = newTitle
                                             )
                                         }
@@ -257,7 +257,7 @@ fun AddCustomWorkoutView(
                                         onCardClicked = {
                                             viewModel.userHasOpenedTimerDurationPicker(
                                                 context = context,
-                                                id = it.id,
+                                                uuid = it.uuid,
                                                 titleId = titleId,
                                                 newModel = it.durationUiState.value
                                             )
@@ -300,7 +300,7 @@ fun AddCustomWorkoutView(
                                                 onCheckedChange = { isSelected ->
                                                     viewModel.userHasClickedWorkoutType(
                                                         context = context,
-                                                        id = it.id,
+                                                        uuid = it.uuid,
                                                         type = type,
                                                         isSelected = isSelected
                                                     )
@@ -347,7 +347,7 @@ fun AddCustomWorkoutView(
                                             modifier = Modifier.clickable {
                                                 viewModel.userHasRemovedTimer(
                                                     context = context,
-                                                    id = it.id
+                                                    uuid = it.uuid
                                                 )
                                             },
                                             text = stringResource(id = removeButtonTextId),

@@ -25,6 +25,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 class AddCustomWorkoutViewModel @AssistedInject constructor(
     @Assisted("workoutType") val workoutType: WorkoutType,
@@ -478,32 +479,32 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         )
     }
 
-    fun userHasClickedOnTimer(id: Int) {
+    fun userHasClickedOnTimer(uuid: UUID) {
         _dataUiState.update {
             it?.copy(
-                customTimerUiStates = it.customTimerUiStates?.mapIndexed { index, timer ->
-                    if (index == id) {
+                customTimerUiStates = it.customTimerUiStates?.map { timer ->
+                    if (timer.uuid == uuid) {
                         val isExpanded = !timer.isExpanded
-                        return@mapIndexed timer.copy(
+                        return@map timer.copy(
                             rightIconId = if (isExpanded) arrowDropUpIconId else arrowDropDownIconId,
                             rightIconDescription = if (isExpanded) arrowDropUpIconContentDescription else arrowDropDownIconContentDescription,
                             isExpanded = isExpanded
                         )
                     } else {
-                        return@mapIndexed timer
+                        return@map timer
                     }
                 }
             )
         }
     }
 
-    fun userHasEditedTimerTitle(context: Context, id: Int, newTitle: String) {
+    fun userHasEditedTimerTitle(context: Context, uuid: UUID, newTitle: String) {
         _dataUiState.update {
             it?.copy(
-                customTimerUiStates = it.customTimerUiStates?.mapIndexed { index, timer ->
-                    if (index == id) {
+                customTimerUiStates = it.customTimerUiStates?.map { timer ->
+                    if (timer.uuid == uuid) {
                         val errorTextId = getTimerNameErrorId(newTitle)
-                        return@mapIndexed timer.copy(
+                        return@map timer.copy(
                             nameUiState = timer.nameUiState.copy(
                                 value = newTitle,
                                 errorTextId = errorTextId
@@ -511,7 +512,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
                             isValid = errorTextId == null && timer.durationUiState.errorTextId == null
                         )
                     } else {
-                        return@mapIndexed timer
+                        return@map timer
                     }
                 }
             )
@@ -520,7 +521,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         refreshAddTimerButtonState()
     }
 
-    fun userHasOpenedTimerDurationPicker(context: Context, id: Int, titleId: Int, newModel: TimerPickerModel?) {
+    fun userHasOpenedTimerDurationPicker(context: Context, uuid: UUID, titleId: Int, newModel: TimerPickerModel?) {
         _timerPickerUiState.value = TimerPickerUiState(
             titleId = titleId,
             initialMinutesValue = newModel?.minutes ?: 0,
@@ -528,10 +529,10 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
             onValueChanged = { newValue ->
                 _dataUiState.update {
                     it?.copy(
-                        customTimerUiStates = it.customTimerUiStates?.mapIndexed { index, timer ->
-                            if (index == id) {
+                        customTimerUiStates = it.customTimerUiStates?.map { timer ->
+                            if (timer.uuid == uuid) {
                                 val errorTextId = getTimerDurationErrorId(newValue)
-                                return@mapIndexed timer.copy(
+                                return@map timer.copy(
                                     durationUiState = timer.durationUiState.copy(
                                         value = newValue,
                                         errorTextId = errorTextId
@@ -539,7 +540,7 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
                                     isValid = timer.nameUiState.errorTextId == null && errorTextId == null
                                 )
                             } else {
-                                return@mapIndexed timer
+                                return@map timer
                             }
                         }
                     )
@@ -551,18 +552,18 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         )
     }
 
-    fun userHasClickedWorkoutType(context: Context, id: Int, type: TimerType, isSelected: Boolean) {
+    fun userHasClickedWorkoutType(context: Context, uuid: UUID, type: TimerType, isSelected: Boolean) {
         _dataUiState.update {
             it?.copy(
-                customTimerUiStates = it.customTimerUiStates?.mapIndexed { index, timer ->
-                    if (index == id) {
-                        return@mapIndexed timer.copy(
+                customTimerUiStates = it.customTimerUiStates?.map { timer ->
+                    if (timer.uuid == uuid) {
+                        return@map timer.copy(
                             typeUiState = timer.typeUiState.copy(
                                 value = if (isSelected) type else timer.typeUiState.value
                             )
                         )
                     } else {
-                        return@mapIndexed timer
+                        return@map timer
                     }
                 }
             )
@@ -570,11 +571,11 @@ class AddCustomWorkoutViewModel @AssistedInject constructor(
         refreshConfirmButtonVisibility(context = context)
     }
 
-    fun userHasRemovedTimer(context: Context, id: Int) {
+    fun userHasRemovedTimer(context: Context, uuid: UUID) {
 
         _dataUiState.update { state ->
             state?.copy(
-                customTimerUiStates = state.customTimerUiStates?.filter { it.id != id }
+                customTimerUiStates = state.customTimerUiStates?.filter { it.uuid != uuid }
             )
         }
         refreshConfirmButtonVisibility(context = context)

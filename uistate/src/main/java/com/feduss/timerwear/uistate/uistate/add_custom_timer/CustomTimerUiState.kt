@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.feduss.timerwear.entity.enums.TimerType
 import com.feduss.timerwear.uistate.uistate.GenericTextInputUiState
 import com.feduss.timerwear.uistate.uistate.TimerPickerInputUiState
+import java.util.UUID
 
 data class CustomTimerUiState(
     val leftIconId: Int = -1,
@@ -14,6 +15,7 @@ data class CustomTimerUiState(
     val rightIconTintColor: Color? = null,
     val isExpanded: Boolean,
     val id: Int = -1,
+    val uuid: UUID = UUID.randomUUID(),
     val nameUiState: GenericTextInputUiState,
     val isNameReadOnly: Boolean,
     val durationUiState: TimerPickerInputUiState,

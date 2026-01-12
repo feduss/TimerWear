@@ -1,0 +1,179 @@
+package com.feduss.timerwear.view.timer
+
+import android.content.Context
+import android.os.CountDownTimer
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.feduss.timerwear.entity.enums.BackgroundAlarmType
+import com.feduss.timerwear.entity.enums.SoundType
+import com.feduss.timerwear.entity.enums.TimerType
+import com.feduss.timerwear.entity.enums.VibrationType
+import com.feduss.timerwear.lifecycle.ObserveTimerBackgroundMode
+import com.feduss.timerwear.uistate.uistate.timer.TimerCountdownUiState
+import com.feduss.timerwear.uistate.uistate.timer.TimerViewModel
+import com.feduss.timerwear.utils.PrefParam
+import com.feduss.timerwear.utils.PrefsUtils
+
+@Composable
+fun TimerCountdownView(
+    timerCountdownUiState: TimerCountdownUiState,
+    viewModel: TimerViewModel,
+    navController: NavController,
+    context: Context,
+    onTimerSet: (String) -> Unit,
+    onEnterBackgroundState: (BackgroundAlarmType, Boolean) -> Unit,
+    onKeepScreenOn: (Boolean) -> Unit,
+    onVibrate: (VibrationType) -> Unit,
+    onPlaySound: (SoundType) -> Unit
+) {
+
+    onTimerSet(timerCountdownUiState.workoutName)
+
+    var countDownTimer: CountDownTimer? by remember(Unit) {
+        mutableStateOf(null)
+    }
+
+    LaunchedEffect(
+        timerCountdownUiState.isTimerActive
+    ) {
+        if (timerCountdownUiState.isTimerActive) {
+            val countDownDurationMillis = (timerCountdownUiState.countdown * 1000).toLong()
+            var elapsedSeconds = 0f
+            var prevMillisUntilFinished = 0L
+            countDownTimer = object : CountDownTimer(countDownDurationMillis, 100) {
+                override fun onTick(millisUntilFinished: Long) {
+                    var currentTimerSecondsRemaining = millisUntilFinished.toDouble() / 1000
+                    if (currentTimerSecondsRemaining == timerCountdownUiState.countdown) {
+                        currentTimerSecondsRemaining -= 0.1
+                    }
+
+                    viewModel.saveCountdownData(
+                        context = context,
+                        currentTimerSecondsRemaining = currentTimerSecondsRemaining
+                    )
+
+                    viewModel.updateCountdown(currentTimerSecondsRemaining)
+
+                    if (currentTimerSecondsRemaining < 1.1) {
+                        viewModel.countdownFinished(
+                            context = context
+                        )
+                    //elapsedSeconds is not ensure that the vibration is played every second
+                    } else if (elapsedSeconds > 1.0) {
+                        elapsedSeconds = 0f
+                        onVibrate(VibrationType.SingleShort)
+                    } else if (prevMillisUntilFinished != 0L) {
+                        elapsedSeconds += (prevMillisUntilFinished - millisUntilFinished).div(1000f)
+                        prevMillisUntilFinished = millisUntilFinished
+                    } else {
+                        prevMillisUntilFinished = millisUntilFinished
+                        onVibrate(VibrationType.SingleShort)
+                    }
+                }
+
+                override fun onFinish() {
+                    if (viewModel.isSoundEnabled) {
+                        val soundType = when (timerCountdownUiState.firstTimerType) {
+                            TimerType.Work -> SoundType.Work
+                            TimerType.Rest -> SoundType.Rest
+                            TimerType.IntermediumRest -> SoundType.Rest
+                        }
+                        onPlaySound(soundType)
+                    }
+                }
+            }
+            countDownTimer?.start()
+        } else {
+            countDownTimer?.cancel()
+        }
+    }
+
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
+
+    //Back button
+    BackHandler {
+        cancelCountdownTimersAndPop(
+            context = context,
+            timer = countDownTimer,
+            navigationController = navController,
+            onEnterBackgroundState = onEnterBackgroundState
+        )
+    }
+
+    ObserveTimerBackgroundMode(
+        viewModel = viewModel,
+        context = context,
+        onKeepScreenOn = onKeepScreenOn,
+        onEnterBackgroundState = onEnterBackgroundState,
+        timer = countDownTimer
+    )
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        backgroundContent = {},
+        onDismiss = {
+            cancelCountdownTimersAndPop(
+                context = context,
+                timer = countDownTimer,
+                navigationController = navController,
+                onEnterBackgroundState = onEnterBackgroundState
+
+            )
+        } //swipe to dismiss gesture
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = timerCountdownUiState.countdown.toInt().toString(),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = TextUnit(40f, TextUnitType.Sp),
+                lineHeight = TextUnit(40f, TextUnitType.Sp)
+            )
+        }
+    }
+}
+
+private fun cancelCountdownTimersAndPop(
+    context: Context,
+    timer: CountDownTimer?,
+    navigationController: NavController,
+    onEnterBackgroundState: (BackgroundAlarmType, Boolean) -> Unit
+) {
+
+    PrefsUtils.setStringPref(context, PrefParam.WorkoutType.value, null)
+
+    PrefsUtils.setStringPref(
+        context = context,
+        pref = PrefParam.IsCountdownTimerActive.value,
+        newValue = false.toString()
+    )
+
+    onEnterBackgroundState(BackgroundAlarmType.CountdownTimer, false)
+    timer?.cancel()
+    navigationController.popBackStack()
+}

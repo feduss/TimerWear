@@ -16,8 +16,8 @@ android {
     defaultConfig {
         applicationId = "com.feduss.timerwear"
         minSdk = 26
-        targetSdk 36
-        versionCode = 38
+        targetSdk = 36
+        versionCode = 39
         versionName = '1.1.4'
         vectorDrawables {
             useSupportLibrary = true

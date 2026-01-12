@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,8 +33,7 @@ import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.uistate.factory.getAddCustomWorkoutViewModel
 import com.feduss.timerwear.uistate.factory.getCustomWorkoutView
 import com.feduss.timerwear.uistate.factory.getTimerViewModel
-import com.feduss.timerwear.utils.NavUtils
-import com.feduss.timerwear.view.component.MenuView
+import com.feduss.timerwear.view.menu.MenuView
 import com.feduss.timerwear.view.custom_workout.AddCustomWorkoutView
 import com.feduss.timerwear.view.custom_workout.CustomWorkoutView
 import com.feduss.timerwear.view.settings.SettingsView

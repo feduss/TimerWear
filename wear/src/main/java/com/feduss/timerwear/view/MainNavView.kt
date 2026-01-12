@@ -31,7 +31,7 @@ import com.feduss.timerwear.uistate.factory.getCustomWorkoutView
 import com.feduss.timerwear.uistate.factory.getTimerViewModel
 import com.feduss.timerwear.utils.NavUtils
 import com.feduss.timerwear.view.ambient.AmbientWarning
-import com.feduss.timerwear.view.component.MenuView
+import com.feduss.timerwear.view.menu.MenuView
 import com.feduss.timerwear.view.component.PageView
 import com.feduss.timerwear.view.custom_workout.AddCustomWorkoutView
 import com.feduss.timerwear.view.custom_workout.CustomWorkoutView

@@ -23,6 +23,9 @@ class MenuViewModel @Inject constructor() : ViewModel() {
     private var _navUiState = MutableStateFlow<NavUiState?>(null)
     val navUiState = _navUiState.asStateFlow()
 
+    private var _canScheduleExactAlarms = MutableStateFlow<Boolean?>(null)
+    val canScheduleExactAlarms = _canScheduleExactAlarms.asStateFlow()
+
     // Copies
     val scheduleAlarmWarningId = R.string.setup_schedule_alarm_warning
 
@@ -93,5 +96,9 @@ class MenuViewModel @Inject constructor() : ViewModel() {
 
     fun navStateFired() {
         _navUiState.value = null
+    }
+
+    fun updateExactAlarmSchedulingPermission(newValue: Boolean) {
+        _canScheduleExactAlarms.value = newValue
     }
 }

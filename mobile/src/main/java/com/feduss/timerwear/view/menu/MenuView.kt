@@ -1,4 +1,4 @@
-package com.feduss.timerwear.view.component
+package com.feduss.timerwear.view.menu
 
 import android.Manifest
 import android.app.AlarmManager
@@ -44,13 +44,11 @@ fun MenuView(
         mutableStateOf(context.getSystemService(Context.ALARM_SERVICE) as AlarmManager)
     }
 
-    val canScheduleExactAlarms = remember {
-        mutableStateOf(false)
-    }
+    val canScheduleExactAlarms = viewModel.canScheduleExactAlarms.collectAsState()
 
     RequestPermission(
         alarmManager = alarmManager,
-        canScheduleExactAlarms = canScheduleExactAlarms
+        viewModel = viewModel
     )
 
     val navUiState by viewModel.navUiState.collectAsState()
@@ -99,7 +97,11 @@ fun MenuView(
             )
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !canScheduleExactAlarms.value) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            canScheduleExactAlarms.value != null &&
+            canScheduleExactAlarms.value == false
+        ) {
 
             item {
                 GenericRoundedCard(
@@ -173,7 +175,7 @@ fun goToSettings(navController: NavController) {
 @Composable
 private fun RequestPermission(
     alarmManager: AlarmManager,
-    canScheduleExactAlarms: MutableState<Boolean>
+    viewModel: MenuViewModel
 ) {
     val notificationPermissionRequest = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -189,7 +191,7 @@ private fun RequestPermission(
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
 
-                canScheduleExactAlarms.value = canScheduleExactAlarms(alarmManager)
+                viewModel.updateExactAlarmSchedulingPermission(newValue = canScheduleExactAlarms(alarmManager))
 
                 val permissions = ArrayList<String>()
 

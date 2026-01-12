@@ -1,4 +1,4 @@
-package com.feduss.timerwear.view.component
+package com.feduss.timerwear.view.menu
 
 import android.Manifest
 import android.app.AlarmManager
@@ -6,18 +6,7 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -25,21 +14,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
-import androidx.compose.ui.unit.dp
 import androidx.core.app.AlarmManagerCompat.canScheduleExactAlarms
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import androidx.wear.compose.material.CompactButton
 import com.feduss.timerwear.entity.enums.Section
 import com.feduss.timerwear.entity.enums.WorkoutType
 import com.feduss.timerwear.lifecycle.OnLifecycleEvent
@@ -67,13 +48,11 @@ fun MenuView(
         mutableStateOf(context.getSystemService(Context.ALARM_SERVICE) as AlarmManager)
     }
 
-    val canScheduleExactAlarms = remember {
-        mutableStateOf(false)
-    }
+    val canScheduleExactAlarms = viewModel.canScheduleExactAlarms.collectAsState()
 
     RequestPermission(
         alarmManager = alarmManager,
-        canScheduleExactAlarms = canScheduleExactAlarms
+        viewModel = viewModel
     )
 
     val navUiState by viewModel.navUiState.collectAsState()
@@ -122,7 +101,11 @@ fun MenuView(
             )
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !canScheduleExactAlarms.value) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            canScheduleExactAlarms.value != null &&
+            canScheduleExactAlarms.value == false
+        ) {
 
             item {
 
@@ -197,7 +180,7 @@ fun goToSettings(navController: NavController) {
 @Composable
 private fun RequestPermission(
     alarmManager: AlarmManager,
-    canScheduleExactAlarms: MutableState<Boolean>
+    viewModel: MenuViewModel
 ) {
     val notificationPermissionRequest = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -213,7 +196,7 @@ private fun RequestPermission(
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
 
-                canScheduleExactAlarms.value = canScheduleExactAlarms(alarmManager)
+                viewModel.updateExactAlarmSchedulingPermission(newValue = canScheduleExactAlarms(alarmManager))
 
                 val permissions = ArrayList<String>()
 

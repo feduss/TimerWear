@@ -2,13 +2,20 @@
 // Do not update dependencies from 2.2.21 to a newer version, because dagger isn't ready
 // source: https://github.com/google/dagger/issues/5001#issuecomment-3687444052
 plugins {
-    id 'com.android.application' version '8.13.2' apply false
-    id 'com.android.library' version '8.13.2' apply false
-    id 'org.jetbrains.kotlin.android' version '2.2.21' apply false
-    id 'com.google.dagger.hilt.android' version '2.57.2' apply false
-    id 'com.google.devtools.ksp' version "2.3.2" apply false
-    id("com.google.gms.google-services") version "4.4.4" apply false
-    id("com.google.firebase.crashlytics") version "3.0.6" apply false
-    id 'org.jetbrains.kotlin.jvm' version '2.2.21' apply false
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.2.21' apply false
+    id 'com.android.application' version '9.5.1' apply false
+    id 'com.android.library' version '9.5.1' apply false
+    id 'com.google.dagger.hilt.android' version '2.60.1' apply false
+    id 'com.google.devtools.ksp' version '2.3.13' apply false
+    id("com.google.gms.google-services") version "4.5.0" apply false
+    id("com.google.firebase.crashlytics") version "3.0.8" apply false
+    id 'org.jetbrains.kotlin.jvm' version '2.3.10' apply false
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.10' apply false
+}
+
+subprojects {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
+    }
 }
